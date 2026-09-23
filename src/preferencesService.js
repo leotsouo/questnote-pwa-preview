@@ -29,7 +29,8 @@ export function normalizeUserPreferences(prefs) {
   if (!prefs) return { ...DEFAULT_PREFS };
   return {
     key: PREFS_KEY,
-    reduceMotion: prefs.reduceMotion ?? false,
+    // Legacy App toggle was removed. System prefers-reduced-motion remains active.
+    reduceMotion: false,
     theme: normalizeTheme(prefs.theme),
   };
 }
@@ -57,14 +58,6 @@ export async function getUserPreferences() {
 /** 初始化偏好（首次使用或遷移舊資料） */
 export async function initUserPreferences() {
   const prefs = await getUserPreferences();
-  await dbPut(STORES.META, prefs);
-  return prefs;
-}
-
-/** 設定減少動畫 */
-export async function setReduceMotion(enabled) {
-  const prefs = await getUserPreferences();
-  prefs.reduceMotion = !!enabled;
   await dbPut(STORES.META, prefs);
   return prefs;
 }

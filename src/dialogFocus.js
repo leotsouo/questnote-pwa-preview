@@ -39,7 +39,7 @@ export function focusDialog(root) {
   requestAnimationFrame(async () => {
     if (!root) return;
     // Wait for the shell's visibility transition, not decorative child animations.
-    // Reduced Motion shortens these transitions through the existing styles.
+    // System reduced-motion shortens these transitions through the existing styles.
     const transitions = root.getAnimations().filter((animation) =>
       Number.isFinite(animation.effect?.getComputedTiming().endTime));
     await Promise.allSettled(transitions.map((animation) => animation.finished));
@@ -104,7 +104,7 @@ export function bindDialogFocus() {
     }
   }, true);
 
-  // Result confirmations replace body content without calling openModal.
+  // Confirmations can replace body content without calling openModal.
   // Keep a stable accessible name instead of pointing at a removed heading ID.
   const overlay = document.getElementById('modal-overlay');
   const body = document.getElementById('modal-body');

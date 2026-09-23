@@ -1,12 +1,12 @@
 /**
- * QuestNote Service Worker — V3.4.9 verified preview cache recovery
+ * QuestNote Service Worker — V3.4.10 verified preview cache recovery
  * 快取 App Shell 與靜態資源，支援離線使用
  * data/global-mailbox.json 使用動態 Network First，不進 App Shell precache
  * 作者本機工具（mailbox publisher／pet series builder／summon preview）原始碼不得加入 App Shell precache
  * 寵物圖片不得加入 App Shell precache
  */
 
-const CACHE_NAME = 'questnote-preview-app-1a23fcd14d8ba55372636ad3c09a0316b504bd81f496d46fee3ceda5bcf274e8';
+const CACHE_NAME = 'questnote-preview-app-ac75c41f18d2e46d1ed769dbba1a32319b1fae1da6178cdea199079f2a0f4a34';
 const PET_IMAGE_CACHE = 'questnote-preview-pet-images-v1';
 const MAILBOX_RUNTIME_CACHE = 'questnote-preview-mailbox-runtime-v1';
 const MAILBOX_FETCH_TIMEOUT_MS = 7000;
@@ -14,8 +14,8 @@ const MAILBOX_FETCH_TIMEOUT_MS = 7000;
 const BUILD_PROFILE = {
   "schemaVersion": 1,
   "profile": "preview",
-  "artifactId": "1a23fcd14d8ba55372636ad3c09a0316b504bd81f496d46fee3ceda5bcf274e8",
-  "sourceCommit": "5eb3d55c7e4be854a3531314ed349d55b913d8d9",
+  "artifactId": "ac75c41f18d2e46d1ed769dbba1a32319b1fae1da6178cdea199079f2a0f4a34",
+  "sourceCommit": "99510064dce30e63c8055f1022b9ad52552d05be",
   "scopePath": "/questnote-pwa-preview/",
   "runtimeContentSchema": 1,
   "dbName": "QuestNotePreviewDB",
@@ -38,7 +38,7 @@ const PRECACHE_HASHES = {
   "data/pools.json": "4fd1cdc8674e5592b6b2256603bad59b5bf555650c482237eedb6a86b3867fcc",
   "data/releases/3dfd5055f9c2d2d288ab7e235d4c85202899f0ecba49a1b2473d505ba3e9ff32/catalog.json": "3dfd5055f9c2d2d288ab7e235d4c85202899f0ecba49a1b2473d505ba3e9ff32",
   "data/titles.json": "318675b79872dfabccc4b8beb99f77eb248a40e5e50bbbd4e4dc24886b3a1398",
-  "index.html": "a22612a51d8167ede473dc29ab16dacb10ea7dc7dbe7ab2e4c05ecc5db5fa3bc",
+  "index.html": "95c435e87e8978cc83e1134289c42323c4ad0517abb6b8d501d0e35b66b8b502",
   "manifest.webmanifest": "d5b2f9a18fc8f0266706510c1a029c33c0754fdf9e38f081d96a2064f090cf90",
   "src/achievementService.js": "25eba10a95247380c424a59dd539b7c0e55b866992a2eb6404ac74d3fb4b0316",
   "src/adventureHandbookService.js": "d9dc8d34fc08a83c0c2f36682698fd4d96ebd0852c8cb0fde161a5a718d065b9",
@@ -55,7 +55,7 @@ const PRECACHE_HASHES = {
   "src/db.js": "4250bbbfb69b07ad590eac6773bec6f092a6512c4445057efc7ffd15c4b69db6",
   "src/deferredRenderGate.js": "cbbaf2e401be35eab6d673a935c13fef615286a554937dc497b02c4aa6aca6e5",
   "src/devService.js": "e7e8c6fe9a0f363bdf7bf8f0d3684cabb9d8806042defbb36f0f0b773e6e5591",
-  "src/dialogFocus.js": "43d3c8b49211f244bb8666151880ea3897320facb6db755d43080901b0de4013",
+  "src/dialogFocus.js": "d1a6eddb88316ae7bad82abdab36dc996f0112feceddfa2027056a1eca5730ab",
   "src/expeditionService.js": "b54bd5306e1d3b91eafe42de553cd1730df3c3a36cf57868d28c1e29b07d6096",
   "src/expeditionStatusService.js": "6e45a6ec8e7b3bfa6018b431991b5540cc214e582e1113fe7636da2f95e141e9",
   "src/explorationService.js": "bde22bcbfefbf28926b2a412630d4061fcce52ef8dcceae05e076ac3b1cf84d5",
@@ -64,7 +64,7 @@ const PRECACHE_HASHES = {
   "src/glacierArrivalScene.js": "bb3d646a9faaece23f41d29f6248b682fb67e3851e702ac3667f006c02d8b2bb",
   "src/habitService.js": "64d488828c26e49b47ec06d17ad853b473ea21aee2307b0cd5963fb225cc78de",
   "src/healthCheckService.js": "e0ba5df1456288bfb509a6d9b2d42285e19cb1125492f12244deb07ac898d393",
-  "src/imagePreloadService.js": "737b3251ff1e934675d8350a4253bf7f5f6d555042da6587b06806cb0967d7e1",
+  "src/imagePreloadService.js": "652027a575307f06c97585874d0e7552754123d686562c8dc182ff8e285d3bad",
   "src/loreService.js": "2beab9e2c2ab3418b16e638e247d1976c916b537e6a7a21d754751c54336541c",
   "src/mailboxSchema.js": "070e2c731ac75a6bdbecfc24afad986d0357e440d1449c374d898d7e0b0ccd15",
   "src/mailboxService.js": "9e2b08feedc9dc73beb9d18bcff62fd722af276c57ab4f79f9bc8d20eccfa0d0",
@@ -77,23 +77,23 @@ const PRECACHE_HASHES = {
   "src/poolPresentation.js": "db5c946949ca4336a290d5a7f53049666f759583683be18885965ba68ffe5998",
   "src/poolUnlockCore.js": "2be9a055162feaf7dd521a054e40853c2c3af1106a098708e40d33d2478b2c22",
   "src/poolUnlockService.js": "6e76ffc3c61f002c750435578a7ea5843c91df6f047b2ac2212b50bc150b800a",
-  "src/preferencesService.js": "c2e7655cd0a8576624be972b83d01a053d7129e41ac55b6ba0c2946c9c6e006d",
+  "src/preferencesService.js": "8183bd9ecb5b5f19a7f80dab17a5f626488fa93922e18e9e6688f14185651bc4",
   "src/questService.js": "93e6c875b21a3fb6cf8d0c0ad2ddae2b4307cee870da3b1b92a2a0969977d8a6",
   "src/releaseCatalog.js": "38ac32aedef26d927638ef7413ec78520c0f9d114623a4a61283d488d99cbb4a",
-  "src/releaseProfile.js": "436c310f2a86ce28e59fdb1003ade48140a5d88113ed80f7c1a8df051970385f",
+  "src/releaseProfile.js": "d231dfddfef24c7ae21213697348e35ebba91f0cec885e79cc70ce185a21bac1",
   "src/rewardService.js": "a245a6e08e6ead6aa65dc4dbb99e8c767fa81bd210e253955359be1a5442e0ff",
-  "src/styles.css": "e48c9adfdd4c16b7dc8e0ebebafece69a996ec044194a98ec6641b39184bffdc",
+  "src/styles.css": "1131103e90e30d5470fcccc562da170679ef7afed1f76c27827da8ec16059d50",
   "src/summon-polish.css": "0d3cbae026034e11034be8ecabc6ff9613a461fbaee616376a26f90f4b924bda",
   "src/summonRevealService.js": "71d4828b6e0c4a89285f63a2781c67e7b96b7966c3e0c98312c4c037c1c1bed4",
   "src/taskFilterService.js": "687858edc36119afcb388fc3fd75ebd058d0a93117da42740c8a1f18d4b00471",
   "src/taskMigration.js": "67055f714b759d43e1a333ce7d039619eca3537f5e83ce46ee76a0d4692f25b1",
   "src/taskService.js": "d706443822d95fc230e367cc3a42e64fcc460b129025a93fbd204fa13c0ee49f",
   "src/taskStatsService.js": "1e61c0f67426459a73b2c6ec405dbfdef87b86840a519518d9f5432fb4d2cbb5",
-  "src/themedSummonController.js": "d9f409c9486ab3ec39c21d76dddf1366d0570dd42f956c3e1ca06ebc1ee54b5b",
+  "src/themedSummonController.js": "1289efdf326d1945ae1b6b5484a145b358a563605ef39db25e168d50b4ec2966",
   "src/ui-polish.css": "d56b6c2dc56782a7833ee96c4573e7a4ffbc7b8580ab9e9e9d0bc08e1fe473f8",
-  "src/ui.js": "eb7bd82e69f3bffd965cfcea2605fa9726a47a4ae6d095af23b053952929f93d",
+  "src/ui.js": "1f5c11f209a6423e8cfa750dd453e65fe8f7f8a01183e3370120c36d59ecc2ea",
   "src/uiHelpers.js": "875f08583510e7c246eebeff4b39d6a7273d2643f6a2a2931281672c6c4d7de6",
-  "src/version.js": "4c5253a2fd6c561b2f85ea06015907beb965287cbe42f31b23e5135cc25ca68f",
+  "src/version.js": "b4e6124beb3a6a6475e0ff19c871d83a724470388d8488aa56444bf309f7afbe",
   "src/workshopService.js": "9833bf353f6c13072f1c3995e2770408533be4e8ed19ea0d1e481740fb7e2e69"
 };
 

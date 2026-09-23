@@ -101,7 +101,7 @@ export function warmPetImageCache(src) {
  * @param {{ companion?: { image?: string } } | null | undefined} state
  */
 export function preloadCompanionImage(state) {
-  const src = getPetImageSrc(state?.companion);
+  const src = getPetImageSrc(state?.companion, 'stage');
   if (!src) return Promise.resolve([]);
   return preloadImage(src, { eager: true }).then((r) => [r]);
 }
@@ -114,24 +114,24 @@ export function preloadGachaResultImages(results) {
   const pets = list.map((item) => item?.pet ?? item).filter(Boolean);
   const firstReveal = pets.find((pet) => pet.rarity === 'SSR' || pet.rarity === 'UR') || pets[0];
   if (!firstReveal) return Promise.resolve([]);
-  // The first on-stage image gets the network slot before any ten-pull thumbnails.
-  const stage = preloadPetImage(firstReveal, 'stage');
-  // Do not block the summary thumbnails on a slow stage request. The browser can
-  // fetch the small rare-card assets while the reveal animation is playing.
+  // A small card image lets a first-time 4G draw display a real pet immediately.
+  // The result view upgrades it to the stage asset when that finishes loading.
+  const card = preloadPetImage(firstReveal, 'card');
+  card.finally(() => { void preloadPetImage(firstReveal, 'stage'); });
   const rarePets = pets.filter((pet) => pet.rarity === 'SSR' || pet.rarity === 'UR');
   const otherPets = pets.filter((pet) => pet.rarity !== 'SSR' && pet.rarity !== 'UR');
   const cardSrcs = [...rarePets, ...otherPets]
     .map((pet) => getPetImageSrc(pet, 'card'))
     .filter(Boolean);
   void preloadImages(cardSrcs, 4);
-  stage.finally(() => {
+  card.finally(() => {
     for (const pet of pets) {
       if (pet !== firstReveal && (pet.rarity === 'SSR' || pet.rarity === 'UR')) {
         void preloadPetImage(pet, 'stage');
       }
     }
   });
-  return stage.then((result) => [result]);
+  return card.then((result) => [result]);
 }
 
 /**

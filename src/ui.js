@@ -64,7 +64,7 @@ import {
   randomBubbleInterval,
   IDLE_THRESHOLD_MS,
 } from './companionDialogueService.js';
-import { setReduceMotion, setTheme, applyThemeToDocument, normalizeTheme } from './preferencesService.js';
+import { setTheme, applyThemeToDocument, normalizeTheme } from './preferencesService.js';
 import {
   pickStatusLine,
   randomStatusInterval,
@@ -275,7 +275,7 @@ const gachaSessionUi = {
 
 /** @type {null|((value?: unknown) => void)} */
 let gachaResultCloseResolver = null;
-let queuedGachaResultPull = null;
+let latestPoolSelection = 0;
 
 function resolveGachaResultWait() {
   if (typeof gachaResultCloseResolver === 'function') {
@@ -283,20 +283,6 @@ function resolveGachaResultWait() {
     gachaResultCloseResolver = null;
     resolve();
   }
-}
-
-function runQueuedGachaResultPull() {
-  const nextPull = queuedGachaResultPull;
-  queuedGachaResultPull = null;
-  if (!nextPull) return;
-  const current = getGachaAffordability();
-  const cost = nextPull.mode === 'ten' ? current.tenCost : current.singleCost;
-  if (current.pool?.id !== nextPull.poolId || cost !== nextPull.cost) {
-    showToast('卡池已變更，請重新確認召喚', 'warning');
-    return;
-  }
-  if (nextPull.mode === 'single') void handlePull();
-  if (nextPull.mode === 'ten') void handleTenPull();
 }
 
 function waitNextFrame() {
@@ -602,16 +588,20 @@ export function initUI(appState, refreshCallback, achievementCheckCallback) {
 
     document.getElementById('gacha-pool-select')?.addEventListener('change', async (e) => {
       const poolId = e.target.value;
+      const selection = ++latestPoolSelection;
       if (!poolId || isGachaPullInProgress()) {
         renderGachaPoolSwitcher();
         return;
       }
       try {
-        state.gachaStats = await setSelectedPoolId(poolId);
+        const stats = await setSelectedPoolId(poolId);
+        if (selection !== latestPoolSelection) return;
+        state.gachaStats = stats;
         renderGachaView();
         maybePlayPoolDebut._fromSwitcher = true;
         await maybePlayPoolDebut(poolId);
       } catch (err) {
+        if (selection !== latestPoolSelection) return;
         showToast(err.message || '切換卡池失敗', 'error');
       }
     });
@@ -1016,14 +1006,6 @@ function bindDelegatedEvents() {
 
   document.getElementById('btn-reset')?.addEventListener('click', handleReset);
 
-  document.getElementById('toggle-reduce-motion')?.addEventListener('change', async (e) => {
-    const enabled = e.target.checked;
-    const prefs = await setReduceMotion(enabled);
-    if (state) state.userPreferences = prefs;
-    applyReduceMotionClass(enabled);
-    showToast(enabled ? '已開啟減少動畫' : '已恢復動畫效果', 'info');
-  });
-
   document.getElementById('btn-dev-unlock')?.addEventListener('click', handleDevUnlock);
 
   document.getElementById('btn-dev-unlock-all')?.addEventListener('click', handleDevUnlockAll);
@@ -1336,8 +1318,8 @@ function bindModals() {
 function dismissModal() {
   const overlay = document.getElementById('modal-overlay');
   if (!isTopDialog(overlay)) return;
-  // Cancel retains existing restore-preview and repeat-ten callbacks / DOM.
-  const cancel = overlay.querySelector('#ten-pull-confirm-cancel, #confirm-cancel');
+  // Cancel retains the existing restore-preview callback and DOM.
+  const cancel = overlay.querySelector('#confirm-cancel');
   if (cancel) cancel.click();
   else closeModal();
 }
@@ -1393,7 +1375,7 @@ export function openPetImageViewer(petId, opener) {
     return;
   }
   const original = pet.nickname ? petOriginalName(pet) : '';
-  openPetImageViewerBySrc(src, petDisplayName(pet), pet.rarity, original, opener);
+  openPetImageViewerBySrc(src, petDisplayName(pet), pet.rarity, original, opener, getPetImageSrc(pet, 'stage'));
 }
 
 /**
@@ -1404,7 +1386,7 @@ export function openPetImageViewer(petId, opener) {
  * @param {string} [originalName] 副名稱（原名，僅有暱稱時顯示）
  * @param {HTMLElement} [opener] 未指定時沿用目前焦點。
  */
-export function openPetImageViewerBySrc(imageSrc, petName, rarity, originalName = '', opener) {
+export function openPetImageViewerBySrc(imageSrc, petName, rarity, originalName = '', opener, previewSrc = '') {
   const resolved = getPetImageSrc({ image: imageSrc }) || imageSrc;
   if (!resolved) return;
 
@@ -1434,12 +1416,10 @@ export function openPetImageViewerBySrc(imageSrc, petName, rarity, originalName 
         <div class="pet-image-viewer__error" role="alert">圖片暫時無法載入</div>
         <img
           class="pet-image-viewer__image"
-          src="${resolved}"
           alt="${safeName}"
           decoding="async"
-          onload="var f=this.closest('.pet-image-viewer__image-frame');if(f){f.classList.remove('is-loading');f.classList.add('is-loaded');}"
-          onerror="this.onerror=null;var f=this.closest('.pet-image-viewer__image-frame');if(f){f.classList.remove('is-loading');f.classList.add('is-error');}"
         />
+        <div class="pet-image-viewer__preview-note" role="status" aria-live="polite"></div>
       </div>
       <div class="pet-image-viewer__hint">點擊背景或按關閉返回</div>
     </div>`;
@@ -1451,11 +1431,43 @@ export function openPetImageViewerBySrc(imageSrc, petName, rarity, originalName 
     }
   });
 
+  const frame = overlay.querySelector('.pet-image-viewer__image-frame');
+  const image = overlay.querySelector('.pet-image-viewer__image');
+  const note = overlay.querySelector('.pet-image-viewer__preview-note');
+  const preview = previewSrc && previewSrc !== resolved ? previewSrc : resolved;
+  let originalStarted = false;
+  const loadOriginal = () => {
+    if (originalStarted || preview === resolved) return;
+    originalStarted = true;
+    void preloadImage(resolved, { eager: true }).then(({ ok }) => {
+      if (!overlay.isConnected) return;
+      if (ok) image.src = resolved;
+      else note.textContent = '原圖暫時無法載入，仍可查看預覽圖';
+    });
+  };
+  image.onload = () => {
+    frame.classList.remove('is-loading', 'is-error');
+    frame.classList.add('is-loaded');
+    if (image.src === new URL(resolved, location.href).href) note.textContent = '';
+    else loadOriginal();
+  };
+  image.onerror = () => {
+    if (image.src !== new URL(resolved, location.href).href) {
+      image.src = resolved;
+      return;
+    }
+    frame.classList.remove('is-loading', 'is-loaded');
+    frame.classList.add('is-error');
+  };
+  image.src = preview;
+  if (preview !== resolved) {
+    note.textContent = '顯示預覽圖，原圖載入中…';
+  }
+
   document.body.appendChild(overlay);
   document.body.classList.add('is-pet-image-viewer-open');
   // 用 capture 攔截 Escape，確保只關閉 viewer 而不會連帶關掉底層 modal
   document.addEventListener('keydown', handlePetImageViewerKeydown, true);
-  warmPetImageCache(resolved).catch(() => {});
 
   requestAnimationFrame(() => {
     overlay.classList.add('is-open');
@@ -1522,10 +1534,10 @@ export function petImageHtml(pet, options = {}) {
     loading = 'lazy',
     eager = false,
     framed = true,
+    imageVariant = size === 'lg' ? 'stage' : 'card',
   } = options;
   const cls = `pet-img pet-img--${size}`;
-  const variant = size === 'lg' ? 'stage' : 'card';
-  const src = getPetImageSrc(pet, variant);
+  const src = getPetImageSrc(pet, imageVariant);
   const originalSrc = getPetImageSrc(pet);
   const loadAttr = eager || loading === 'eager' ? 'eager' : loading;
   const onload = "this.classList.add('is-loaded');this.closest('.pet-image-frame')?.classList.remove('is-loading')";
@@ -3263,7 +3275,7 @@ function renderCompanionSection(companion, defaultLine) {
     return;
   }
 
-  warmPetImageCache(getPetImageSrc(companion)).catch(() => {});
+  warmPetImageCache(getPetImageSrc(companion, 'stage')).catch(() => {});
 
   const progress = getBondProgress(companion.bondExp ?? 0, companion.bondLevel ?? 1);
   const rarityClass = escapeHtml(`rarity-${companion.rarity}`);
@@ -3551,7 +3563,7 @@ function openCompanionImageModal(companion) {
 /** 陪伴寵物未變時只更新圖片 src（避免整卡重建） */
 function updateCompanionImageIfNeeded(companion) {
   const img = document.querySelector('.companion-card__image img');
-  const src = getPetImageSrc(companion);
+  const src = getPetImageSrc(companion, 'stage');
   if (!img || !src) return;
 
   const currentSrc = img.getAttribute('src') || '';
@@ -4906,7 +4918,11 @@ function renderGachaThemeStage(pool) {
   const heroImg = document.getElementById('gacha-theme-hero-img');
   const heroFigure = document.getElementById('gacha-theme-hero');
   if (heroFigure) heroFigure.hidden = !hero;
-  if (!hero && heroImg) { heroImg.removeAttribute('src'); delete heroImg.dataset.src; }
+  if (!hero && heroImg) {
+    heroImg.classList.add('is-loading');
+    heroImg.removeAttribute('src');
+    delete heroImg.dataset.src;
+  }
   const dualHost = document.getElementById('gacha-theme-dual-hero');
   if (awakened && dualHost && hero && dawnHero) {
     dualHost.hidden = false;
@@ -4942,14 +4958,26 @@ function renderGachaThemeStage(pool) {
   if (hero && heroImg) {
     const src = getPetImageSrc(hero, 'stage');
     if (src && heroImg.dataset.src !== src) {
+      // The same element serves every pool. Hide its previous decoded bitmap
+      // before updating the copy, then reveal only the current request.
+      heroImg.classList.add('is-loading');
       heroImg.dataset.src = src;
+      heroImg.onload = () => {
+        if (heroImg.dataset.src === src) heroImg.classList.remove('is-loading');
+      };
       heroImg.onerror = () => {
+        if (heroImg.dataset.src !== src) return;
         heroImg.onerror = null;
         const original = getPetImageSrc(hero);
         if (original && original !== src) heroImg.src = original;
+        else heroImg.classList.add('is-loading');
       };
       heroImg.src = src;
       preloadImage(src, { eager: true }).catch(() => {});
+    } else if (!src) {
+      heroImg.classList.add('is-loading');
+      heroImg.removeAttribute('src');
+      delete heroImg.dataset.src;
     }
     heroImg.classList.add('is-silhouette');
     heroImg.alt = hero.title || hero.rarity || '限定大獎';
@@ -5309,8 +5337,7 @@ async function handlePull() {
     if (btn) delete btn.dataset.pulling;
     if (poolSelect) poolSelect.disabled = false;
     renderGachaView();
-    if (queuedGachaResultPull) runQueuedGachaResultPull();
-    else btn?.focus?.();
+    btn?.focus?.();
   }
 }
 
@@ -5391,8 +5418,7 @@ async function handleTenPull() {
     if (btn) delete btn.dataset.pulling;
     if (poolSelect) poolSelect.disabled = false;
     renderGachaView();
-    if (queuedGachaResultPull) runQueuedGachaResultPull();
-    else btn?.focus?.();
+    btn?.focus?.();
   }
 }
 
@@ -5424,9 +5450,20 @@ function sweetSummonRarityDesc(rarity) {
   return labels[rarity] || rarity;
 }
 
+function upgradeSingleResultImage(pet) {
+  const image = document.querySelector('.summon-result-single__frame .pet-img');
+  const stageSrc = getPetImageSrc(pet, 'stage');
+  const cardSrc = getPetImageSrc(pet, 'card');
+  if (!image || !stageSrc || stageSrc === cardSrc) return;
+  void preloadImage(stageSrc, { eager: true }).then(({ ok }) => {
+    if (ok && image.isConnected && document.querySelector('.summon-result-single__frame .pet-img') === image) {
+      image.src = stageSrc;
+    }
+  });
+}
+
 function renderSweetSinglePullResult(result, options = {}) {
   const { pet, isNew, fragmentsGained, rarity, triggeredPity } = result;
-  const { canSingle, canTen } = getGachaAffordability();
   const pendingAwakening = !!options.pendingAwakening;
   const title = pet.title ? escapeHtml(pet.title) : '';
   const statusLabel = isNew ? '初次相遇' : '再次相遇';
@@ -5442,7 +5479,7 @@ function renderSweetSinglePullResult(result, options = {}) {
       <div class="sweet-summon-result__scroll summon-result-single__body">
         <section class="sweet-summon-showcase summon-result-single__showcase" data-rarity="${rarity}" aria-label="召喚寵物展示">
           <div class="sweet-summon-showcase__frame summon-result-single__frame">
-            ${petImageHtml(pet, { size: 'lg', loading: 'eager', eager: true })}
+            ${petImageHtml(pet, { size: 'lg', loading: 'eager', eager: true, imageVariant: 'card' })}
           </div>
           <p class="summon-result-single__status">${statusLabel}</p>
           <h3 class="sweet-summon-showcase__name summon-result-single__name">${escapeHtml(pet.name)}</h3>
@@ -5461,19 +5498,17 @@ function renderSweetSinglePullResult(result, options = {}) {
             <button type="button" class="sweet-summon-btn sweet-summon-btn--primary" id="pull-close" data-action="result-continue">繼續</button>
           </footer>`
         : `<footer class="sweet-summon-result__actions">
-            <button type="button" class="sweet-summon-btn sweet-summon-btn--primary" data-action="result-single-pull"${canSingle ? '' : ' disabled'}>再召喚 1 次</button>
-            <button type="button" class="sweet-summon-btn sweet-summon-btn--secondary" data-action="result-ten-pull"${canTen ? '' : ' disabled'}>召喚 10 次</button>
             <button type="button" class="sweet-summon-btn sweet-summon-btn--ghost" id="pull-close">關閉</button>
           </footer>`}
     </div>
   `);
 
-  bindGachaResultButtons('pull-close', { pendingAwakening });
+  upgradeSingleResultImage(pet);
+  bindGachaResultButtons('pull-close');
 }
 
 function renderSweetTenPullResult(result) {
   const { results, summary } = result;
-  const { canSingle, canTen } = getGachaAffordability();
 
   const cardsHtml = results
     .map(
@@ -5526,8 +5561,6 @@ function renderSweetTenPullResult(result) {
       </div>
 
       <footer class="sweet-summon-result__actions">
-        <button type="button" class="sweet-summon-btn sweet-summon-btn--secondary" data-action="result-ten-pull"${canTen ? '' : ' disabled'}>再召喚 10 次</button>
-        <button type="button" class="sweet-summon-btn sweet-summon-btn--primary" data-action="result-single-pull"${canSingle ? '' : ' disabled'}>召喚 1 次</button>
         <button type="button" class="sweet-summon-btn sweet-summon-btn--ghost" id="ten-pull-close">關閉</button>
       </footer>
     </div>
@@ -5560,7 +5593,6 @@ function defaultSummonRarityHint(rarity) {
 
 function renderDefaultSinglePullResult(result, options = {}) {
   const { pet, isNew, fragmentsGained, rarity, triggeredPity } = result;
-  const { canSingle, canTen } = getGachaAffordability();
   const pendingAwakening = !!options.pendingAwakening;
   const title = pet.title ? escapeHtml(pet.title) : '';
   const statusLabel = isNew ? '初次相遇' : '再次相遇';
@@ -5578,7 +5610,7 @@ function renderDefaultSinglePullResult(result, options = {}) {
           <div class="default-summon-showcase__altar" aria-hidden="true"></div>
           ${defaultSummonRarityHint(rarity)}
           <div class="default-summon-showcase__frame summon-result-single__frame">
-            ${petImageHtml(pet, { size: 'lg', loading: 'eager', eager: true })}
+            ${petImageHtml(pet, { size: 'lg', loading: 'eager', eager: true, imageVariant: 'card' })}
           </div>
           <p class="summon-result-single__status">${statusLabel}</p>
           <h3 class="default-summon-showcase__name summon-result-single__name">${escapeHtml(pet.name)}</h3>
@@ -5597,19 +5629,17 @@ function renderDefaultSinglePullResult(result, options = {}) {
             <button type="button" class="default-summon-btn default-summon-btn--primary" id="pull-close" data-action="result-continue">繼續</button>
           </footer>`
         : `<footer class="default-summon-result__actions">
-            <button type="button" class="default-summon-btn default-summon-btn--primary" data-action="result-single-pull"${canSingle ? '' : ' disabled'}>再召喚 1 次</button>
-            <button type="button" class="default-summon-btn default-summon-btn--ten" data-action="result-ten-pull"${canTen ? '' : ' disabled'}>召喚 10 次</button>
             <button type="button" class="default-summon-btn default-summon-btn--ghost" id="pull-close">關閉</button>
           </footer>`}
     </div>
   `);
 
-  bindGachaResultButtons('pull-close', { pendingAwakening });
+  upgradeSingleResultImage(pet);
+  bindGachaResultButtons('pull-close');
 }
 
 function renderDefaultTenPullResult(result) {
   const { results, summary } = result;
-  const { canSingle, canTen } = getGachaAffordability();
 
   const cardsHtml = results
     .map(
@@ -5662,8 +5692,6 @@ function renderDefaultTenPullResult(result) {
       </div>
 
       <footer class="default-summon-result__actions">
-        <button type="button" class="default-summon-btn default-summon-btn--ten" data-action="result-ten-pull"${canTen ? '' : ' disabled'}>再召喚 10 次</button>
-        <button type="button" class="default-summon-btn default-summon-btn--primary" data-action="result-single-pull"${canSingle ? '' : ' disabled'}>召喚 1 次</button>
         <button type="button" class="default-summon-btn default-summon-btn--ghost" id="ten-pull-close">關閉</button>
       </footer>
     </div>
@@ -5672,66 +5700,7 @@ function renderDefaultTenPullResult(result) {
   bindGachaResultButtons('ten-pull-close');
 }
 
-function requestGachaResultPull(mode) {
-  if (queuedGachaResultPull) return;
-  const current = getGachaAffordability();
-  if (!current.pool) return;
-  queuedGachaResultPull = { mode, poolId: current.pool.id, cost: mode === 'ten' ? current.tenCost : current.singleCost };
-  closeModal();
-  if (!gachaPullInProgress) runQueuedGachaResultPull();
-}
-
-function showTenPullConfirmationFromResult(trigger) {
-  const { pool: quotedPool, canTen, stardust, tenCost } = getGachaAffordability();
-  if (!canTen) {
-    showToast(tenCost === null ? '目前沒有可用的召喚卡池' : `10 連抽需要 ${tenCost} 星塵`, 'warning');
-    return;
-  }
-
-  const body = document.getElementById('modal-body');
-  if (!body) return;
-  if (body.querySelector('#ten-pull-confirm-ok')) return;
-  const resultContent = document.createDocumentFragment();
-  while (body.firstChild) resultContent.appendChild(body.firstChild);
-  const poolName = getSelectedGachaPool()?.name || '目前卡池';
-  body.innerHTML = `
-    <div class="confirm-modal" role="alertdialog" aria-labelledby="ten-pull-confirm-title" aria-describedby="ten-pull-confirm-text">
-      <div class="confirm-modal__icon">❓</div>
-      <h2 class="modal-title" id="ten-pull-confirm-title">再次召喚 10 次？</h2>
-      <p class="confirm-modal__text" id="ten-pull-confirm-text">確定消耗 ${tenCost} 星塵，在「${escapeHtml(poolName)}」召喚 10 次嗎？目前有 ${stardust} 星塵。</p>
-      <div class="confirm-modal__actions">
-        <button type="button" class="btn btn--ghost" id="ten-pull-confirm-cancel">取消</button>
-        <button type="button" class="btn btn--primary" id="ten-pull-confirm-ok">確認召喚</button>
-      </div>
-    </div>
-  `;
-
-  const restoreResult = () => {
-    body.replaceChildren(resultContent);
-    trigger.focus();
-  };
-  document.getElementById('ten-pull-confirm-cancel')?.addEventListener('click', restoreResult);
-  document.getElementById('ten-pull-confirm-ok')?.addEventListener('click', (event) => {
-    event.currentTarget.disabled = true;
-    const current = getGachaAffordability();
-    if (current.pool?.id !== quotedPool.id || current.tenCost !== tenCost) {
-      restoreResult();
-      showToast('卡池已變更，請重新確認召喚', 'warning');
-      return;
-    }
-    if (!current.canTen) {
-      restoreResult();
-      showToast(tenCost === null ? '目前沒有可用的召喚卡池' : `10 連抽需要 ${tenCost} 星塵`, 'warning');
-      return;
-    }
-    requestGachaResultPull('ten');
-  });
-  document.getElementById('ten-pull-confirm-cancel')?.focus();
-}
-
-function bindGachaResultButtons(closeId = 'pull-close', options = {}) {
-  const pendingAwakening = !!options.pendingAwakening;
-
+function bindGachaResultButtons(closeId = 'pull-close') {
   const finish = () => {
     closeModal();
   };
@@ -5746,21 +5715,6 @@ function bindGachaResultButtons(closeId = 'pull-close', options = {}) {
     finish();
   });
 
-  document.querySelector('[data-action="result-single-pull"]')?.addEventListener('click', () => {
-    if (pendingAwakening || gachaSessionUi.pendingAwakening) {
-      finish();
-      return;
-    }
-    requestGachaResultPull('single');
-  });
-
-  document.querySelector('[data-action="result-ten-pull"]')?.addEventListener('click', (event) => {
-    if (pendingAwakening || gachaSessionUi.pendingAwakening) {
-      finish();
-      return;
-    }
-    showTenPullConfirmationFromResult(event.currentTarget);
-  });
 }
 
 function showPullResult(result, options = {}) {
@@ -5791,7 +5745,7 @@ function showTenPullResult(result, options = {}) {
         : 'default-summon-btn default-summon-btn--primary';
       btn.textContent = '繼續';
       footer.appendChild(btn);
-      bindGachaResultButtons('ten-pull-close', { pendingAwakening: true });
+      bindGachaResultButtons('ten-pull-close');
     }
   }
 }
@@ -8692,11 +8646,6 @@ function renderSettingsView() {
   const achUnlocked = achievementSummary?.unlocked ?? 0;
   const achTotal = achievementSummary?.total ?? 0;
   setText('settings-achievements', `${achUnlocked}/${achTotal}`);
-
-  const reduceMotionToggle = document.getElementById('toggle-reduce-motion');
-  if (reduceMotionToggle) {
-    reduceMotionToggle.checked = userPreferences?.reduceMotion ?? false;
-  }
 
   renderThemePickerState(userPreferences?.theme ?? 'default');
 

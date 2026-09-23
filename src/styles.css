@@ -9125,7 +9125,7 @@ body[data-theme="sweet"] .sweet-summon-result__actions {
   gap: 8px;
   padding: 12px 16px calc(14px + var(--safe-bottom));
   border-top: 1px solid var(--sweet-result-border-soft);
-  background: var(--sweet-result-bg-surface);
+  background: transparent;
   flex-shrink: 0;
 }
 
@@ -9631,7 +9631,7 @@ body[data-theme="default"] .default-summon-result__actions {
   gap: 8px;
   padding: 12px 16px calc(14px + var(--safe-bottom));
   border-top: 1px solid var(--default-result-border-soft);
-  background: rgba(8, 11, 22, 0.42);
+  background: transparent;
   flex-shrink: 0;
 }
 
@@ -11929,16 +11929,34 @@ body.is-pet-image-viewer-open {
 .pet-image-viewer__loading,
 .pet-image-viewer__error {
   display: none;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  white-space: normal;
   font-size: 0.875rem;
   font-weight: 600;
   padding: 12px 16px;
   border-radius: 12px;
 }
 .pet-image-viewer__image-frame.is-loading .pet-image-viewer__loading {
-  display: block;
+  display: flex;
 }
 .pet-image-viewer__image-frame.is-error .pet-image-viewer__error {
-  display: block;
+  display: flex;
+}
+
+.pet-image-viewer__preview-note:not(:empty) {
+  position: absolute;
+  inset: auto 16px 16px;
+  text-align: center;
+  font-size: 0.75rem;
+  padding: 6px 10px;
+  border-radius: 8px;
+  color: var(--color-text-secondary);
+  background: var(--color-bg-card-soft);
 }
 
 .pet-image-viewer__hint {
@@ -15582,6 +15600,10 @@ body[data-theme="sweet"] .mailbox-detail__claim-btn:disabled {
   opacity: 0.92;
 }
 
+.gacha-theme-hero__img.is-loading {
+  visibility: hidden;
+}
+
 /* 大獎預覽：降彩為近似黑白剪影感，非全塗黑 */
 .gacha-theme-hero__img.is-silhouette,
 .gacha-theme-featured__img.is-silhouette {
@@ -15728,6 +15750,8 @@ body[data-theme="sweet"] .mailbox-detail__claim-btn:disabled {
 .dream-debut-overlay {
   position: fixed;
   inset: 0;
+  touch-action: none;
+  overscroll-behavior: contain;
   z-index: 12000;
   display: grid;
   place-items: center;

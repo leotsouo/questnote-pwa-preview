@@ -150,6 +150,22 @@ function unlockScroll() {
   window.scrollTo(0, scrollY);
 }
 
+// The pool debut does not need to move the body. Keeping its fixed-position
+// bottom navigation in the viewport prevents a visible jump on iOS Safari.
+function lockDebutScroll() {
+  document.body.dataset.debutOverflow = document.body.style.overflow;
+  document.documentElement.dataset.debutOverflow = document.documentElement.style.overflow;
+  document.body.style.overflow = 'hidden';
+  document.documentElement.style.overflow = 'hidden';
+}
+
+function unlockDebutScroll() {
+  document.body.style.overflow = document.body.dataset.debutOverflow || '';
+  document.documentElement.style.overflow = document.documentElement.dataset.debutOverflow || '';
+  delete document.body.dataset.debutOverflow;
+  delete document.documentElement.dataset.debutOverflow;
+}
+
 function createParticles(count, className) {
   const n = Math.min(MAX_PARTICLES, Math.max(0, count));
   const frag = document.createDocumentFragment();
@@ -761,7 +777,7 @@ export async function playPoolDebutPresentation(options = {}) {
   overlay.addEventListener('click', onOverlayPointer);
   document.addEventListener('keydown', onKey, true);
 
-  lockScroll();
+  lockDebutScroll();
   document.body.appendChild(overlay);
   requestAnimationFrame(() => overlay?.isConnected && overlay.classList.add('is-active', 'is-phase-night'));
 
@@ -791,7 +807,7 @@ export async function playPoolDebutPresentation(options = {}) {
     document.removeEventListener('keydown', onKey, true);
     overlay.remove();
     panel?.classList.remove('is-pool-debut-veil', 'is-pool-debut-reveal');
-    unlockScroll();
+    unlockDebutScroll();
   }
 }
 
