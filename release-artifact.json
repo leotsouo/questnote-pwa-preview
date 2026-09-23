@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "artifactId": "ac75c41f18d2e46d1ed769dbba1a32319b1fae1da6178cdea199079f2a0f4a34",
-  "sourceCommit": "99510064dce30e63c8055f1022b9ad52552d05be",
+  "artifactId": "db2b88364437440eb06ae76644942d52df651ad3881c569c2a93d44242fccf3a",
+  "sourceCommit": "fb95dddcd900f81e8b96658609550273656f0975",
   "profile": {
     "schemaVersion": 1,
     "profile": "preview",
-    "artifactId": "ac75c41f18d2e46d1ed769dbba1a32319b1fae1da6178cdea199079f2a0f4a34",
-    "sourceCommit": "99510064dce30e63c8055f1022b9ad52552d05be",
+    "artifactId": "db2b88364437440eb06ae76644942d52df651ad3881c569c2a93d44242fccf3a",
+    "sourceCommit": "fb95dddcd900f81e8b96658609550273656f0975",
     "scopePath": "/questnote-pwa-preview/",
     "runtimeContentSchema": 1,
     "dbName": "QuestNotePreviewDB",
@@ -259,7 +259,7 @@
     "data/titles.json": "318675b79872dfabccc4b8beb99f77eb248a40e5e50bbbd4e4dc24886b3a1398",
     "index.html": "f87b175015000c18da4cacf9d90059155ae82853f0484d83ca8c0a464ec01ee8",
     "manifest.webmanifest": "1a93de46b1f68c9db32629f508ea3f6bfa73dc3df38c8a3d00abe736dce829cb",
-    "service-worker.js": "6783053b2b3f42122f9f1f746422ad971fc7acb4fe125f654cdbf988694bed4b",
+    "service-worker.js": "ac6ba1eecebd960ae8fbf578b0690e10365b91bdd2f9a429b5bef08bc56589fb",
     "src/achievementService.js": "25eba10a95247380c424a59dd539b7c0e55b866992a2eb6404ac74d3fb4b0316",
     "src/adventureHandbookService.js": "d9dc8d34fc08a83c0c2f36682698fd4d96ebd0852c8cb0fde161a5a718d065b9",
     "src/app.js": "f74cadc84a1436adb3555eafe318f7ed518e323c2340b8cfed4e807a5813f8a6",
@@ -302,7 +302,7 @@
     "src/releaseCatalog.js": "38ac32aedef26d927638ef7413ec78520c0f9d114623a4a61283d488d99cbb4a",
     "src/releaseProfile.js": "512b20c341a3b11c6eeb764789fe8efc3f00fae20a732baaafef8cfec32f4061",
     "src/rewardService.js": "a245a6e08e6ead6aa65dc4dbb99e8c767fa81bd210e253955359be1a5442e0ff",
-    "src/styles.css": "1131103e90e30d5470fcccc562da170679ef7afed1f76c27827da8ec16059d50",
+    "src/styles.css": "06f10d08121e083f3ac000835f306765ad129f617dbfa9dfd94e5afceb901a1c",
     "src/summon-polish.css": "0d3cbae026034e11034be8ecabc6ff9613a461fbaee616376a26f90f4b924bda",
     "src/summonRevealService.js": "71d4828b6e0c4a89285f63a2781c67e7b96b7966c3e0c98312c4c037c1c1bed4",
     "src/taskFilterService.js": "687858edc36119afcb388fc3fd75ebd058d0a93117da42740c8a1f18d4b00471",
@@ -313,7 +313,7 @@
     "src/ui-polish.css": "d56b6c2dc56782a7833ee96c4573e7a4ffbc7b8580ab9e9e9d0bc08e1fe473f8",
     "src/ui.js": "1f5c11f209a6423e8cfa750dd453e65fe8f7f8a01183e3370120c36d59ecc2ea",
     "src/uiHelpers.js": "875f08583510e7c246eebeff4b39d6a7273d2643f6a2a2931281672c6c4d7de6",
-    "src/version.js": "6798fb07cf58a1440c8cb037024fad7cf94df920c077bc2d5fed507b4abcc711",
+    "src/version.js": "afb9810fa2e9692f2307c93d218751b88df49abf0a4115f6b89b9c93b1fea6c8",
     "src/workshopService.js": "9833bf353f6c13072f1c3995e2770408533be4e8ed19ea0d1e481740fb7e2e69"
   },
   "assemblerSha256": "b700be0abcfa3b40471e177fdfbdfccce328ec11666eb37994e628ebb12cc899",
@@ -1397,7 +1397,7 @@
       "bytes": 6119
     },
     "index.html": {
-      "sha256": "95c435e87e8978cc83e1134289c42323c4ad0517abb6b8d501d0e35b66b8b502",
+      "sha256": "e42da98641c068d6d3ad18c1e0a237b7e656b3ff7c0f6b6f1a0b514fda8db105",
       "bytes": 35226
     },
     "manifest.webmanifest": {
@@ -1417,7 +1417,7 @@
       "bytes": 6393
     },
     "service-worker.js": {
-      "sha256": "457df41dcd0663fddc77b7630edd4ce267d16f0810472d6c03396d8f6dd21891",
+      "sha256": "81e2563d9b869679f8ad807157e920061c6e09c1af398b349243f71b82f73f5a",
       "bytes": 19286
     },
     "src/achievementService.js": {
@@ -1581,7 +1581,7 @@
       "bytes": 4727
     },
     "src/releaseProfile.js": {
-      "sha256": "d231dfddfef24c7ae21213697348e35ebba91f0cec885e79cc70ce185a21bac1",
+      "sha256": "ec17ba08ed79e604dc6a9b9c2cc8516d173be76781935f521ea147953b334025",
       "bytes": 631
     },
     "src/rewardService.js": {
@@ -1589,8 +1589,8 @@
       "bytes": 9635
     },
     "src/styles.css": {
-      "sha256": "1131103e90e30d5470fcccc562da170679ef7afed1f76c27827da8ec16059d50",
-      "bytes": 438667
+      "sha256": "06f10d08121e083f3ac000835f306765ad129f617dbfa9dfd94e5afceb901a1c",
+      "bytes": 438725
     },
     "src/summon-polish.css": {
       "sha256": "0d3cbae026034e11034be8ecabc6ff9613a461fbaee616376a26f90f4b924bda",
@@ -1633,7 +1633,7 @@
       "bytes": 2309
     },
     "src/version.js": {
-      "sha256": "b4e6124beb3a6a6475e0ff19c871d83a724470388d8488aa56444bf309f7afbe",
+      "sha256": "8faf69327de01ffb7c03fd9864f28c468c787c963b535d1a4ab3b43875c22b6e",
       "bytes": 1138
     },
     "src/workshopService.js": {

@@ -2,8 +2,8 @@
 export const RELEASE_PROFILE = {
   "schemaVersion": 1,
   "profile": "preview",
-  "artifactId": "ac75c41f18d2e46d1ed769dbba1a32319b1fae1da6178cdea199079f2a0f4a34",
-  "sourceCommit": "99510064dce30e63c8055f1022b9ad52552d05be",
+  "artifactId": "db2b88364437440eb06ae76644942d52df651ad3881c569c2a93d44242fccf3a",
+  "sourceCommit": "fb95dddcd900f81e8b96658609550273656f0975",
   "scopePath": "/questnote-pwa-preview/",
   "runtimeContentSchema": 1,
   "dbName": "QuestNotePreviewDB",
