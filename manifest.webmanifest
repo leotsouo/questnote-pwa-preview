@@ -2,8 +2,8 @@
   "name": "QuestNote 預覽",
   "short_name": "QN 預覽",
   "description": "個人任務記事 App — 完成任務獲得星塵，召喚幻獸！",
-  "start_url": "./index.html?perf=1",
-  "scope": "./",
+  "start_url": "/questnote-pwa-preview/index.html",
+  "scope": "/questnote-pwa-preview/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0f0f1a",
@@ -28,5 +28,6 @@
       "type": "image/png",
       "purpose": "maskable"
     }
-  ]
+  ],
+  "id": "/questnote-pwa-preview/"
 }

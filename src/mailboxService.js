@@ -10,7 +10,7 @@
  * Schema 純函式見 mailboxSchema.js（與作者發布工具共用）。
  */
 import { openDB, dbGet, dbPut, STORES } from './db.js';
-import { APP_VERSION } from './version.js';
+import { APP_VERSION, MAILBOX_RUNTIME_CACHE } from './version.js';
 import { normalizeWallet, DEFAULT_MATERIALS } from './rewardService.js';
 import { normalizeInventory, DEFAULT_ITEM_IDS, getMaterialName, getItemName } from './workshopService.js';
 import { isDebugMode, isAuthorLocalDevMode } from './devService.js';
@@ -36,7 +36,7 @@ export {
 
 export const MAILBOX_STATE_KEY = 'globalMailboxState';
 export const MAILBOX_JSON_PATH = './data/global-mailbox.json';
-export const MAILBOX_RUNTIME_CACHE = 'questnote-mailbox-runtime-v1';
+export { MAILBOX_RUNTIME_CACHE };
 export const MAILBOX_FETCH_TIMEOUT_MS = 7000;
 export const MAILBOX_CHECK_THROTTLE_MS = 10 * 60 * 1000;
 
@@ -268,11 +268,6 @@ function getMailboxCacheRequest() {
   return new Request(new URL(MAILBOX_CACHE_RELATIVE_PATH, base).href);
 }
 
-function isMailboxJsonPathname(pathname) {
-  return pathname.endsWith('/data/global-mailbox.json')
-    || pathname.endsWith('data/global-mailbox.json');
-}
-
 async function putMailboxRuntimeCache(response) {
   if (!('caches' in globalThis)) return;
   try {
@@ -291,7 +286,9 @@ async function matchMailboxRuntimeCache() {
     if (matched) return matched;
     const keys = await cache.keys();
     for (const req of keys) {
-      if (isMailboxJsonPathname(new URL(req.url).pathname)) {
+      const actual = new URL(req.url);
+      const expected = new URL(getMailboxCacheRequest().url);
+      if (actual.origin === expected.origin && actual.pathname === expected.pathname) {
         matched = await cache.match(req);
         if (matched) return matched;
       }

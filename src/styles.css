@@ -17318,3 +17318,144 @@ body[data-theme="sweet"] .dream-bloom-btn--ghost {
     font-size: 0.8125rem;
   }
 }
+
+/* Pool content has independent visual and unlock sections. Legacy order is retained. */
+.gacha-pool-content { margin: 0 0 1rem; padding-bottom: 0.25rem; }
+.gacha-pool-content > .gacha-theme-stage { margin-bottom: 0; padding-bottom: 0; }
+.gacha-pool-content > .gacha-awakening-panel { position: relative; z-index: 1; }
+.gacha-panel:not([data-pool-theme]) .gacha-awakening-panel {
+  background: var(--color-bg-card-soft);
+  border-color: var(--color-border);
+  color: var(--color-text-main);
+}
+.gacha-panel:not([data-pool-theme]) .gacha-awakening-panel__desc,
+.gacha-panel:not([data-pool-theme]) .gacha-awakening-panel__counts,
+.gacha-panel:not([data-pool-theme]) .gacha-awakening-panel__note,
+.gacha-panel:not([data-pool-theme]) .gacha-awakening-preview__item {
+  color: var(--color-text-secondary);
+}
+.gacha-pool-content .gacha-theme-details-btn[hidden],
+.gacha-pool-content .gacha-theme-hero[hidden] { display: none; }
+
+/* glacier_arrival: owned, finite CSS/SVG scenery shared by debut and summon. */
+.glacier-scene {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: #09232d;
+  contain: layout paint;
+}
+.glacier-scene__sky {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 36%, #b5cdd0 0%, #426b80 32%, #09232d 70%);
+}
+.glacier-scene__landscape { position: absolute; width: 100%; height: 100%; inset: 0; }
+.glacier-scene__wall { transform-box: fill-box; transform-origin: center; }
+.glacier-scene__wall--left { transform: translateX(9%); }
+.glacier-scene__wall--right { transform: translateX(-9%); }
+.glacier-scene__fog {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #0d2b36aa 12%, #a7c6d8cc 48%, #28556355 78%);
+  opacity: 0.95;
+}
+.glacier-scene__beacons { position: absolute; inset: 0; }
+.glacier-scene__beacons i {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: 7px;
+  height: 17px;
+  border-radius: 50% 50% 35% 35%;
+  background: #ffe5ad;
+  box-shadow: 0 0 12px 4px #e9843c99, 0 0 38px 8px #ed673c44;
+  opacity: 0;
+}
+.glacier-scene__oath {
+  position: absolute;
+  left: 50%;
+  top: 38%;
+  width: 4.5rem;
+  height: 4.5rem;
+  margin: -2.25rem;
+  border: 2px solid #f4ca8b;
+  transform: rotate(45deg) scale(0.8);
+  opacity: 0;
+  box-shadow: inset 0 0 22px #f4ca8b33, 0 0 34px #f4ca8b22;
+}
+.glacier-scene__oath::after { content: ''; position: absolute; inset: 11px; border: 1px solid #f4ca8b99; }
+.glacier-scene__vignette {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #02111977, transparent 30%, transparent 62%, #03131cdd);
+}
+[data-animation='glacier_arrival'].is-active .glacier-scene__wall--left { animation: glacierLeftArrival 3.4s ease-out forwards; }
+[data-animation='glacier_arrival'].is-active .glacier-scene__wall--right { animation: glacierRightArrival 3.4s ease-out forwards; }
+[data-animation='glacier_arrival'].is-active .glacier-scene__fog { animation: glacierFogArrival 3.4s ease-out forwards; }
+[data-animation='glacier_arrival'].is-active .glacier-scene__ship { animation: glacierShipArrival 3.4s ease-out forwards; transform-origin: 50% 62%; }
+[data-animation='glacier_arrival'].is-active .glacier-scene__ripples { animation: glacierWaterArrival 3.4s ease-out forwards; transform-origin: 50% 55%; }
+[data-animation='glacier_arrival'].is-active .glacier-scene__beacons i { animation: glacierBeaconArrival 1s ease-out calc(0.4s + var(--i) * 0.16s) forwards; }
+[data-animation='glacier_arrival']:is([data-state='rarityOmen'], [data-state='bloom'], .is-phase-line) .glacier-scene__oath { opacity: 0.9; transform: rotate(45deg) scale(1); transition: opacity 0.5s, transform 0.7s; }
+[data-animation='glacier_arrival'][data-state='summary'] .glacier-scene { opacity: 0.5; transition: opacity 0.35s; }
+[data-animation='glacier_arrival'] .dream-bloom-omen { background: radial-gradient(circle, #e4bd7844, transparent 66%); }
+[data-animation='glacier_arrival'][data-omen='UR'] .glacier-scene__oath { border-width: 3px; box-shadow: 0 0 52px #efad5d88; }
+[data-animation='glacier_arrival'] .dream-bloom-seal__petal,
+[data-animation='glacier_arrival'] .dream-bloom-seal__reflect { display: none; }
+[data-animation='glacier_arrival'] .dream-bloom-seal { border-color: #94c4cf; background: #102d38eb; }
+[data-animation='glacier_arrival'] .dream-bloom-mini-seal { background: #102d38eb; border-color: #6899a6; }
+[data-animation='glacier_arrival'] .dream-bloom-summary__eyebrow { color: #f4ca8b; }
+[data-animation='glacier_arrival'] .dream-bloom-btn--primary { background: #d8a469; color: #172a32; border-color: #f4ca8b; }
+[data-animation='glacier_arrival'] .dream-debut-copy { align-self: end; margin-bottom: 12vh; }
+[data-animation='glacier_arrival'] .dream-debut-line { text-shadow: 0 2px 12px #00131f, 0 1px 3px #00131f; }
+@keyframes glacierLeftArrival { from { transform: translateX(9%); } to { transform: translateX(-5%); } }
+@keyframes glacierRightArrival { from { transform: translateX(-9%); } to { transform: translateX(5%); } }
+@keyframes glacierFogArrival { from { opacity: 0.95; } to { opacity: 0.15; } }
+@keyframes glacierShipArrival { from { transform: translateY(-10px) scale(0.85); } to { transform: translateY(0) scale(1); } }
+@keyframes glacierWaterArrival { from { transform: scaleY(0.86); opacity: 0.15; } to { transform: scaleY(1.08); opacity: 0.4; } }
+@keyframes glacierBeaconArrival { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+
+.gacha-panel[data-pool-theme='glacier_arrival'] {
+  position: relative;
+  overflow: hidden;
+  --pool-text-primary: #edf7fa;
+  --pool-text-secondary: #c5dce2;
+  --pool-text-muted: #9bbec8;
+  --pool-surface: #102e3c;
+  --pool-border: #467183;
+  --pool-accent: #f4ca8b;
+  --dream-moon: #e2f3f8;
+  color: var(--pool-text-primary);
+  background: linear-gradient(165deg, #1b4558, #0c2634 60%, #152830);
+  border-color: var(--pool-border);
+}
+.gacha-panel[data-pool-theme='glacier_arrival'] .gacha-pool,
+.gacha-panel[data-pool-theme='glacier_arrival'] .gacha-theme-stage__atmosphere { display: none; }
+.gacha-panel[data-pool-theme='glacier_arrival'] :is(.gacha-theme-stage__name, .gacha-theme-stage__eyebrow, .gacha-theme-stage__tagline, .gacha-theme-stage__meta, .gacha-theme-details-btn, .gacha-theme-details, .gacha-theme-details dd, .gacha-theme-hero__name) { color: var(--pool-text-primary); }
+.gacha-panel[data-pool-theme='glacier_arrival'] :is(.gacha-theme-details dt, .gacha-theme-hero__cap, .gacha-theme-featured__item) { color: var(--pool-text-secondary); }
+.gacha-panel[data-pool-theme='glacier_arrival'] :is(.gacha-theme-details, .gacha-theme-hero__cap, .gacha-theme-featured__item) { background: var(--pool-surface); border: 1px solid var(--pool-border); border-radius: 0.75rem; padding: 0.65rem; }
+.gacha-panel[data-pool-theme='glacier_arrival'] .gacha-theme-stage__badge { color: var(--pool-accent); border-color: #d8a46988; }
+.gacha-panel[data-pool-theme='glacier_arrival'] .btn--gacha { background: #d8a469; color: #122832; }
+.gacha-panel[data-pool-theme='glacier_arrival'] .btn--gacha-ten { background: #244f60; color: #f4ca8b; border-color: #d8a469; }
+
+/* Motion is finite. Reduced motion and skip render the arrival composition at rest. */
+[data-animation='glacier_arrival']:is(.is-reduced, .is-skipped, .is-short) .glacier-scene *,
+[data-animation='glacier_arrival'][data-state='summary'] .glacier-scene *,
+body.reduce-motion [data-animation='glacier_arrival'] .glacier-scene * { animation: none !important; transition: none !important; }
+[data-animation='glacier_arrival']:is(.is-reduced, .is-skipped, .is-short, [data-state='summary']) .glacier-scene__wall,
+body.reduce-motion [data-animation='glacier_arrival'] .glacier-scene__wall { transform: none; }
+[data-animation='glacier_arrival']:is(.is-reduced, .is-skipped, .is-short, [data-state='summary']) .glacier-scene__fog,
+body.reduce-motion [data-animation='glacier_arrival'] .glacier-scene__fog { opacity: 0.15; }
+[data-animation='glacier_arrival']:is(.is-reduced, .is-skipped, .is-short, [data-state='summary']) .glacier-scene__beacons i,
+body.reduce-motion [data-animation='glacier_arrival'] .glacier-scene__beacons i { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  [data-animation='glacier_arrival'] .glacier-scene * { animation: none !important; transition: none !important; }
+  [data-animation='glacier_arrival'] .glacier-scene__wall { transform: none; }
+  [data-animation='glacier_arrival'] .glacier-scene__fog { opacity: 0.15; }
+  [data-animation='glacier_arrival'] .glacier-scene__beacons i { opacity: 1; }
+}
+@media (max-width: 480px) {
+  [data-animation='glacier_arrival'] .dream-debut-copy { margin-bottom: 15vh; }
+  [data-animation='glacier_arrival'] .dream-debut-line { font-size: clamp(1.2rem, 5.6vw, 1.7rem); }
+}

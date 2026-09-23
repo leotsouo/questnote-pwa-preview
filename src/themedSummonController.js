@@ -7,6 +7,7 @@
  * - 略過／錯誤／Reduced Motion 都只能改變展示，不可重抽
  */
 import { getPetImageSrc, preloadImage, delay } from './imagePreloadService.js';
+import { createGlacierArrivalScene } from './glacierArrivalScene.js';
 import {
   getHighestRarity,
   collectSsrPlusRevealQueue,
@@ -79,7 +80,7 @@ function setState(next, liveEl) {
   if (liveEl && (next === 'rarityOmen' || next === 'revealing' || next === 'summary' || next === 'complete')) {
     const labels = {
       rarityOmen: '稀有度預兆顯現',
-      revealing: '夥伴甦醒中',
+      revealing: activeOverlay?.dataset.animation === 'glacier_arrival' ? '遠航夥伴抵達' : '夥伴甦醒中',
       summary: '召喚結果整理',
       complete: '召喚演出結束',
     };
@@ -169,16 +170,18 @@ function createParticles(count, className) {
  * 建立主題召喚 overlay（文字一律 textContent）
  * @param {{ mode: string, reduceMotion: boolean, highestRarity: string }} opts
  */
-function createOverlay({ mode, reduceMotion, highestRarity }) {
+function createOverlay({ mode, reduceMotion, highestRarity, poolName, animationKey }) {
+  const glacier = animationKey === 'glacier_arrival';
   const overlay = document.createElement('div');
   overlay.className = 'dream-bloom-overlay';
+  overlay.dataset.animation = animationKey;
   overlay.dataset.mode = mode;
   overlay.dataset.omen = highestRarity;
   overlay.dataset.state = STATES.PREPARING;
   if (reduceMotion) overlay.classList.add('is-reduced');
   overlay.setAttribute('role', 'dialog');
   overlay.setAttribute('aria-modal', 'true');
-  overlay.setAttribute('aria-label', '永眠花海召喚演出');
+  overlay.setAttribute('aria-label', `${poolName || '召喚'}演出`);
 
   overlay.innerHTML = `
     <div class="dream-bloom-bg" aria-hidden="true">
@@ -219,6 +222,11 @@ function createOverlay({ mode, reduceMotion, highestRarity }) {
       <button type="button" class="dream-bloom-btn dream-bloom-btn--primary" data-action="close" hidden aria-label="關閉結果">關閉結果</button>
     </div>
   `;
+
+  if (glacier) {
+    overlay.querySelector('.dream-bloom-bg').replaceWith(createGlacierArrivalScene());
+    overlay.querySelectorAll('[data-role="dust"], [data-role="ripple"], [data-role="buds"], [data-role="crest"]').forEach((node) => node.remove());
+  }
 
   return overlay;
 }
@@ -323,13 +331,18 @@ function setupBuds(container, count, reduceMotion) {
  * 播放永眠花海主題召喚（純展示）
  * @param {{
  *   results: Array,
+ *   poolName?: string,
  *   mode?: 'single'|'ten'|'preview',
  *   reduceMotion?: boolean,
  *   skipRitual?: boolean,
  * }} options
  * @returns {Promise<{ ok: boolean, fallback: boolean, state: string }>}
  */
-export async function playDreamBloomSummon(options = {}) {
+export async function playThemedSummon(options = {}) {
+  const animationKey = options.animationKey || 'dream_bloom';
+  if (!['dream_bloom', 'glacier_arrival'].includes(animationKey)) {
+    return { ok: false, fallback: true, state: STATES.FALLBACK };
+  }
   const results = Array.isArray(options.results) ? options.results.slice() : [];
   if (results.length === 0) {
     return { ok: false, fallback: true, state: STATES.FALLBACK };
@@ -345,6 +358,7 @@ export async function playDreamBloomSummon(options = {}) {
   const controller = new AbortController();
   activeAbort = controller;
   let overlay = null;
+  let cleanupListeners = () => {};
   /** 僅略過前置儀式（夢塵／鏡池／預兆／花苞），不可略過 SSR+ reveal */
   let introSkipped = false;
   let userClosed = false;
@@ -367,7 +381,7 @@ export async function playDreamBloomSummon(options = {}) {
       delay(reduce ? 100 : 200),
     ]);
 
-    overlay = createOverlay({ mode, reduceMotion: reduce, highestRarity });
+    overlay = createOverlay({ mode, reduceMotion: reduce, highestRarity, poolName: options.poolName, animationKey });
     activeOverlay = overlay;
     lockScroll();
     document.body.appendChild(overlay);
@@ -386,7 +400,7 @@ export async function playDreamBloomSummon(options = {}) {
       particlesHost.appendChild(createParticles(mode === 'ten' ? 18 : 12, 'dream-bloom-petal'));
     }
 
-    setupBuds(budsHost, mode === 'ten' ? 10 : 1, reduce);
+    if (budsHost) setupBuds(budsHost, mode === 'ten' ? 10 : 1, reduce);
 
     const onSkip = (e) => {
       e.preventDefault();
@@ -420,7 +434,7 @@ export async function playDreamBloomSummon(options = {}) {
     });
     document.addEventListener('keydown', onKey, true);
 
-    const cleanupListeners = () => {
+    cleanupListeners = () => {
       btnSkip?.removeEventListener('click', onSkip);
       document.removeEventListener('keydown', onKey, true);
     };
@@ -490,8 +504,8 @@ export async function playDreamBloomSummon(options = {}) {
         const eyebrow = overlay.querySelector('[data-role="summary-eyebrow"]');
         const title = overlay.querySelector('[data-role="summary-title"]');
         const grid = overlay.querySelector('[data-role="summary-grid"]');
-        if (eyebrow) eyebrow.textContent = '十連夢境花印';
-        if (title) title.textContent = '沉睡生命已甦醒';
+        if (eyebrow) eyebrow.textContent = animationKey === 'glacier_arrival' ? '十連遠航契約' : '十連夢境花印';
+        if (title) title.textContent = animationKey === 'glacier_arrival' ? '遠航夥伴已抵達' : '沉睡生命已甦醒';
         if (grid) buildSummaryCards(grid, results);
       }
     }
@@ -533,6 +547,7 @@ export async function playDreamBloomSummon(options = {}) {
     setState(STATES.FALLBACK, null);
     return { ok: false, fallback: true, state: STATES.FALLBACK };
   } finally {
+    cleanupListeners();
     if (activeOverlay && activeOverlay.parentNode) {
       activeOverlay.parentNode.removeChild(activeOverlay);
     }
@@ -544,6 +559,11 @@ export async function playDreamBloomSummon(options = {}) {
     playing = false;
     currentState = STATES.IDLE;
   }
+}
+
+/** Kept for existing previews; new pools dispatch through playThemedSummon. */
+export function playDreamBloomSummon(options = {}) {
+  return playThemedSummon({ ...options, animationKey: 'dream_bloom' });
 }
 
 /**
@@ -573,9 +593,10 @@ const DEBUT_DUST_COUNT = { full: 8, short: 3, reduced: 0 };
  * 永眠花海卡池入場演出
  * 流程：長夜沉幕 → 鏡池微光 → 月皇花甦醒 → 台詞 → 停在完整畫面等待點擊 → 關閉時化開成主畫面
  * 動畫播完後需使用者點擊／Esc／繼續才關閉；略過可提早結束。
- * @param {{ reduceMotion?: boolean, full?: boolean }} options
+ * @param {{ poolName?: string, presentation?: object, reduceMotion?: boolean, full?: boolean }} options
  */
 export async function playPoolDebutPresentation(options = {}) {
+  const glacier = options.presentation?.animationKey === 'glacier_arrival';
   const reduce = isReduceMotion(options.reduceMotion);
   const full = options.full !== false;
   // 進入「可關閉」狀態前的演出時長（不含等待點擊）
@@ -588,11 +609,12 @@ export async function playPoolDebutPresentation(options = {}) {
 
   const overlay = document.createElement('div');
   overlay.className = 'dream-debut-overlay';
+  overlay.dataset.animation = glacier ? 'glacier_arrival' : 'dream_bloom';
   if (reduce) overlay.classList.add('is-reduced');
   if (!full) overlay.classList.add('is-short');
   overlay.setAttribute('role', 'dialog');
   overlay.setAttribute('aria-modal', 'true');
-  overlay.setAttribute('aria-label', '永眠花海登場');
+  overlay.setAttribute('aria-label', options.presentation?.debutLabel || `${options.poolName || '卡池'}登場`);
   overlay.innerHTML = `
     <div class="dream-debut-stage" aria-hidden="true">
       <div class="dream-debut-bg"></div>
@@ -615,14 +637,20 @@ export async function playPoolDebutPresentation(options = {}) {
     </div>
     <div class="dream-debut-copy">
       <p class="dream-debut-line" data-role="line">
-        <span class="dream-debut-line__seg" data-seg="a">月皇花</span>
-        <span class="dream-debut-line__seg" data-seg="b">已於長夜中</span>
-        <span class="dream-debut-line__seg" data-seg="c">甦醒</span>
+        <span class="dream-debut-line__seg" data-seg="a"></span>
+        <span class="dream-debut-line__seg" data-seg="b"></span>
+        <span class="dream-debut-line__seg" data-seg="c"></span>
       </p>
       <p class="dream-debut-continue" data-role="continue" hidden>點擊畫面繼續</p>
     </div>
     <button type="button" class="dream-debut-skip" data-role="skip" aria-label="略過登場演出">略過</button>
   `;
+
+  if (glacier) overlay.querySelector('.dream-debut-stage').replaceWith(createGlacierArrivalScene());
+  const lines = options.presentation?.debutLines || [];
+  overlay.querySelectorAll('.dream-debut-line__seg').forEach((element, index) => {
+    element.textContent = lines[index] || '';
+  });
 
   const dustHost = overlay.querySelector('[data-role="dust"]');
   const dustCount = reduce

@@ -1,0 +1,176 @@
+/* UI workstream: task, collection and dialog polish only.
+   Keep pool stages/reveal selectors in styles.css owned by the pool workstream. */
+
+/* VP-01: semantic state, readable surfaces and native task inputs. */
+body[data-theme="sweet"] #view-collection .collection-card.rarity-UR {
+  background: var(--color-bg-card-soft);
+  color: var(--color-text-main);
+  box-shadow: var(--shadow-sm);
+}
+
+body[data-theme="default"] .task-card.priority-normal { border-left: 3px solid var(--priority-normal); }
+body[data-theme="default"] .task-card.priority-important { border-left: 3px solid var(--priority-important); }
+body[data-theme="default"] .task-card.priority-urgent { border-left: 3px solid var(--priority-urgent); }
+
+.import-success-panel[hidden] { display: none; }
+.collection-grid > .empty-state { grid-column: 1 / -1; }
+
+body[data-theme] #task-form :is(.form-input, .form-textarea, .form-select, input[type="date"]) {
+  width: 100%;
+  min-width: 0;
+  min-height: var(--tap-min);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-elevated);
+  color: var(--color-text-main);
+  font: inherit;
+  font-size: 1rem;
+  line-height: var(--line-height-normal);
+  box-shadow: none;
+}
+
+body[data-theme] #task-form :is(.form-input, .form-textarea)::placeholder {
+  color: var(--color-text-muted);
+  opacity: 1;
+}
+
+body[data-theme] #task-form :is(.form-input, .form-textarea, .form-select):focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-color: var(--color-primary);
+}
+
+body[data-theme="default"] #task-form input[type="date"] { color-scheme: dark; }
+body[data-theme="sweet"] #task-form input[type="date"] { color-scheme: light; }
+#task-form :is(.form-field, .subtask-form-input) { min-width: 0; }
+#task-form .form-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); }
+#task-form .form-field { display: grid; gap: var(--space-2); }
+#task-form :is(.subtask-form-add, .subtask-form-item) { display: flex; align-items: center; gap: var(--space-2); }
+#task-form :is(.subtask-form-add, .subtask-form-item) > .btn { flex-shrink: 0; min-height: var(--tap-min); }
+#task-form .form-hint { color: var(--color-text-secondary); font-size: var(--font-size-sm); line-height: var(--line-height-normal); }
+
+/* VP-02: the daily list precedes optional companion / adventure summaries. */
+body[data-theme] #view-tasks .page-title {
+  color: var(--color-text-main);
+  background: none;
+  -webkit-text-fill-color: currentColor;
+}
+body[data-theme] #view-tasks .stats-bar { gap: var(--space-2); padding-bottom: var(--space-2); scroll-snap-type: x proximity; scrollbar-width: thin; scrollbar-color: var(--color-border) transparent; }
+body[data-theme] #view-tasks .stats-bar::-webkit-scrollbar { display: block; height: 3px; }
+body[data-theme] #view-tasks .stats-bar::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: var(--radius-pill); }
+body[data-theme] #view-tasks .stat-card { background: var(--color-bg-surface); box-shadow: none; border: 1px solid var(--color-border-soft); padding: var(--space-3); scroll-snap-align: start; }
+body[data-theme] #view-tasks .stat-value { font-size: var(--font-size-xl); }
+body[data-theme] #view-tasks .stat-label { font-size: var(--font-size-sm); color: var(--color-text-secondary); }
+body[data-theme] #view-tasks .task-view-tabs { margin-bottom: var(--space-3); }
+body[data-theme] #view-tasks .filter-bar { margin-bottom: var(--space-4); }
+body[data-theme] #view-tasks .filter-btn { min-height: var(--tap-min); font-size: var(--font-size-sm); }
+body[data-theme] #view-tasks .filter-btn.active { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+body[data-theme] #view-tasks .section-title { font-size: var(--font-size-base); line-height: var(--line-height-normal); color: var(--color-text-main); }
+body[data-theme] #view-tasks .task-card { background: var(--color-bg-card); box-shadow: none; padding: var(--space-4); }
+body[data-theme] #view-tasks .task-card__title { color: var(--color-text-main); font-size: var(--font-size-lg); line-height: var(--line-height-normal); overflow-wrap: anywhere; }
+body[data-theme] #view-tasks .task-card__preview { color: var(--color-text-secondary); font-size: var(--font-size-md); line-height: var(--line-height-normal); overflow-wrap: anywhere; }
+body[data-theme] #view-tasks .task-check { width: var(--tap-min); height: var(--tap-min); }
+body[data-theme] #view-tasks .task-card__meta { gap: var(--space-1); }
+body[data-theme] #view-tasks .task-card__actions { gap: var(--space-2); flex-wrap: wrap; padding-top: var(--space-3); margin-top: var(--space-3); border-top: 1px solid var(--color-divider); }
+body[data-theme] #view-tasks .task-card__actions .btn { min-height: var(--tap-min); font-size: var(--font-size-sm); }
+body[data-theme] #view-tasks .task-card__actions .btn--ghost { background: transparent; box-shadow: none; border-color: transparent; color: var(--color-text-secondary); }
+body[data-theme] #view-tasks .task-card__actions .btn--danger { color: var(--color-danger); }
+body[data-theme] #view-tasks .task-card--done { opacity: 1; background: var(--color-bg-surface); }
+body[data-theme] #view-tasks .task-card--done .task-card__title { color: var(--color-text-secondary); }
+body[data-theme] #view-tasks .task-view-content > .empty-state:not(:first-child) { padding: var(--space-3) var(--space-4); background: transparent; box-shadow: none; border: 1px solid var(--color-border-soft); }
+body[data-theme] #view-tasks .task-view-content > .empty-state:not(:first-child) .empty-state__icon { display: none; }
+body[data-theme] #view-tasks .task-view-content > .empty-state:not(:first-child) .empty-state__title { font-size: var(--font-size-md); }
+body[data-theme] #view-tasks .task-view-content > .empty-state:not(:first-child) .empty-state__desc { margin: 0; }
+body[data-theme] #view-tasks .today-plan-summary { background: transparent; box-shadow: none; padding: var(--space-3) 0; border: 0; }
+body[data-theme] #view-tasks .today-plan-summary__value { font-size: var(--font-size-base); }
+body[data-theme] #view-tasks #companion-section > .empty-state { padding: var(--space-4); box-shadow: none; }
+body[data-theme] #view-tasks #companion-section > .empty-state .empty-state__icon { font-size: var(--font-size-xl); margin-bottom: var(--space-2); }
+
+/* VP-04: display the pet first; keep image, detail and progression controls separate. */
+body[data-theme] #view-collection :is(.collection-progress-summary, .collection-milestones-panel, .collection-companion) { background: var(--color-bg-surface); box-shadow: none; padding: var(--space-3); border-color: var(--color-border-soft); }
+body[data-theme] #view-collection .collection-summary__title { font-size: var(--font-size-base); }
+body[data-theme] #view-collection .collection-summary__next strong { color: var(--color-text-secondary); }
+body[data-theme] #view-collection .collection-summary__rarities { gap: var(--space-1); }
+body[data-theme] #view-collection .collection-rarity-chip { padding: var(--space-1) 6px; }
+body[data-theme] #view-collection .filter-btn { min-height: var(--tap-min); }
+body[data-theme] #view-collection .filter-btn.active { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
+.collection-browse-hint { margin: 0 0 var(--space-3); color: var(--color-text-muted); font-size: var(--font-size-sm); }
+body[data-theme] #view-collection .collection-card {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-3);
+  background: var(--color-bg-card);
+  color: var(--color-text-main);
+  border-radius: var(--radius-lg);
+  box-shadow: none;
+}
+body[data-theme] #view-collection .collection-card--locked { opacity: 1; background: var(--color-bg-surface); }
+body[data-theme] #view-collection .collection-card__image { margin-bottom: var(--space-2); }
+body[data-theme] #view-collection .collection-card__image :is(.pet-image-frame, .pet-img-wrap, .pet-img) { width: 100%; height: auto; aspect-ratio: 1; }
+body[data-theme] #view-collection .collection-card__image img { object-fit: contain; }
+body[data-theme] #view-collection .collection-card__tap { flex: 1; }
+body[data-theme] #view-collection .collection-card__name { color: var(--color-text-main); font-size: var(--font-size-base); line-height: var(--line-height-snug); overflow-wrap: anywhere; }
+body[data-theme] #view-collection .collection-card__title { color: var(--color-text-secondary); font-size: var(--font-size-sm); line-height: var(--line-height-normal); min-height: 1.5em; margin: var(--space-1) 0 var(--space-2); }
+body[data-theme] #view-collection :is(.fragments, .pet-original-name, .locked-label) { color: var(--color-text-muted); font-size: var(--font-size-sm); line-height: var(--line-height-normal); overflow-wrap: anywhere; }
+.collection-card__meta { display: flex; justify-content: center; gap: var(--space-1) var(--space-2); flex-wrap: wrap; margin-top: var(--space-2); }
+.collection-card__actions { display: grid; gap: var(--space-2); margin-top: var(--space-3); padding-top: var(--space-3); border-top: 1px solid var(--color-divider); }
+body[data-theme] #view-collection .collection-card__actions .btn { margin: 0; width: 100%; min-height: var(--tap-min); border-radius: var(--radius-sm); box-shadow: none; font-size: var(--font-size-sm); line-height: var(--line-height-normal); padding: var(--space-2); }
+body[data-theme] #view-collection .collection-card__actions .btn--companion { background: var(--color-primary-soft); color: var(--color-primary-light); border: 1px solid var(--color-primary-border); }
+body[data-theme] #view-collection .collection-card__actions .btn--upgrade { background: transparent; color: var(--color-text-secondary); border: 1px solid var(--color-border); }
+.collection-card__state { display: flex; align-items: center; justify-content: center; min-height: var(--tap-min); color: var(--color-text-muted); font-size: var(--font-size-sm); }
+body[data-theme] .pet-detail__hero .pet-image-frame { width: min(100%, 220px); height: auto; aspect-ratio: 1; }
+body[data-theme] .pet-detail__hero .pet-detail-image-button { width: min(100%, 220px); }
+
+/* VP-05: preserve the summon result's own scrolling/actions layout. */
+body[data-theme] .modal:not(:has(.sweet-summon-result, .default-summon-result)) {
+  padding: 0;
+  max-height: calc(100dvh - var(--safe-top) - var(--space-4));
+  overflow: hidden;
+  background: var(--color-bg-card);
+  border-color: var(--color-border);
+}
+body[data-theme] .modal:not(:has(.sweet-summon-result, .default-summon-result)) > .modal-body {
+  max-height: min(88dvh, calc(100dvh - var(--safe-top) - var(--space-4)));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--space-6);
+  padding-bottom: calc(var(--space-6) + var(--safe-bottom));
+  scroll-padding: var(--space-6) 0;
+}
+body[data-theme] .modal:not(:has(.sweet-summon-result, .default-summon-result)) .modal-title {
+  min-height: var(--tap-min);
+  padding-right: calc(var(--tap-min) + var(--space-2));
+  margin-bottom: var(--space-4);
+  font-size: var(--font-size-xl);
+  line-height: var(--line-height-snug);
+  color: var(--color-text-main);
+  overflow-wrap: anywhere;
+}
+body[data-theme] .modal:not(:has(.sweet-summon-result, .default-summon-result)) .modal-close {
+  width: var(--tap-min);
+  height: var(--tap-min);
+  top: var(--space-3);
+  right: var(--space-3);
+  background: var(--color-bg-elevated);
+  color: var(--color-text-secondary);
+  border-color: var(--color-border);
+}
+body[data-theme] .modal:not(:has(.sweet-summon-result, .default-summon-result)) :is(.form-actions, .confirm-modal__actions, .pet-detail__nickname-actions) { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-4); }
+body[data-theme] .modal:not(:has(.sweet-summon-result, .default-summon-result)) :is(.form-actions, .confirm-modal__actions) .btn { flex: 1; min-height: var(--tap-min); white-space: normal; }
+body.modal-open:has(#modal-overlay.open):not(:has(#modal-overlay .sweet-summon-result, #modal-overlay .default-summon-result)),
+body.global-mailbox-open,
+body.expedition-dispatch-open,
+body.is-pet-image-viewer-open { overflow: hidden; touch-action: auto; }
+body[data-theme] :is(.global-mailbox-modal__sheet, .expedition-dispatch-modal__content) { max-height: calc(100dvh - var(--safe-top) - var(--safe-bottom) - var(--space-6)); }
+body[data-theme] :is(.global-mailbox-modal__body, .expedition-dispatch-modal__body) { min-height: 0; overscroll-behavior: contain; }
+body[data-theme] .expedition-dispatch-modal__pet-list { max-height: none; overflow: visible; }
+body[data-theme] :is(.global-mailbox-modal__icon-btn, .expedition-dispatch-modal__close, .pet-image-viewer__close) { min-width: var(--tap-min); min-height: var(--tap-min); flex-shrink: 0; }
+body[data-theme] :is(.global-mailbox-modal__title, .expedition-dispatch-modal__title, .pet-image-viewer__title) { font-size: var(--font-size-xl); line-height: var(--line-height-snug); overflow-wrap: anywhere; }
+body[data-theme] .pet-image-viewer__content { max-height: calc(100dvh - var(--safe-top) - var(--safe-bottom) - var(--space-6)); overflow-y: auto; overscroll-behavior: contain; }
+body[data-theme] :is(.modal-body, .global-mailbox-modal__sheet, .expedition-dispatch-modal__content) :focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+@media (max-width: 360px) {
+  #task-form .form-row { grid-template-columns: 1fr; }
+  body[data-theme] .modal:not(:has(.sweet-summon-result, .default-summon-result)) > .modal-body { padding-inline: var(--space-4); }
+}

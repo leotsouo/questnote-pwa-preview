@@ -1,11 +1,12 @@
-/** Preview-only summon timings. No game state or draw result is changed here. */
+/** Legacy source-preview diagnostics. Disabled in every assembled release. */
+import { RELEASE_PROFILE } from './releaseProfile.js';
 import { grantDevStardust } from './devService.js';
 import { playSummonReveal } from './summonRevealService.js';
 
 const OVERLAY_SELECTOR = '.dream-bloom-overlay, .summon-reveal-overlay, .dream-debut-overlay, .pool-awakening-overlay';
 
 export function startPerfDiagnostics(state, refreshState) {
-  if (location.hostname !== 'leotsouo.github.io'
+  if (RELEASE_PROFILE || location.hostname !== 'leotsouo.github.io'
     || !location.pathname.startsWith('/questnote-pwa-preview/')
     || new URLSearchParams(location.search).get('perf') !== '1') return;
 

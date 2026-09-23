@@ -6,6 +6,9 @@
  * 可於 Browser 與 Node ESM 載入。
  */
 
+import { validatePoolContent, normalizePoolDefinition, resolveEffectivePool, resolvePetRevealPresentation } from './poolContentContract.js';
+import { getEligiblePetsForPool as matchPoolCandidates } from './petPoolFilter.js';
+
 export const PET_RARITIES = Object.freeze(['N', 'R', 'SR', 'SSR', 'UR']);
 
 export const PET_ID_TYPES = Object.freeze({
@@ -130,6 +133,7 @@ export function normalizePetForValidation(pet) {
     rarity: typeof pet.rarity === 'string' ? pet.rarity.trim() : pet.rarity,
     image: typeof pet.image === 'string' ? pet.image.trim().replace(/\\/g, '/') : pet.image,
     imageVariants: pet.imageVariants,
+    presentation: pet.presentation,
     description: typeof pet.description === 'string' ? pet.description.trim() : pet.description,
     poolTags: Array.isArray(pet.poolTags) ? pet.poolTags.map((t) => (typeof t === 'string' ? t.trim() : t)) : pet.poolTags,
     seriesId: typeof pet.seriesId === 'string' ? pet.seriesId.trim() : pet.seriesId,
@@ -297,6 +301,17 @@ export function validatePet(pet, options = {}) {
         if (typeof path !== 'string' || !pattern.test(path)) {
           result.errors.push(createIssue('error', 'PET_IMAGE_VARIANT_PATH', `${kind} 圖片路徑格式錯誤`, `${prefix}.imageVariants.${kind}`));
         }
+      }
+    }
+  }
+
+  if (p.presentation !== undefined) {
+    if (!p.presentation || typeof p.presentation !== 'object' || Array.isArray(p.presentation)) {
+      result.errors.push(createIssue('error', 'PET_PRESENTATION_INVALID', 'presentation 必須為物件', prefix + '.presentation'));
+    } else {
+      try { resolvePetRevealPresentation(p); }
+      catch (error) {
+        for (const entry of error.issues || []) result.errors.push({ ...entry, path: prefix + '.' + entry.path.replace(/^pet\./, '') });
       }
     }
   }
@@ -720,70 +735,10 @@ export function validatePetAndLoreConsistency(petsData, loreData) {
 }
 
 /**
- * 抽卡池 catalog 基本驗證（不含候選數；候選數由 pool matching 函式計算）
+ * 抽卡池共用契約驗證，包含 locked / unlocked 候選與引用。
  */
 export function validatePoolCatalog(poolsData, options = {}) {
-  const result = emptyResult();
-  const pools = Array.isArray(poolsData?.pools) ? poolsData.pools : Array.isArray(poolsData) ? poolsData : null;
-  if (!pools) {
-    result.errors.push(createIssue('error', 'POOL_CATALOG_INVALID', 'pools 必須為陣列'));
-    result.ok = false;
-    return result;
-  }
-  const ids = new Set();
-  const eligibleFn = options.getEligiblePetsForPool;
-  const allPets = options.pets || [];
-
-  pools.forEach((pool, i) => {
-    if (!isNonEmptyString(pool?.id)) {
-      result.errors.push(createIssue('error', 'POOL_ID_MISSING', `pools[${i}] 缺少 id`));
-    } else if (ids.has(pool.id)) {
-      result.errors.push(createIssue('error', 'POOL_ID_DUP', `Pool ID 重複: ${pool.id}`));
-    } else {
-      ids.add(pool.id);
-    }
-
-    const rates = pool?.rates || {};
-    let sum = 0;
-    for (const rarity of PET_RARITIES) {
-      const rate = Number(rates[rarity] ?? 0);
-      if (rate < 0 || Number.isNaN(rate)) {
-        result.errors.push(createIssue('error', 'POOL_RATE_INVALID', `${pool.id} rates.${rarity} 不合法`));
-      }
-      sum += rate;
-    }
-    if (sum > 0 && (sum < 0.99 || sum > 1.01)) {
-      result.warnings.push(createIssue('warning', 'POOL_RATE_SUM', `${pool.id} rates 合計約 ${sum.toFixed(4)}（建議接近 1）`));
-    }
-
-    const tags = pool?.petFilter?.poolTags;
-    if (tags && (!Array.isArray(tags) || tags.some((t) => typeof t !== 'string' || !t.trim()))) {
-      result.errors.push(createIssue('error', 'POOL_FILTER_INVALID', `${pool.id} petFilter.poolTags 不合法`));
-    }
-
-    if (typeof eligibleFn === 'function') {
-      const eligible = eligibleFn(allPets, pool);
-      if (pool.active && eligible.length === 0) {
-        result.errors.push(createIssue('error', 'POOL_ACTIVE_EMPTY', `active Pool「${pool.id}」候選為空`));
-      }
-      for (const rarity of PET_RARITIES) {
-        const rate = Number(rates[rarity] ?? 0);
-        if (rate > 0) {
-          const count = eligible.filter((p) => p.rarity === rarity).length;
-          if (count === 0) {
-            result.errors.push(createIssue(
-              'error',
-              'POOL_EMPTY_RARITY',
-              `Pool「${pool.id}」${rarity} 機率 > 0 但候選數為 0`,
-            ));
-          }
-        }
-      }
-    }
-  });
-
-  result.ok = result.errors.length === 0;
-  return result;
+  return validatePoolContent(poolsData, { pets: options.pets, previousPoolsData: options.previousPoolsData });
 }
 
 /**
@@ -800,7 +755,6 @@ export function validatePetPackage(pkg, options = {}) {
     officialLore = [],
     seriesCatalog,
     poolsData,
-    getEligiblePetsForPool,
     knownPoolTags,
   } = pkg;
 
@@ -912,35 +866,23 @@ export function validatePetPackage(pkg, options = {}) {
   }
 
   // Pool preview safety on merged set
-  if (poolsData && typeof getEligiblePetsForPool === 'function') {
+  if (poolsData) {
     const mergedPets = [...officialPets, ...workspacePets];
     const poolResult = validatePoolCatalog(poolsData, {
       pets: mergedPets,
-      getEligiblePetsForPool,
     });
-    // Only surface empty-rarity / active-empty as package errors; rate sum warnings ok
-    for (const err of poolResult.errors) {
-      if (err.code === 'POOL_EMPTY_RARITY' || err.code === 'POOL_ACTIVE_EMPTY') {
-        result.errors.push(err);
-      }
-    }
+    // Every contract error blocks publication; do not discard new validation codes.
+    result.errors.push(...poolResult.errors);
     for (const warn of poolResult.warnings) {
       result.warnings.push(warn);
     }
 
     for (const pet of workspacePets) {
       let inAnyActive = false;
-      const petTags = Array.isArray(pet?.poolTags) ? pet.poolTags : [];
-      for (const pool of poolsData.pools || []) {
+      for (const pool of poolResult.ok ? poolResult.pools : []) {
         if (!pool.active) continue;
-        const eligible = getEligiblePetsForPool([pet], pool);
+        const eligible = matchPoolCandidates([pet], resolveEffectivePool(pool, { unlocked: true }));
         if (eligible.length > 0) {
-          inAnyActive = true;
-          break;
-        }
-        // 解鎖擴充標籤：靜態 petFilter 不含，但屬該池解鎖後候選
-        const extra = pool?.unlockExpansion?.extraPoolTags || [];
-        if (Array.isArray(extra) && extra.some((t) => petTags.includes(t))) {
           inAnyActive = true;
           break;
         }
@@ -989,25 +931,32 @@ export function countByRarity(pets) {
   return counts;
 }
 
-export function buildPoolPreview(poolsData, beforePets, afterPets, getEligiblePetsForPool) {
-  const pools = poolsData?.pools || [];
-  return pools.map((pool) => {
-    const before = getEligiblePetsForPool(beforePets, pool);
-    const after = getEligiblePetsForPool(afterPets, pool);
-    return {
-      id: pool.id,
-      name: pool.name,
-      active: !!pool.active,
-      before: {
-        total: before.length,
-        byRarity: countByRarity(before),
-      },
-      after: {
-        total: after.length,
-        byRarity: countByRarity(after),
-      },
-      addedIds: after.filter((p) => !before.some((b) => b.id === p.id)).map((p) => p.id),
-    };
+export function buildPoolPreview(poolsData, beforePets, afterPets, _legacyMatcher) {
+  const pools = Array.isArray(poolsData?.pools) ? poolsData.pools : [];
+  const snapshot = (pets) => ({ total: pets.length, byRarity: countByRarity(pets) });
+  const added = (before, after) => { const ids = new Set(before.map((pet) => pet.id)); return after.filter((pet) => !ids.has(pet.id)).map((pet) => pet.id); };
+  return pools.map((rawPool) => {
+    try {
+      const pool = normalizePoolDefinition(rawPool);
+      const expanded = resolveEffectivePool(pool, { unlocked: true });
+      const before = matchPoolCandidates(beforePets, pool);
+      const after = matchPoolCandidates(afterPets, pool);
+      const beforeExpanded = matchPoolCandidates(beforePets, expanded);
+      const afterExpanded = matchPoolCandidates(afterPets, expanded);
+      return {
+        id: pool.id, name: pool.name, active: pool.active,
+        before: snapshot(before), after: snapshot(after), addedIds: added(before, after),
+        unlocked: { before: snapshot(beforeExpanded), after: snapshot(afterExpanded), addedIds: added(beforeExpanded, afterExpanded) },
+        errors: [],
+      };
+    } catch (error) {
+      return {
+        id: rawPool?.id || '', name: rawPool?.name || '', active: rawPool?.active === true,
+        before: snapshot([]), after: snapshot([]), addedIds: [],
+        unlocked: { before: snapshot([]), after: snapshot([]), addedIds: [] },
+        errors: error.issues || [createIssue('error', 'POOL_PREVIEW_INVALID', '無法預覽此卡池')],
+      };
+    }
   });
 }
 

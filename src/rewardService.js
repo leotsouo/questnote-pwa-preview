@@ -1,7 +1,7 @@
 /**
  * 星塵獎勵計算與發放
  */
-import { openDB, dbGet, dbPut, STORES } from './db.js';
+import { openDB, dbGet, dbPut, dbUpdateRecord, STORES } from './db.js';
 import { updateTask } from './taskService.js';
 import { addBondExpToCompanion } from './collectionService.js';
 
@@ -99,88 +99,76 @@ export async function getWallet() {
   return normalizeWallet(wallet);
 }
 
+function updateWallet(update) {
+  return dbUpdateRecord(STORES.META, WALLET_KEY, (raw) => {
+    const wallet = normalizeWallet(raw);
+    update(wallet);
+    return wallet;
+  });
+}
+
 /** 增加冒險能量 */
 export async function addAdventureEnergy(amount) {
   if (amount <= 0) return getWallet();
-  const wallet = await getWallet();
-  wallet.adventureEnergy = (wallet.adventureEnergy || 0) + amount;
-  await dbPut(STORES.META, wallet);
-  return wallet;
+  return updateWallet((wallet) => {
+    wallet.adventureEnergy = (wallet.adventureEnergy || 0) + amount;
+  });
 }
 
 /** 扣除冒險能量 */
 export async function spendAdventureEnergy(amount) {
-  const wallet = await getWallet();
-  if ((wallet.adventureEnergy || 0) < amount) {
-    throw new Error('冒險能量不足');
-  }
-  wallet.adventureEnergy -= amount;
-  await dbPut(STORES.META, wallet);
-  return wallet;
+  return updateWallet((wallet) => {
+    if ((wallet.adventureEnergy || 0) < amount) throw new Error('冒險能量不足');
+    wallet.adventureEnergy -= amount;
+  });
 }
 
 /** 增加材料 */
 export async function addMaterial(materialId, amount) {
   if (amount <= 0) return getWallet();
-  const wallet = await getWallet();
-  wallet.materials[materialId] = (wallet.materials[materialId] || 0) + amount;
-  await dbPut(STORES.META, wallet);
-  return wallet;
+  return updateWallet((wallet) => {
+    wallet.materials[materialId] = (wallet.materials[materialId] || 0) + amount;
+  });
 }
 
 /** 扣除材料 */
 export async function spendMaterial(materialId, amount) {
   if (amount <= 0) return getWallet();
-  const wallet = await getWallet();
-  const current = wallet.materials[materialId] || 0;
-  if (current < amount) {
-    throw new Error('材料不足');
-  }
-  wallet.materials[materialId] = current - amount;
-  await dbPut(STORES.META, wallet);
-  return wallet;
+  return updateWallet((wallet) => {
+    const current = wallet.materials[materialId] || 0;
+    if (current < amount) throw new Error('材料不足');
+    wallet.materials[materialId] = current - amount;
+  });
 }
 
 /** 一次扣除多種材料（全部足夠才扣） */
 export async function spendMaterials(recipe) {
-  const wallet = await getWallet();
-  for (const [matId, amount] of Object.entries(recipe || {})) {
-    if ((wallet.materials[matId] || 0) < amount) {
-      throw new Error('材料不足');
+  return updateWallet((wallet) => {
+    for (const [matId, amount] of Object.entries(recipe || {})) {
+      if ((wallet.materials[matId] || 0) < amount) throw new Error('材料不足');
     }
-  }
-  for (const [matId, amount] of Object.entries(recipe || {})) {
-    wallet.materials[matId] = (wallet.materials[matId] || 0) - amount;
-  }
-  await dbPut(STORES.META, wallet);
-  return wallet;
+    for (const [matId, amount] of Object.entries(recipe || {})) {
+      wallet.materials[matId] = (wallet.materials[matId] || 0) - amount;
+    }
+  });
 }
 
 /** 設定星塵數量 */
 export async function setStardust(amount) {
-  const wallet = await getWallet();
-  wallet.stardust = Math.max(0, amount);
-  await dbPut(STORES.META, wallet);
-  return wallet;
+  return updateWallet((wallet) => { wallet.stardust = Math.max(0, amount); });
 }
 
 /** 增加星塵 */
 export async function addStardust(amount) {
-  const wallet = await getWallet();
-  wallet.stardust = (wallet.stardust || 0) + amount;
-  await dbPut(STORES.META, wallet);
-  return wallet;
+  return updateWallet((wallet) => { wallet.stardust = (wallet.stardust || 0) + amount; });
 }
 
 /** 扣除星塵，餘額不足時拋錯 */
 export async function spendStardust(amount) {
-  const wallet = await getWallet();
-  if ((wallet.stardust || 0) < amount) {
-    throw new Error('星塵不足');
-  }
-  wallet.stardust -= amount;
-  await dbPut(STORES.META, wallet);
-  return wallet;
+  return updateWallet((wallet) => {
+    if ((wallet.stardust || 0) < amount) throw new Error('星塵不足');
+    wallet.stardust -= amount;
+  });
 }
 
 /**
@@ -223,9 +211,7 @@ export async function getAvailablePulls() {
 
 /** 初始化錢包（首次使用或遷移舊資料） */
 export async function initWallet() {
-  const existing = await dbGet(STORES.META, WALLET_KEY);
-  const wallet = normalizeWallet(existing);
-  await dbPut(STORES.META, wallet);
+  await updateWallet(() => {});
 }
 
 /**

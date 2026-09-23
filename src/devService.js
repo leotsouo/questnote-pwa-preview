@@ -17,6 +17,7 @@ import {
   releaseWheelSpinLock,
 } from './dailyCheckInService.js';
 import { dbPut, STORES } from './db.js';
+import { RELEASE_PROFILE } from './releaseProfile.js';
 
 /** 每次測試發放的星塵數量 */
 export const DEV_STARDUST_GRANT = 100000;
@@ -44,6 +45,7 @@ export function isDevMode() {
  * 正式 GitHub Pages 即使 ?debug=1 或 localStorage debug 也不得通過。
  */
 export function isAuthorLocalDevMode() {
+  if (RELEASE_PROFILE) return false;
   try {
     const hostname = window.location.hostname;
     return (
@@ -63,6 +65,7 @@ export function isAuthorLocalDevMode() {
  * @returns {boolean}
  */
 export function isDebugMode() {
+  if (RELEASE_PROFILE) return false;
   try {
     const params = new URLSearchParams(location.search);
     if (params.get('debug') === '1') return true;
@@ -106,6 +109,7 @@ export async function unlockAllDevPets(petIds) {
  * @returns {Promise<number>} 發放後的星塵總數
  */
 export async function grantDevStardust() {
+  if (!isAuthorLocalDevMode()) throw new Error('Test currency is available only in a local source checkout');
   await addStardust(DEV_STARDUST_GRANT);
   const wallet = await getWallet();
   return wallet.stardust ?? 0;

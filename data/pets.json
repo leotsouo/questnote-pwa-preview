@@ -8,11 +8,7 @@
       "description": "棲息於迷霧森林的低階幻獸，雙眼在夜間泛著幽藍微光。",
       "poolTags": [
         "standard"
-      ],
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_n01-card-384-41df3c9be3b1.webp",
-        "stage": "assets/pets/variants/pet_n01-stage-960-41df3c9be3b1.webp"
-      }
+      ]
     },
     {
       "id": "pet_n02",
@@ -22,11 +18,7 @@
       "description": "以堅硬岩甲包裹全身的穴居獸，挖掘速度驚人。",
       "poolTags": [
         "standard"
-      ],
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_n02-card-384-d0d0a661e3e9.webp",
-        "stage": "assets/pets/variants/pet_n02-stage-960-d0d0a661e3e9.webp"
-      }
+      ]
     },
     {
       "id": "pet_n03",
@@ -36,11 +28,7 @@
       "description": "能聽見風中低語的夜行鳥，是初階冒險者的可靠夥伴。",
       "poolTags": [
         "standard"
-      ],
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_n03-card-384-ae0e84d7da7e.webp",
-        "stage": "assets/pets/variants/pet_n03-stage-960-ae0e84d7da7e.webp"
-      }
+      ]
     },
     {
       "id": "pet_n04",
@@ -50,11 +38,7 @@
       "description": "尾巴尖端能迸出小火花的蜥蜴，性格活潑好動。",
       "poolTags": [
         "standard"
-      ],
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_n04-card-384-f1394109c4a4.webp",
-        "stage": "assets/pets/variants/pet_n04-stage-960-f1394109c4a4.webp"
-      }
+      ]
     },
     {
       "id": "pet_n05",
@@ -64,11 +48,7 @@
       "description": "由森林苔蘚凝聚而成的軟體生物，對植物有特殊感應。",
       "poolTags": [
         "standard"
-      ],
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_n05-card-384-3fb8d0fe4da7.webp",
-        "stage": "assets/pets/variants/pet_n05-stage-960-3fb8d0fe4da7.webp"
-      }
+      ]
     },
     {
       "id": "pet_n06",
@@ -78,11 +58,7 @@
       "description": "喙部如精鐵般堅硬的黑色渡鴉，象徵著旅途的開始。",
       "poolTags": [
         "standard"
-      ],
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_n06-card-384-a661e719c4d2.webp",
-        "stage": "assets/pets/variants/pet_n06-stage-960-a661e719c4d2.webp"
-      }
+      ]
     },
     {
       "id": "pet_n07",
@@ -92,11 +68,7 @@
       "description": "棲息於沼澤地帶的兩棲獸，皮膚能分泌麻痹性黏液。",
       "poolTags": [
         "standard"
-      ],
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_n07-card-384-ffb4b0444c91.webp",
-        "stage": "assets/pets/variants/pet_n07-stage-960-ffb4b0444c91.webp"
-      }
+      ]
     },
     {
       "id": "pet_n08",
@@ -106,11 +78,7 @@
       "description": "背脊長滿半透明晶刺的防禦型幻獸。",
       "poolTags": [
         "standard"
-      ],
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_n08-card-384-317c19589fd0.webp",
-        "stage": "assets/pets/variants/pet_n08-stage-960-317c19589fd0.webp"
-      }
+      ]
     },
     {
       "id": "pet_n09",
@@ -120,11 +88,7 @@
       "description": "能在薄霧中隱身的敏捷生物，耳朵異常靈敏。",
       "poolTags": [
         "standard"
-      ],
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_n09-card-384-5da0cbcd4a06.webp",
-        "stage": "assets/pets/variants/pet_n09-stage-960-5da0cbcd4a06.webp"
-      }
+      ]
     },
     {
       "id": "pet_n10",
@@ -134,11 +98,7 @@
       "description": "鱗片如古銅般閃耀的淡水魚，據說能帶來好運。",
       "poolTags": [
         "standard"
-      ],
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_n10-card-384-bd5e522d55a6.webp",
-        "stage": "assets/pets/variants/pet_n10-stage-960-bd5e522d55a6.webp"
-      }
+      ]
     },
     {
       "id": "pet_r01",
@@ -148,11 +108,7 @@
       "description": "馳騁於高原的狼群首領，毛色隨風向變化。",
       "poolTags": [
         "standard"
-      ],
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_r01-card-384-0d6ca7821c32.webp",
-        "stage": "assets/pets/variants/pet_r01-stage-960-0d6ca7821c32.webp"
-      }
+      ]
     },
     {
       "id": "pet_r02",
@@ -162,11 +118,7 @@
       "description": "鬃毛燃燒著恆定火焰的幼獅，血脈中流淌著王族之力。",
       "poolTags": [
         "standard"
-      ],
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_r02-card-384-ee3b1b08cc6a.webp",
-        "stage": "assets/pets/variants/pet_r02-stage-960-ee3b1b08cc6a.webp"
-      }
+      ]
     },
     {
       "id": "pet_r03",
@@ -176,11 +128,7 @@
       "description": "身體纏繞雷電紋路的飛行蛇類，速度凌厲。",
       "poolTags": [
         "standard"
-      ],
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_r03-card-384-d5ddf9733ef9.webp",
-        "stage": "assets/pets/variants/pet_r03-stage-960-d5ddf9733ef9.webp"
-      }
+      ]
     },
     {
       "id": "pet_r04",
@@ -190,11 +138,7 @@
       "description": "骨骼外化為金屬的兇猛鬣狗，咬合力驚人。",
       "poolTags": [
         "standard"
-      ],
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_r04-card-384-096be1486688.webp",
-        "stage": "assets/pets/variants/pet_r04-stage-960-096be1486688.webp"
-      }
+      ]
     },
     {
       "id": "pet_r05",
@@ -204,11 +148,7 @@
       "description": "九尾尚未覺醒的冰霜狐狸，足跡所至結成薄冰。",
       "poolTags": [
         "standard"
-      ],
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_r05-card-384-a63692d4b731.webp",
-        "stage": "assets/pets/variants/pet_r05-stage-960-a63692d4b731.webp"
-      }
+      ]
     },
     {
       "id": "pet_r06",
@@ -218,11 +158,7 @@
       "description": "能在影子間穿梭的暗色豹獸，爪刃鋒利無比。",
       "poolTags": [
         "standard"
-      ],
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_r06-card-384-20e63613d5ce.webp",
-        "stage": "assets/pets/variants/pet_r06-stage-960-20e63613d5ce.webp"
-      }
+      ]
     },
     {
       "id": "pet_r07",
@@ -232,11 +168,7 @@
       "description": "羽毛如寶石般絢麗的靈鳥，能模仿各種魔法咒語。",
       "poolTags": [
         "standard"
-      ],
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_r07-card-384-528c8955e7a5.webp",
-        "stage": "assets/pets/variants/pet_r07-stage-960-528c8955e7a5.webp"
-      }
+      ]
     },
     {
       "id": "pet_r08",
@@ -246,11 +178,7 @@
       "description": "背甲上刻滿古代符文的沙漠巨龜，壽命逾千年。",
       "poolTags": [
         "standard"
-      ],
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_r08-card-384-8c8ff1c02c44.webp",
-        "stage": "assets/pets/variants/pet_r08-stage-960-8c8ff1c02c44.webp"
-      }
+      ]
     },
     {
       "id": "pet_sr01",
@@ -260,11 +188,7 @@
       "description": "盤旋於暴雲之上的雷電翼龍，振翅時引發雷鳴。",
       "poolTags": [
         "standard"
-      ],
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_sr01-card-384-bacd9dcf3f5b.webp",
-        "stage": "assets/pets/variants/pet_sr01-stage-960-bacd9dcf3f5b.webp"
-      }
+      ]
     },
     {
       "id": "pet_sr02",
@@ -274,11 +198,7 @@
       "description": "體表覆蓋流動熔岩鎧甲的戰獅，所過之處留下焦痕。",
       "poolTags": [
         "standard"
-      ],
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_sr02-card-384-f6d26dd281f8.webp",
-        "stage": "assets/pets/variants/pet_sr02-stage-960-f6d26dd281f8.webp"
-      }
+      ]
     },
     {
       "id": "pet_sr03",
@@ -288,11 +208,7 @@
       "description": "來自冥界的嘯天狼，嚎叫聲能撕裂靈魂邊界。",
       "poolTags": [
         "standard"
-      ],
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_sr03-card-384-38d734ec7c26.webp",
-        "stage": "assets/pets/variants/pet_sr03-stage-960-38d734ec7c26.webp"
-      }
+      ]
     },
     {
       "id": "pet_sr04",
@@ -302,11 +218,7 @@
       "description": "古代文明遺留的機械獵犬，搭載自動追蹤系統。",
       "poolTags": [
         "standard"
-      ],
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_sr04-card-384-9114ee4204b4.webp",
-        "stage": "assets/pets/variants/pet_sr04-stage-960-9114ee4204b4.webp"
-      }
+      ]
     },
     {
       "id": "pet_sr05",
@@ -316,11 +228,7 @@
       "description": "由極地玄冰凝聚而成的晶龍，呼吸間凍結一切。",
       "poolTags": [
         "standard"
-      ],
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_sr05-card-384-d9346a75de4f.webp",
-        "stage": "assets/pets/variants/pet_sr05-stage-960-d9346a75de4f.webp"
-      }
+      ]
     },
     {
       "id": "pet_sr06",
@@ -330,11 +238,7 @@
       "description": "額角散發聖潔光芒的幻獸，能淨化黑暗腐化。",
       "poolTags": [
         "standard"
-      ],
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_sr06-card-384-d0ea3264f842.webp",
-        "stage": "assets/pets/variants/pet_sr06-stage-960-d0ea3264f842.webp"
-      }
+      ]
     },
     {
       "id": "pet_ssr01",
@@ -344,11 +248,7 @@
       "description": "浴火重生的神話鳳凰，羽翼燃燒著不滅的天火。",
       "poolTags": [
         "standard"
-      ],
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_ssr01-card-384-1594be3fe91e.webp",
-        "stage": "assets/pets/variants/pet_ssr01-stage-960-1594be3fe91e.webp"
-      }
+      ]
     },
     {
       "id": "pet_ssr02",
@@ -358,11 +258,7 @@
       "description": "守衛深淵入口的遠古魔狼，雙眸映照無盡虛空。",
       "poolTags": [
         "standard"
-      ],
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_ssr02-card-384-414937ec82b0.webp",
-        "stage": "assets/pets/variants/pet_ssr02-stage-960-414937ec82b0.webp"
-      }
+      ]
     },
     {
       "id": "pet_ssr03",
@@ -372,11 +268,7 @@
       "description": "以隕星核心驅動的泰坦機甲獸，一擊可撼動大地。",
       "poolTags": [
         "standard"
-      ],
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_ssr03-card-384-47a434c4d5cf.webp",
-        "stage": "assets/pets/variants/pet_ssr03-stage-960-47a434c4d5cf.webp"
-      }
+      ]
     },
     {
       "id": "pet_ssr04",
@@ -386,11 +278,7 @@
       "description": "翱翔九霄的應龍，掌控風雨雷電，為雨師之祖。",
       "poolTags": [
         "standard"
-      ],
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_ssr04-card-384-d6f7b366a3b2.webp",
-        "stage": "assets/pets/variants/pet_ssr04-stage-960-d6f7b366a3b2.webp"
-      }
+      ]
     },
     {
       "id": "pet_ur01",
@@ -400,11 +288,7 @@
       "description": "誕生於宇宙初開的星龍，鱗片中嵌入整片星河。",
       "poolTags": [
         "standard"
-      ],
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_ur01-card-384-41e5120e8e1a.webp",
-        "stage": "assets/pets/variants/pet_ur01-stage-960-41e5120e8e1a.webp"
-      }
+      ]
     },
     {
       "id": "pet_ur02",
@@ -414,11 +298,7 @@
       "description": "行走於毀滅與重生邊界的黑麒麟，蹄下踏碎命運。",
       "poolTags": [
         "standard"
-      ],
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_ur02-card-384-23031d355464.webp",
-        "stage": "assets/pets/variants/pet_ur02-stage-960-23031d355464.webp"
-      }
+      ]
     },
     {
       "id": "pet_ur03",
@@ -428,11 +308,7 @@
       "description": "超越時間的機械龍神，擁有自我進化的終極形態。",
       "poolTags": [
         "standard"
-      ],
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_ur03-card-384-865c3b5665eb.webp",
-        "stage": "assets/pets/variants/pet_ur03-stage-960-865c3b5665eb.webp"
-      }
+      ]
     },
     {
       "id": "pet_ur04",
@@ -442,11 +318,7 @@
       "description": "太初之時便存在的聖凰，一羽可化萬界、一啼可創生。",
       "poolTags": [
         "standard"
-      ],
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_ur04-card-384-74bb691a8d99.webp",
-        "stage": "assets/pets/variants/pet_ur04-stage-960-74bb691a8d99.webp"
-      }
+      ]
     },
     {
       "id": "pet_sp01",
@@ -460,11 +332,7 @@
       ],
       "speciesType": "cat",
       "element": "steam_rice",
-      "visualTheme": "warm_daily_companion",
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_sp01-card-384-040886f87235.webp",
-        "stage": "assets/pets/variants/pet_sp01-stage-960-040886f87235.webp"
-      }
+      "visualTheme": "warm_daily_companion"
     },
     {
       "id": "pet_sp02",
@@ -478,11 +346,7 @@
       ],
       "speciesType": "bird",
       "element": "wind_command",
-      "visualTheme": "cool_boss_bird",
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_sp02-card-384-ea10f2d91fff.webp",
-        "stage": "assets/pets/variants/pet_sp02-stage-960-ea10f2d91fff.webp"
-      }
+      "visualTheme": "cool_boss_bird"
     },
     {
       "id": "pet_sp03",
@@ -496,11 +360,7 @@
       ],
       "speciesType": "dog",
       "element": "fire_motivation",
-      "visualTheme": "warm_action_partner",
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_sp03-card-384-05f25ea15d1d.webp",
-        "stage": "assets/pets/variants/pet_sp03-stage-960-05f25ea15d1d.webp"
-      }
+      "visualTheme": "warm_action_partner"
     },
     {
       "id": "pet_sp04",
@@ -514,11 +374,7 @@
       ],
       "speciesType": "bear",
       "element": "ice_aurora",
-      "visualTheme": "majestic_frost_guardian",
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_sp04-card-384-87d63597569c.webp",
-        "stage": "assets/pets/variants/pet_sp04-stage-960-87d63597569c.webp"
-      }
+      "visualTheme": "majestic_frost_guardian"
     },
     {
       "id": "pet_sp05",
@@ -532,11 +388,7 @@
       ],
       "speciesType": "horse",
       "element": "wind_aether",
-      "visualTheme": "celestial_wind_steed",
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_sp05-card-384-169321516a02.webp",
-        "stage": "assets/pets/variants/pet_sp05-stage-960-169321516a02.webp"
-      }
+      "visualTheme": "celestial_wind_steed"
     },
     {
       "id": "pet_sp06",
@@ -550,11 +402,7 @@
       ],
       "speciesType": "robot",
       "element": "light_core",
-      "visualTheme": "cute_future_companion",
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_sp06-card-384-46728dd910b4.webp",
-        "stage": "assets/pets/variants/pet_sp06-stage-960-46728dd910b4.webp"
-      }
+      "visualTheme": "cute_future_companion"
     },
     {
       "id": "pet_sp08",
@@ -569,11 +417,7 @@
       ],
       "speciesType": "sea_beast",
       "element": "ice_ocean",
-      "visualTheme": "arctic_ocean_overlord",
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_sp08-card-384-384abc56db35.webp",
-        "stage": "assets/pets/variants/pet_sp08-stage-960-384abc56db35.webp"
-      }
+      "visualTheme": "arctic_ocean_overlord"
     },
     {
       "id": "pet_sp09",
@@ -587,11 +431,7 @@
       ],
       "speciesType": "wolf_bear",
       "element": "ice_warrior",
-      "visualTheme": "viking_arctic_guardian",
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_sp09-card-384-e4ea720a4777.webp",
-        "stage": "assets/pets/variants/pet_sp09-stage-960-e4ea720a4777.webp"
-      }
+      "visualTheme": "viking_arctic_guardian"
     },
     {
       "id": "pet_sp10",
@@ -606,11 +446,7 @@
       ],
       "speciesType": "fluffy_spirit",
       "element": "star_sweet",
-      "visualTheme": "ultra_cute_star_companion",
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_sp10-card-384-1ad83531fa2c.webp",
-        "stage": "assets/pets/variants/pet_sp10-stage-960-1ad83531fa2c.webp"
-      }
+      "visualTheme": "ultra_cute_star_companion"
     },
     {
       "id": "pet_sp11",
@@ -625,11 +461,7 @@
       ],
       "speciesType": "shadow_feline",
       "element": "abyss_crimson",
-      "visualTheme": "evil_abyss_overlord",
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_sp11-card-384-948a2bb59875.webp",
-        "stage": "assets/pets/variants/pet_sp11-stage-960-948a2bb59875.webp"
-      }
+      "visualTheme": "evil_abyss_overlord"
     },
     {
       "id": "pet_sp12",
@@ -644,11 +476,7 @@
       ],
       "speciesType": "pastoral_guardian",
       "element": "harvest_light",
-      "visualTheme": "pure_rustic_field_guardian",
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_sp12-card-384-ed0a96dae373.webp",
-        "stage": "assets/pets/variants/pet_sp12-stage-960-ed0a96dae373.webp"
-      }
+      "visualTheme": "pure_rustic_field_guardian"
     },
     {
       "id": "pet_sp13",
@@ -663,11 +491,7 @@
       ],
       "speciesType": "arcane_fox",
       "element": "star_mind",
-      "visualTheme": "intelligent_arcane_strategist",
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_sp13-card-384-4bb18716e633.webp",
-        "stage": "assets/pets/variants/pet_sp13-stage-960-4bb18716e633.webp"
-      }
+      "visualTheme": "intelligent_arcane_strategist"
     },
     {
       "id": "pet_n11",
@@ -680,11 +504,7 @@
       ],
       "speciesType": "fox",
       "element": "lantern_light",
-      "visualTheme": "gentle_paper_lantern_fox",
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_n11-card-384-4cc1c7dc33a2.webp",
-        "stage": "assets/pets/variants/pet_n11-stage-960-4cc1c7dc33a2.webp"
-      }
+      "visualTheme": "gentle_paper_lantern_fox"
     },
     {
       "id": "pet_n12",
@@ -697,11 +517,7 @@
       ],
       "speciesType": "hamster",
       "element": "storage_earth",
-      "visualTheme": "tiny_bag_carrier_companion",
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_n12-card-384-5f93af0a4d34.webp",
-        "stage": "assets/pets/variants/pet_n12-stage-960-5f93af0a4d34.webp"
-      }
+      "visualTheme": "tiny_bag_carrier_companion"
     },
     {
       "id": "pet_n13",
@@ -714,11 +530,7 @@
       ],
       "speciesType": "sparrow",
       "element": "bell_wind",
-      "visualTheme": "small_bell_sparrow",
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_n13-card-384-f8a8632dae3d.webp",
-        "stage": "assets/pets/variants/pet_n13-stage-960-f8a8632dae3d.webp"
-      }
+      "visualTheme": "small_bell_sparrow"
     },
     {
       "id": "pet_n14",
@@ -731,11 +543,7 @@
       ],
       "speciesType": "sheep",
       "element": "cloud_softness",
-      "visualTheme": "fluffy_cloud_sheep",
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_n14-card-384-c938004eec00.webp",
-        "stage": "assets/pets/variants/pet_n14-stage-960-c938004eec00.webp"
-      }
+      "visualTheme": "fluffy_cloud_sheep"
     },
     {
       "id": "pet_n15",
@@ -748,11 +556,7 @@
       ],
       "speciesType": "snail",
       "element": "ink_trail",
-      "visualTheme": "slow_ink_shell_snail",
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_n15-card-384-8b32c2cd30c9.webp",
-        "stage": "assets/pets/variants/pet_n15-stage-960-8b32c2cd30c9.webp"
-      }
+      "visualTheme": "slow_ink_shell_snail"
     },
     {
       "id": "pet_n16",
@@ -765,11 +569,7 @@
       ],
       "speciesType": "deer",
       "element": "sprout_nature",
-      "visualTheme": "young_sprout_deer",
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_n16-card-384-6669c278dbcc.webp",
-        "stage": "assets/pets/variants/pet_n16-stage-960-6669c278dbcc.webp"
-      }
+      "visualTheme": "young_sprout_deer"
     },
     {
       "id": "pet_r09",
@@ -782,11 +582,7 @@
       ],
       "speciesType": "cat",
       "element": "night_shadow",
-      "visualTheme": "stealthy_ink_feather_cat",
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_r09-card-384-b67e24791a0a.webp",
-        "stage": "assets/pets/variants/pet_r09-stage-960-b67e24791a0a.webp"
-      }
+      "visualTheme": "stealthy_ink_feather_cat"
     },
     {
       "id": "pet_r10",
@@ -799,11 +595,7 @@
       ],
       "speciesType": "beetle",
       "element": "amber_wood",
-      "visualTheme": "golden_amber_beetle",
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_r10-card-384-9f1581acfbd4.webp",
-        "stage": "assets/pets/variants/pet_r10-stage-960-9f1581acfbd4.webp"
-      }
+      "visualTheme": "golden_amber_beetle"
     },
     {
       "id": "pet_r11",
@@ -816,11 +608,7 @@
       ],
       "speciesType": "otter",
       "element": "tide_water",
-      "visualTheme": "playful_tide_otter",
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_r11-card-384-174ea084c94b.webp",
-        "stage": "assets/pets/variants/pet_r11-stage-960-174ea084c94b.webp"
-      }
+      "visualTheme": "playful_tide_otter"
     },
     {
       "id": "pet_r12",
@@ -833,11 +621,7 @@
       ],
       "speciesType": "goat",
       "element": "ember_stone",
-      "visualTheme": "volcanic_horned_goat",
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_r12-card-384-b8ffc888a49b.webp",
-        "stage": "assets/pets/variants/pet_r12-stage-960-b8ffc888a49b.webp"
-      }
+      "visualTheme": "volcanic_horned_goat"
     },
     {
       "id": "pet_sr07",
@@ -850,11 +634,7 @@
       ],
       "speciesType": "leopard",
       "element": "moon_amber",
-      "visualTheme": "elegant_lunar_amber_leopard",
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_sr07-card-384-94376b3ed3b3.webp",
-        "stage": "assets/pets/variants/pet_sr07-stage-960-94376b3ed3b3.webp"
-      }
+      "visualTheme": "elegant_lunar_amber_leopard"
     },
     {
       "id": "pet_sr08",
@@ -867,11 +647,7 @@
       ],
       "speciesType": "mechanical_owl",
       "element": "clockwork_time",
-      "visualTheme": "arcane_clocktower_owl",
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_sr08-card-384-fe7e28f3c504.webp",
-        "stage": "assets/pets/variants/pet_sr08-stage-960-fe7e28f3c504.webp"
-      }
+      "visualTheme": "arcane_clocktower_owl"
     },
     {
       "id": "pet_n17",
@@ -885,11 +661,7 @@
       "seriesId": "eternal_slumber_bloom",
       "speciesType": "sugar_glider",
       "element": "dream_dust",
-      "visualTheme": "moonlit_dreamdust_glider",
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_n17-card-384-b778724fa519.webp",
-        "stage": "assets/pets/variants/pet_n17-stage-960-b778724fa519.webp"
-      }
+      "visualTheme": "moonlit_dreamdust_glider"
     },
     {
       "id": "pet_n18",
@@ -903,11 +675,7 @@
       "seriesId": "eternal_slumber_bloom",
       "speciesType": "mushroom_spirit",
       "element": "spore_light",
-      "visualTheme": "bud_lantern_fungal_spirit",
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_n18-card-384-0417c6c856c0.webp",
-        "stage": "assets/pets/variants/pet_n18-stage-960-0417c6c856c0.webp"
-      }
+      "visualTheme": "bud_lantern_fungal_spirit"
     },
     {
       "id": "pet_n19",
@@ -921,11 +689,7 @@
       "seriesId": "eternal_slumber_bloom",
       "speciesType": "nudibranch",
       "element": "mist_aether",
-      "visualTheme": "mistfrill_garden_slug",
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_n19-card-384-a46e864b3677.webp",
-        "stage": "assets/pets/variants/pet_n19-stage-960-a46e864b3677.webp"
-      }
+      "visualTheme": "mistfrill_garden_slug"
     },
     {
       "id": "pet_r13",
@@ -939,11 +703,7 @@
       "seriesId": "eternal_slumber_bloom",
       "speciesType": "jellyfish",
       "element": "memory_water",
-      "visualTheme": "mirrorpool_memory_jelly",
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_r13-card-384-bb855b09ac38.webp",
-        "stage": "assets/pets/variants/pet_r13-stage-960-bb855b09ac38.webp"
-      }
+      "visualTheme": "mirrorpool_memory_jelly"
     },
     {
       "id": "pet_r14",
@@ -957,11 +717,7 @@
       "seriesId": "eternal_slumber_bloom",
       "speciesType": "pangolin",
       "element": "dream_earth",
-      "visualTheme": "moonpetal_burrow_keeper",
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_r14-card-384-b390e87a3b3b.webp",
-        "stage": "assets/pets/variants/pet_r14-stage-960-b390e87a3b3b.webp"
-      }
+      "visualTheme": "moonpetal_burrow_keeper"
     },
     {
       "id": "pet_r15",
@@ -975,11 +731,7 @@
       "seriesId": "eternal_slumber_bloom",
       "speciesType": "masked_palm_civet",
       "element": "dream_fruit",
-      "visualTheme": "bellflower_fruit_guide",
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_r15-card-384-588016c183ea.webp",
-        "stage": "assets/pets/variants/pet_r15-stage-960-588016c183ea.webp"
-      }
+      "visualTheme": "bellflower_fruit_guide"
     },
     {
       "id": "pet_sr09",
@@ -993,11 +745,7 @@
       "seriesId": "eternal_slumber_bloom",
       "speciesType": "orb_weaver_spider",
       "element": "dream_silk",
-      "visualTheme": "moonveil_dream_mender",
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_sr09-card-384-1fe9bc648e6a.webp",
-        "stage": "assets/pets/variants/pet_sr09-stage-960-1fe9bc648e6a.webp"
-      }
+      "visualTheme": "moonveil_dream_mender"
     },
     {
       "id": "pet_sr10",
@@ -1011,11 +759,7 @@
       "seriesId": "eternal_slumber_bloom",
       "speciesType": "spiral_horn_antelope",
       "element": "path_light",
-      "visualTheme": "moonlit_garden_guide",
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_sr10-card-384-33c16c3a72ab.webp",
-        "stage": "assets/pets/variants/pet_sr10-stage-960-33c16c3a72ab.webp"
-      }
+      "visualTheme": "moonlit_garden_guide"
     },
     {
       "id": "pet_sr11",
@@ -1029,11 +773,7 @@
       "seriesId": "eternal_slumber_bloom",
       "speciesType": "salamander",
       "element": "slumber_water",
-      "visualTheme": "pastel_dreampond_keeper",
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_sr11-card-384-1a08bb093b37.webp",
-        "stage": "assets/pets/variants/pet_sr11-stage-960-1a08bb093b37.webp"
-      }
+      "visualTheme": "pastel_dreampond_keeper"
     },
     {
       "id": "pet_ssr05",
@@ -1047,11 +787,7 @@
       "seriesId": "eternal_slumber_bloom",
       "speciesType": "silk_moth",
       "element": "dream_veil",
-      "visualTheme": "faceless_cocoon_weaver",
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_ssr05-card-384-5a1d1605acb7.webp",
-        "stage": "assets/pets/variants/pet_ssr05-stage-960-5a1d1605acb7.webp"
-      }
+      "visualTheme": "faceless_cocoon_weaver"
     },
     {
       "id": "pet_ssr06",
@@ -1065,11 +801,7 @@
       "seriesId": "eternal_slumber_bloom",
       "speciesType": "tapir",
       "element": "nightmare_water",
-      "visualTheme": "mirrorpool_nightmare_purifier",
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_ssr06-card-384-c5539f8ebe4a.webp",
-        "stage": "assets/pets/variants/pet_ssr06-stage-960-c5539f8ebe4a.webp"
-      }
+      "visualTheme": "mirrorpool_nightmare_purifier"
     },
     {
       "id": "pet_ur05",
@@ -1083,11 +815,7 @@
       "seriesId": "eternal_slumber_bloom",
       "speciesType": "lop_rabbit",
       "element": "dream_flora",
-      "visualTheme": "moonlit_flower_sovereign",
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_ur05-card-384-39292d46cb73.webp",
-        "stage": "assets/pets/variants/pet_ur05-stage-960-39292d46cb73.webp"
-      }
+      "visualTheme": "moonlit_flower_sovereign"
     },
     {
       "id": "pet_r16",
@@ -1101,11 +829,7 @@
       "seriesId": "eternal_slumber_bloom",
       "speciesType": "hedgehog",
       "element": "dawn_dew",
-      "visualTheme": "dawn_dew_flower_awakener",
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_r16-card-384-9a699476de1c.webp",
-        "stage": "assets/pets/variants/pet_r16-stage-960-9a699476de1c.webp"
-      }
+      "visualTheme": "dawn_dew_flower_awakener"
     },
     {
       "id": "pet_sr12",
@@ -1119,11 +843,7 @@
       "seriesId": "eternal_slumber_bloom",
       "speciesType": "songbird",
       "element": "dawn_song",
-      "visualTheme": "dawn_bell_canopy_songbird",
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_sr12-card-384-8ed787ead176.webp",
-        "stage": "assets/pets/variants/pet_sr12-stage-960-8ed787ead176.webp"
-      }
+      "visualTheme": "dawn_bell_canopy_songbird"
     },
     {
       "id": "pet_ssr07",
@@ -1137,11 +857,7 @@
       "seriesId": "eternal_slumber_bloom",
       "speciesType": "crane",
       "element": "dawn_light",
-      "visualTheme": "dawnveil_crane",
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_ssr07-card-384-1008be1397aa.webp",
-        "stage": "assets/pets/variants/pet_ssr07-stage-960-1008be1397aa.webp"
-      }
+      "visualTheme": "dawnveil_crane"
     },
     {
       "id": "pet_ur06",
@@ -1155,11 +871,7 @@
       "seriesId": "eternal_slumber_bloom",
       "speciesType": "lop_rabbit",
       "element": "dawn_flora",
-      "visualTheme": "dawn_bloom_flower_sovereign",
-      "imageVariants": {
-        "card": "assets/pets/variants/pet_ur06-card-384-df1dbd7eadff.webp",
-        "stage": "assets/pets/variants/pet_ur06-stage-960-df1dbd7eadff.webp"
-      }
+      "visualTheme": "dawn_bloom_flower_sovereign"
     }
   ]
 }

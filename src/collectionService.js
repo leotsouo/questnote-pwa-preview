@@ -1,7 +1,7 @@
 /**
  * 寵物圖鑑、碎片、升星、陪伴與親密度管理
  */
-import { dbGetAll, dbGet, dbPut, STORES } from './db.js';
+import { dbGetAll, dbGet, dbPut, dbMutateRecords, STORES } from './db.js';
 
 /** 重複寵物轉換碎片數量 */
 export const FRAGMENT_BY_RARITY = {
@@ -121,21 +121,14 @@ export function getPetOriginalName(pet) {
  * @returns {Promise<{ success: boolean, message?: string, entry?: object, cleared?: boolean }>}
  */
 export async function setPetNickname(petId, nickname) {
-  const entry = await getPetCollection(petId);
-  if (!entry) {
-    return { success: false, message: '尚未獲得的寵物無法設定暱稱。' };
-  }
-
-  const validation = validatePetNickname(nickname);
-  if (!validation.valid) {
-    return { success: false, message: validation.error || '暱稱太長，請重新輸入。' };
-  }
-
   try {
-    const normalized = normalizeEntry(entry);
-    normalized.nickname = validation.nickname;
-    await dbPut(STORES.COLLECTION, normalized);
-    return { success: true, entry: normalized, cleared: validation.nickname === null };
+    return await mutatePet(petId, (entry) => {
+      if (!entry) return noCollectionChange({ success: false, message: '尚未獲得的寵物無法設定暱稱。' });
+      const validation = validatePetNickname(nickname);
+      if (!validation.valid) return noCollectionChange({ success: false, message: validation.error || '暱稱太長，請重新輸入。' });
+      entry.nickname = validation.nickname;
+      return saveCollectionChange(entry, { success: true, entry, cleared: validation.nickname === null });
+    });
   } catch (err) {
     console.error('[QuestNote] 暱稱儲存失敗:', err);
     return { success: false, message: '暱稱儲存失敗，請稍後再試。' };
@@ -146,16 +139,12 @@ export async function setPetNickname(petId, nickname) {
  * 清除寵物暱稱
  */
 export async function clearPetNickname(petId) {
-  const entry = await getPetCollection(petId);
-  if (!entry) {
-    return { success: false, message: '找不到這隻寵物資料。' };
-  }
-
   try {
-    const normalized = normalizeEntry(entry);
-    normalized.nickname = null;
-    await dbPut(STORES.COLLECTION, normalized);
-    return { success: true, entry: normalized };
+    return await mutatePet(petId, (entry) => {
+      if (!entry) return noCollectionChange({ success: false, message: '找不到這隻寵物資料。' });
+      entry.nickname = null;
+      return saveCollectionChange(entry, { success: true, entry });
+    });
   } catch (err) {
     console.error('[QuestNote] 暱稱清除失敗:', err);
     return { success: false, message: '暱稱儲存失敗，請稍後再試。' };
@@ -164,19 +153,17 @@ export async function clearPetNickname(petId) {
 
 /** 啟動時 migration：補齊 nickname 與 bondUnlocks 欄位（bondUnlocks 為 silent unlock） */
 export async function migrateCollectionNicknames() {
-  const items = await dbGetAll(STORES.COLLECTION);
-  for (const item of items) {
-    const normalized = normalizeEntry(item);
-    const changed =
-      !('nickname' in item) ||
-      item.nickname !== normalized.nickname ||
-      !item.bondUnlocks ||
-      typeof item.bondUnlocks !== 'object' ||
-      !Array.isArray(item.bondUnlocks.notifiedLevels);
-    if (changed) {
-      await dbPut(STORES.COLLECTION, normalized);
+  await dbMutateRecords([{ store: STORES.COLLECTION, all: true }], ([items]) => {
+    const puts = [];
+    for (const item of items) {
+      const normalized = normalizeEntry(item);
+      if (!('nickname' in item) || item.nickname !== normalized.nickname || !item.bondUnlocks
+        || typeof item.bondUnlocks !== 'object' || !Array.isArray(item.bondUnlocks.notifiedLevels)) {
+        puts.push({ store: STORES.COLLECTION, value: normalized });
+      }
     }
-  }
+    return { puts };
+  });
 }
 
 /* ─── V2.6.0 羈絆解放：解鎖狀態 ─── */
@@ -317,6 +304,26 @@ export function normalizeEntry(entry) {
   };
 }
 
+
+function noCollectionChange(result) { return { puts: [], result }; }
+function saveCollectionChange(entry, result = entry) {
+  return { puts: [{ store: STORES.COLLECTION, value: entry }], result };
+}
+function mutatePet(petId, reduce) {
+  return dbMutateRecords([{ store: STORES.COLLECTION, key: petId }], ([raw]) => reduce(normalizeEntry(raw)));
+}
+function mutateCompanion(reduce) {
+  return dbMutateRecords([{ store: STORES.COLLECTION, all: true }], ([raw]) => {
+    return reduce(raw.map(normalizeEntry).find((entry) => entry.isCompanion) || null);
+  });
+}
+
+/** Pure initial record shared by first draws and fixed gifts. */
+export function createCollectionEntry(petId, now = new Date().toISOString()) {
+  return normalizeEntry({ petId, stars: 1, fragments: 0, bondExp: 0, bondLevel: 1,
+    isCompanion: false, nickname: null, lastPettedAt: null, obtainedAt: now });
+}
+
 /** 取得全部收藏紀錄（已正規化） */
 export async function getCollection() {
   const items = await dbGetAll(STORES.COLLECTION);
@@ -333,73 +340,56 @@ export async function getPetCollection(petId) {
  * 新增寵物到圖鑑（首次獲得）
  */
 export async function addPetToCollection(petId) {
-  const existing = await getPetCollection(petId);
-  if (existing) return existing;
-
-  const entry = normalizeEntry({
-    petId,
-    stars: 1,
-    fragments: 0,
-    bondExp: 0,
-    bondLevel: 1,
-    isCompanion: false,
-    nickname: null,
-    lastPettedAt: null,
-    obtainedAt: new Date().toISOString(),
-  });
-  await dbPut(STORES.COLLECTION, entry);
-  return entry;
+  return mutatePet(petId, (entry) => entry
+    ? noCollectionChange(entry) : saveCollectionChange(createCollectionEntry(petId)));
 }
 
 /**
  * 增加碎片（重複抽到的寵物）
  */
 export async function addFragments(petId, amount) {
-  let entry = await getPetCollection(petId);
-  if (!entry) {
-    entry = await addPetToCollection(petId);
-  }
-  entry.fragments = (entry.fragments || 0) + amount;
-  await dbPut(STORES.COLLECTION, entry);
-  return entry;
+  return mutatePet(petId, (existing) => {
+    const entry = existing || createCollectionEntry(petId);
+    entry.fragments = (entry.fragments || 0) + amount;
+    return saveCollectionChange(entry);
+  });
 }
 
 /**
  * 升星
  */
 export async function upgradeStar(petId) {
-  const entry = await getPetCollection(petId);
-  if (!entry) return { success: false, message: '尚未獲得此寵物' };
-
-  const currentStars = entry.stars || 1;
-  if (currentStars >= 5) return { success: false, message: '已達最高星級' };
-
-  const nextStar = currentStars + 1;
-  const cost = STAR_UPGRADE_COST[nextStar];
-  if ((entry.fragments || 0) < cost) {
-    return { success: false, message: `碎片不足，需要 ${cost} 碎片` };
-  }
-
-  entry.fragments -= cost;
-  entry.stars = nextStar;
-  await dbPut(STORES.COLLECTION, entry);
-  return { success: true, entry };
+  return mutatePet(petId, (entry) => {
+    if (!entry) return noCollectionChange({ success: false, message: '尚未獲得此寵物' });
+    const currentStars = entry.stars || 1;
+    if (currentStars >= 5) return noCollectionChange({ success: false, message: '已達最高星級' });
+    const nextStar = currentStars + 1;
+    const cost = STAR_UPGRADE_COST[nextStar];
+    if ((entry.fragments || 0) < cost) return noCollectionChange({ success: false, message: '碎片不足，需要 ' + cost + ' 碎片' });
+    entry.fragments -= cost;
+    entry.stars = nextStar;
+    return saveCollectionChange(entry, { success: true, entry });
+  });
 }
 
 /**
  * 設為陪伴寵物（同一時間僅一隻）
  */
 export async function setCompanion(petId) {
-  const owned = await getPetCollection(petId);
-  if (!owned) throw new Error('尚未獲得此寵物');
-
-  const collection = await getCollection();
-  for (const entry of collection) {
-    const normalized = normalizeEntry(entry);
-    normalized.isCompanion = normalized.petId === petId;
-    await dbPut(STORES.COLLECTION, normalized);
-  }
-  return getPetCollection(petId);
+  return dbMutateRecords([{ store: STORES.COLLECTION, all: true }], ([items]) => {
+    const collection = items.map(normalizeEntry);
+    const owned = collection.find((entry) => entry.petId === petId);
+    if (!owned) throw new Error('尚未獲得此寵物');
+    const puts = [];
+    for (const entry of collection) {
+      const selected = entry.petId === petId;
+      if (entry.isCompanion !== selected) {
+        entry.isCompanion = selected;
+        puts.push({ store: STORES.COLLECTION, value: entry });
+      }
+    }
+    return { puts, result: owned };
+  });
 }
 
 /** 取得目前陪伴寵物的收藏紀錄 */
@@ -438,35 +428,20 @@ export function formatCooldown(ms) {
  * 撫摸陪伴寵物（+5 親密度，4 小時冷卻）
  */
 export async function petCompanion() {
-  const entry = await getCompanionPet();
-  if (!entry) {
-    return { success: false, message: '尚未設定陪伴寵物。' };
-  }
-
-  const normalized = normalizeEntry(entry);
-  if (!canPetCompanion(normalized)) {
-    const remaining = getPetCooldownRemaining(normalized);
-    return {
-      success: false,
-      message: `牠剛剛已經被摸過了，還要 ${formatCooldown(remaining)}才能再次撫摸。`,
-      cooldownRemaining: remaining,
-    };
-  }
-
-  const oldLevel = normalized.bondLevel;
-  normalized.bondExp = (normalized.bondExp || 0) + PET_BOND_EXP_GAIN;
-  normalized.bondLevel = getBondLevelFromExp(normalized.bondExp);
-  normalized.lastPettedAt = new Date().toISOString();
-  await dbPut(STORES.COLLECTION, normalized);
-
-  return {
-    success: true,
-    entry: normalized,
-    expGained: PET_BOND_EXP_GAIN,
-    leveledUp: normalized.bondLevel > oldLevel,
-    newLevel: normalized.bondLevel,
-    oldLevel,
-  };
+  return mutateCompanion((entry) => {
+    if (!entry) return noCollectionChange({ success: false, message: '尚未設定陪伴寵物。' });
+    if (!canPetCompanion(entry)) {
+      const remaining = getPetCooldownRemaining(entry);
+      return noCollectionChange({ success: false,
+        message: '牠剛剛已經被摸過了，還要 ' + formatCooldown(remaining) + '才能再次撫摸。', cooldownRemaining: remaining });
+    }
+    const oldLevel = entry.bondLevel;
+    entry.bondExp = (entry.bondExp || 0) + PET_BOND_EXP_GAIN;
+    entry.bondLevel = getBondLevelFromExp(entry.bondExp);
+    entry.lastPettedAt = new Date().toISOString();
+    return saveCollectionChange(entry, { success: true, entry, expGained: PET_BOND_EXP_GAIN,
+      leveledUp: entry.bondLevel > oldLevel, newLevel: entry.bondLevel, oldLevel });
+  });
 }
 
 /**
@@ -481,8 +456,9 @@ export async function getCompanion(allPets) {
   if (!pet) return null;
 
   return {
-    ...pet,
+    // Catalog identity and presentation cannot be overridden by stored user state.
     ...companionEntry,
+    ...pet,
     // 保留 lore 的 bondUnlocks（等級→台詞文字），避免被收藏項目的解鎖旗標覆蓋
     bondUnlocks: pet.bondUnlocks ?? {},
     bondUnlockState: companionEntry.bondUnlocks ?? normalizeBondUnlocks(null, companionEntry.bondLevel ?? 1),
@@ -499,22 +475,7 @@ export async function getCompanion(allPets) {
  */
 export async function addBondExpToPet(petId, amount) {
   if (amount <= 0) return null;
-
-  const entry = await getPetCollection(petId);
-  if (!entry) return null;
-
-  const normalized = normalizeEntry(entry);
-  const oldLevel = normalized.bondLevel;
-  normalized.bondExp = (normalized.bondExp || 0) + amount;
-  normalized.bondLevel = getBondLevelFromExp(normalized.bondExp);
-  await dbPut(STORES.COLLECTION, normalized);
-
-  return {
-    expGained: amount,
-    leveledUp: normalized.bondLevel > oldLevel,
-    newLevel: normalized.bondLevel,
-    oldLevel,
-  };
+  return mutatePet(petId, (entry) => addBondChange(entry, amount));
 }
 
 /**
@@ -523,23 +484,7 @@ export async function addBondExpToPet(petId, amount) {
  */
 export async function addBondExpToCompanion(amount) {
   if (amount <= 0) return null;
-
-  const collection = await getCollection();
-  const companion = collection.find((c) => c.isCompanion);
-  if (!companion) return null;
-
-  const entry = normalizeEntry(companion);
-  const oldLevel = entry.bondLevel;
-  entry.bondExp = (entry.bondExp || 0) + amount;
-  entry.bondLevel = getBondLevelFromExp(entry.bondExp);
-  await dbPut(STORES.COLLECTION, entry);
-
-  return {
-    expGained: amount,
-    leveledUp: entry.bondLevel > oldLevel,
-    newLevel: entry.bondLevel,
-    oldLevel,
-  };
+  return mutateCompanion((entry) => addBondChange(entry, amount));
 }
 
 /**
@@ -550,28 +495,18 @@ export async function addBondExpToCompanion(amount) {
  * @returns {Promise<{ newlyUnlockedLevels: number[], bondUnlocks: object|null, entry: object|null }>}
  */
 export async function updatePetBondUnlocks(petId) {
-  const entry = await getPetCollection(petId);
-  if (!entry) return { newlyUnlockedLevels: [], bondUnlocks: null, entry: null };
-
-  const bondLevel = entry.bondLevel ?? 1;
-  const unlocks = entry.bondUnlocks || normalizeBondUnlocks(null, bondLevel);
-  const notified = new Set(unlocks.notifiedLevels || []);
-
-  const reached = BOND_UNLOCK_LEVELS.filter((lv) => bondLevel >= lv);
-  const newlyUnlockedLevels = reached.filter((lv) => !notified.has(lv));
-
-  if (newlyUnlockedLevels.length === 0) {
-    return { newlyUnlockedLevels: [], bondUnlocks: unlocks, entry };
-  }
-
-  for (const lv of newlyUnlockedLevels) notified.add(lv);
-  entry.bondUnlocks = {
-    ...unlocks,
-    notifiedLevels: [...notified].sort((a, b) => a - b),
-  };
-  await dbPut(STORES.COLLECTION, entry);
-
-  return { newlyUnlockedLevels, bondUnlocks: entry.bondUnlocks, entry };
+  return mutatePet(petId, (entry) => {
+    if (!entry) return noCollectionChange({ newlyUnlockedLevels: [], bondUnlocks: null, entry: null });
+    const bondLevel = entry.bondLevel ?? 1;
+    const unlocks = entry.bondUnlocks || normalizeBondUnlocks(null, bondLevel);
+    const notified = new Set(unlocks.notifiedLevels || []);
+    const reached = BOND_UNLOCK_LEVELS.filter((lv) => bondLevel >= lv);
+    const newlyUnlockedLevels = reached.filter((lv) => !notified.has(lv));
+    if (!newlyUnlockedLevels.length) return noCollectionChange({ newlyUnlockedLevels: [], bondUnlocks: unlocks, entry });
+    for (const lv of newlyUnlockedLevels) notified.add(lv);
+    entry.bondUnlocks = { ...unlocks, notifiedLevels: [...notified].sort((a, b) => a - b) };
+    return saveCollectionChange(entry, { newlyUnlockedLevels, bondUnlocks: entry.bondUnlocks, entry });
+  });
 }
 
 /** 取得寵物目前的羈絆解鎖狀態（已正規化） */
@@ -638,4 +573,13 @@ export async function importCollection(items) {
   for (const item of items) {
     await dbPut(STORES.COLLECTION, normalizeEntry(item));
   }
+}
+
+function addBondChange(entry, amount) {
+  if (!entry) return noCollectionChange(null);
+  const oldLevel = entry.bondLevel;
+  entry.bondExp = (entry.bondExp || 0) + amount;
+  entry.bondLevel = getBondLevelFromExp(entry.bondExp);
+  return saveCollectionChange(entry, { expGained: amount, leveledUp: entry.bondLevel > oldLevel,
+    newLevel: entry.bondLevel, oldLevel });
 }

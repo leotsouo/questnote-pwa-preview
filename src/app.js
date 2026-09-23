@@ -5,6 +5,7 @@
  */
 
 import { openDB, clearAllData } from './db.js';
+import { RELEASE_PROFILE } from './releaseProfile.js';
 
 import { getAllTasks } from './taskService.js';
 
@@ -107,6 +108,7 @@ import {
 import { initUI, renderAfterRefresh, applyReduceMotionClass, syncGlobalMailbox } from './ui.js';
 import { runAppHealthCheck } from './healthCheckService.js';
 import { getServiceWorkerRegisterUrl } from './version.js';
+import { loadCatalogBundle } from './releaseCatalog.js';
 import { preloadCompanionImage, preloadOwnedPetImages } from './imagePreloadService.js';
 
 
@@ -190,68 +192,16 @@ let lastKnownDate = getTodayDateString();
 
 
 async function loadGameData() {
-
-  const [petsRes, poolsRes, loreRes, expeditionsRes, seriesRes] = await Promise.all([
-
-    fetch('./data/pets.json'),
-
-    fetch('./data/pools.json'),
-
-    fetch('./data/pets-lore.json'),
-
-    fetch('./data/expeditions.json'),
-
-    fetch('./data/pet-series.json'),
-
+  const [bundle, expeditionAreas] = await Promise.all([
+    loadCatalogBundle(),
+    loadExpeditionAreas().catch(() => []),
   ]);
-
-
-
-  if (!petsRes.ok || !poolsRes.ok) {
-
-    throw new Error('無法載入遊戲資料');
-
-  }
-
-
-
-  const petsData = await petsRes.json();
-
-  const poolsData = await poolsRes.json();
-
-  const loreData = loreRes.ok ? await loreRes.json() : { lore: [] };
-
-  const seriesCatalog = seriesRes.ok ? await seriesRes.json() : { series: [] };
-
-
-
-  appState.allPets = mergeAllPetsWithLore(petsData.pets || [], loreData);
-
-  appState.poolsData = poolsData;
-
-  appState.seriesCatalog = seriesCatalog;
-
-
-
-  if (expeditionsRes.ok) {
-
-    const expData = await expeditionsRes.json();
-
-    appState.expeditionAreas = expData.areas || [];
-
-  } else {
-
-    appState.expeditionAreas = await loadExpeditionAreas().catch(() => []);
-
-  }
-
-
-
+  // All content references pass validation before this single state publication.
+  const allPets = mergeAllPetsWithLore(bundle.petsData.pets, bundle.loreData);
+  Object.assign(appState, { allPets, poolsData: bundle.poolsData,
+    seriesCatalog: bundle.seriesCatalog, expeditionAreas });
   await syncWithPetDatabase(appState.allPets);
-
 }
-
-
 
 /** 預載首頁陪伴與已擁有寵物圖片（背景執行，不阻斷 UI） */
 function warmCriticalPetImages() {
@@ -478,7 +428,7 @@ export async function runAchievementCheck() {
 
 
 
-let swRefreshing = false;
+// Waiting workers activate naturally after every previous client closes.
 
 
 
@@ -551,13 +501,8 @@ async function registerServiceWorker() {
 
 
     navigator.serviceWorker.addEventListener('controllerchange', () => {
-
-      if (swRefreshing) return;
-
-      swRefreshing = true;
-
-      window.location.reload();
-
+      // Never reload during an unsaved edit, draw, restore, or animation.
+      showUpdateBanner(reg);
     });
 
   } catch (err) {
@@ -571,48 +516,16 @@ async function registerServiceWorker() {
 
 
 function showUpdateBanner(reg) {
-
   if (document.getElementById('update-banner')) return;
-
-
-
   const banner = document.createElement('div');
-
   banner.id = 'update-banner';
-
   banner.className = 'update-banner';
-
-  banner.innerHTML = `
-
-    <p class="update-banner__text">有新版本可用</p>
-
-    <button type="button" class="btn btn--primary btn--sm" id="btn-update-reload">立即更新</button>
-
-  `;
-
+  banner.setAttribute('role', 'status');
+  banner.innerHTML = '<p class="update-banner__text">新版本已準備。完成目前操作後，關閉所有 QuestNote 分頁與視窗，再重新開啟即可更新。</p><button type="button" class="btn btn--primary btn--sm" id="btn-update-dismiss">知道了</button>';
   document.body.appendChild(banner);
-
   requestAnimationFrame(() => banner.classList.add('show'));
-
-
-
-  document.getElementById('btn-update-reload')?.addEventListener('click', () => {
-
-    if (reg.waiting) {
-
-      reg.waiting.postMessage({ type: 'SKIP_WAITING' });
-
-    } else {
-
-      window.location.reload();
-
-    }
-
-  });
-
+  document.getElementById('btn-update-dismiss').addEventListener('click', () => banner.remove());
 }
-
-
 
 async function initApp() {
 
@@ -769,7 +682,7 @@ async function initApp() {
 
     await refreshState({ renderMode: 'full' });
 
-    if (location.hostname === 'leotsouo.github.io'
+    if (!RELEASE_PROFILE && location.hostname === 'leotsouo.github.io'
       && location.pathname.startsWith('/questnote-pwa-preview/')
       && new URLSearchParams(location.search).get('perf') === '1') {
       const { startPerfDiagnostics } = await import('./perfDiagnostics.js');
@@ -820,7 +733,7 @@ async function initApp() {
 
     if (loader) {
 
-      loader.innerHTML = `<p class="error-msg">載入失敗：${err.message}</p>`;
+      loader.textContent = `載入失敗：${err.message}`;
 
     }
 
@@ -830,7 +743,9 @@ async function initApp() {
 
 
 
-document.addEventListener('DOMContentLoaded', initApp);
+// Release bootstrap imports this module only after the verified worker is ready.
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initApp, { once: true });
+else void initApp();
 
 if (typeof window !== 'undefined') {
   window.runAppHealthCheck = runAppHealthCheck;

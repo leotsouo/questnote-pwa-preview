@@ -2,54 +2,30 @@
  * 備份與恢復服務 — QuestNote V2.3
  * 支援匯出、驗證、正規化與安全覆蓋恢復
  */
-import { exportTasks } from './taskService.js';
-import { getWallet, normalizeWallet, DEFAULT_MATERIALS } from './rewardService.js';
-import { replaceAllStores } from './db.js';
-import { exportCollection, normalizeCollectionItem } from './collectionService.js';
-import { exportGachaStats, normalizeGachaStats } from './gachaService.js';
-import { exportExpeditions, normalizeExpedition } from './expeditionService.js';
-import {
-  exportAchievementsState,
-  normalizeAchievementsState,
-} from './achievementService.js';
-import { exportTaskStats, normalizeTaskStats } from './taskStatsService.js';
-import { exportHabits, normalizeHabit } from './habitService.js';
-import { getUserPreferences, normalizeUserPreferences } from './preferencesService.js';
-import {
-  exportPoolDebutSeen,
-  normalizePoolDebutSeen,
-} from './poolDebutService.js';
-import {
-  exportPoolUnlockState,
-  exportIdempotentGrants,
-  normalizePoolUnlockState,
-  normalizeIdempotentGrants,
-  mergeLifetimeDraws,
-} from './poolUnlockService.js';
-import {
-  exportInventory,
-  exportWorkshopStats,
-  normalizeInventory,
-  normalizeWorkshopStats,
-} from './workshopService.js';
-import { normalizeTask, migrateTasks } from './taskMigration.js';
+import { normalizeWallet, DEFAULT_MATERIALS } from './rewardService.js';
+import { readAllStoresSnapshot, replaceAllStores } from './db.js';
+import { normalizeCollectionItem } from './collectionService.js';
+import { normalizeGachaStats } from './gachaService.js';
+import { normalizeExpedition } from './expeditionService.js';
+import { normalizeAchievementsState } from './achievementService.js';
+import { normalizeTaskStats } from './taskStatsService.js';
+import { normalizeHabit } from './habitService.js';
+import { normalizeUserPreferences } from './preferencesService.js';
+import { normalizePoolDebutSeen } from './poolDebutService.js';
+import { normalizePoolUnlockState, normalizeIdempotentGrants } from './poolUnlockService.js';
+import { normalizeInventory, normalizeWorkshopStats } from './workshopService.js';
+import { normalizeTask } from './taskMigration.js';
 import { getTodayDateString } from './taskFilterService.js';
-import { exportDailyCheckIn, normalizeDailyCheckIn } from './dailyCheckInService.js';
-import { exportQuestProgress, normalizeQuestProgress, rolloverQuestProgress } from './questService.js';
-import { exportExplorationProgress, normalizeExplorationProgress } from './explorationService.js';
-import {
-  exportCollectionMilestoneState,
-  normalizeCollectionMilestoneState,
-} from './collectionMilestoneService.js';
-import {
-  exportGlobalMailboxState,
-  normalizeGlobalMailboxState,
-} from './mailboxService.js';
+import { normalizeDailyCheckIn } from './dailyCheckInService.js';
+import { normalizeQuestProgress } from './questService.js';
+import { normalizeExplorationProgress } from './explorationService.js';
+import { normalizeCollectionMilestoneState } from './collectionMilestoneService.js';
+import { normalizeGlobalMailboxState } from './mailboxService.js';
+import { validateBackupEnvelope, validateSnapshotData, validateStoredSnapshot } from './backupSchema.js';
 import { APP_VERSION } from './version.js';
 
 export { APP_VERSION };
 const APP_NAME = 'QuestNote';
-const SUPPORTED_VERSIONS = ['1.8', '1.8.1', '1.8.2', '2.0', '2.0.0', '2.1', '2.1.1', '2.1.2', '2.1.4', '2.1.5', '2.2', '2.2.7', '2.3.0', '2.3.1', '2.3.2', '2.3.3', '2.3.4', '2.3.5', '2.3.6', '2.3.7', '2.3.8', '2.4.0', '2.5.0', '2.6.0', '2.6.1', '2.7.0', '2.7.1', '2.7.2', '2.7.3', '2.7.4', '2.7.5', '2.8.0', '2.9.0', '3.0.0', '3.0.1', '3.1.0', '3.1.1', '3.2.0', '3.3.0', '3.4.0', '3.4.1', '3.4.2', '3.4.3', '3.4.4'];
 const WALLET_KEY = 'wallet';
 const GACHA_STATS_KEY = 'gachaStats';
 const ACHIEVEMENTS_KEY = 'achievements';
@@ -80,36 +56,6 @@ const DATA_KEYS = [
   'poolUnlockState',
   'idempotentGrants',
 ];
-
-/**
- * 解析版本字串為可比較的數字陣列
- * @param {string|null|undefined} version
- * @returns {number[]|null}
- */
-function parseVersion(version) {
-  if (!version || typeof version !== 'string') return null;
-  const parts = version.trim().split('.').map((p) => parseInt(p, 10));
-  if (parts.some((n) => Number.isNaN(n))) return null;
-  return parts;
-}
-
-/**
- * 比較兩個版本
- * @returns {-1|0|1}
- */
-function compareVersions(a, b) {
-  const va = parseVersion(a);
-  const vb = parseVersion(b);
-  if (!va && !vb) return 0;
-  if (!va) return -1;
-  if (!vb) return 1;
-  const len = Math.max(va.length, vb.length);
-  for (let i = 0; i < len; i += 1) {
-    const diff = (va[i] ?? 0) - (vb[i] ?? 0);
-    if (diff !== 0) return diff > 0 ? 1 : -1;
-  }
-  return 0;
-}
 
 /**
  * 組裝匯出用 data 區塊
@@ -194,71 +140,19 @@ function buildDataPayload({
  * @returns {Promise<object>}
  */
 export async function exportBackup() {
-  const [
-    tasks,
-    wallet,
-    collection,
-    gachaStats,
-    expeditions,
-    achievements,
-    taskStats,
-    habits,
-    userPreferences,
-    inventory,
-    workshopStats,
-    dailyCheckIn,
-    questProgress,
-    explorationProgress,
-    collectionMilestones,
-    poolDebutSeen,
-    poolUnlockState,
-    idempotentGrants,
-  ] = await Promise.all([
-    exportTasks(),
-    getWallet(),
-    exportCollection(),
-    exportGachaStats(),
-    exportExpeditions(),
-    exportAchievementsState(),
-    exportTaskStats(),
-    exportHabits(),
-    getUserPreferences(),
-    exportInventory(),
-    exportWorkshopStats(),
-    exportDailyCheckIn(),
-    exportQuestProgress(),
-    exportExplorationProgress(),
-    exportCollectionMilestoneState(),
-    exportPoolDebutSeen(),
-    exportPoolUnlockState(),
-    exportIdempotentGrants(),
-  ]);
-
-  const globalMailboxState = await exportGlobalMailboxState();
-
-  const data = buildDataPayload({
-    tasks,
-    wallet,
-    collection,
-    gachaStats,
-    expeditions,
-    achievements,
-    taskStats,
-    habits,
-    userPreferences,
-    inventory,
-    workshopStats,
-    dailyCheckIn,
-    questProgress,
-    explorationProgress,
-    collectionMilestones,
-    globalMailboxState,
-    poolDebutSeen,
-    poolUnlockState,
-    idempotentGrants,
-  });
-
-  return {
+  const snapshot = await readAllStoresSnapshot();
+  const snapshotErrors = validateStoredSnapshot(snapshot);
+  if (snapshotErrors.length) throw new Error('現有資料需要檢查，未建立可恢復備份：' + snapshotErrors.slice(0, 3).join('；'));
+  const meta = Object.fromEntries(snapshot.meta.map((entry) => [entry.key, entry]));
+  const normalized = migrateImportedData(normalizePayloadData({ data: {
+    ...meta,
+    tasks: snapshot.tasks,
+    collection: snapshot.collection,
+    expeditions: snapshot.expeditions,
+    habits: snapshot.habits,
+  } }));
+  const data = buildDataPayload(normalized);
+  const backup = {
     appName: APP_NAME,
     app: APP_NAME,
     appVersion: APP_VERSION,
@@ -267,6 +161,9 @@ export async function exportBackup() {
     ...data,
     data,
   };
+  const validation = validateBackup(backup);
+  if (!validation.valid) throw new Error(validation.error);
+  return backup;
 }
 
 /**
@@ -369,75 +266,11 @@ function extractRawData(rawBackup) {
 }
 
 /**
- * 判斷是否像 QuestNote 備份
+ * 驗證已知完整備份格式、資料型別及重複表示的一致性
  * @param {object} rawBackup
- */
-function looksLikeQuestNoteBackup(rawBackup) {
-  if (!rawBackup || typeof rawBackup !== 'object') return false;
-
-  const appName = rawBackup.appName || rawBackup.app;
-  if (appName === APP_NAME) return true;
-  if (rawBackup.appVersion || rawBackup.version) return true;
-  if (rawBackup.data && typeof rawBackup.data === 'object') return true;
-
-  const data = extractRawData(rawBackup);
-  if (!data) return false;
-
-  return DATA_KEYS.some((key) => data[key] !== undefined);
-}
-
-/**
- * 是否包含至少一種核心資料
- * @param {object} data
- */
-function hasCoreData(data) {
-  if (!data) return false;
-  if (Array.isArray(data.tasks) && data.tasks.length >= 0) return true;
-  if (data.wallet && typeof data.wallet === 'object') return true;
-  if (Array.isArray(data.collection)) return true;
-  if (Array.isArray(data.habits)) return true;
-  if (data.achievements && typeof data.achievements === 'object') return true;
-  if (Array.isArray(data.unlockedAchievementIds)) return true;
-  if (data.materials && typeof data.materials === 'object') return true;
-  if (typeof data.adventureEnergy === 'number') return true;
-  return false;
-}
-
-/**
- * 驗證備份格式
- * @param {object} rawBackup
- * @returns {{ valid: boolean, error?: string, warnings?: string[] }}
  */
 export function validateBackup(rawBackup) {
-  const warnings = [];
-
-  if (!rawBackup || typeof rawBackup !== 'object') {
-    return { valid: false, error: '這不是有效的 QuestNote 備份檔。' };
-  }
-
-  if (!looksLikeQuestNoteBackup(rawBackup)) {
-    return { valid: false, error: '這不是有效的 QuestNote 備份檔。' };
-  }
-
-  const data = extractRawData(rawBackup);
-  if (!hasCoreData(data)) {
-    return { valid: false, error: '這不是有效的 QuestNote 備份檔。' };
-  }
-
-  const appVersion = rawBackup.appVersion ?? null;
-  if (!appVersion) {
-    warnings.push('此備份沒有版本資訊，系統會嘗試以相容模式匯入。');
-  } else if (compareVersions(appVersion, APP_VERSION) > 0) {
-    warnings.push('此備份來自較新的版本，可能無法完全相容。');
-  } else if (compareVersions(appVersion, APP_VERSION) < 0) {
-    warnings.push('此備份版本較舊，系統會自動補齊缺少欄位。');
-  }
-
-  if (appVersion && !SUPPORTED_VERSIONS.includes(appVersion) && compareVersions(appVersion, APP_VERSION) <= 0) {
-    warnings.push(`備份版本 ${appVersion} 不在已知清單中，將嘗試相容匯入。`);
-  }
-
-  return { valid: true, warnings };
+  return validateBackupEnvelope(rawBackup, APP_VERSION);
 }
 
 /**
@@ -492,6 +325,12 @@ function resolveWallet(data) {
  * @param {object} rawBackup
  */
 export function normalizeBackupPayload(rawBackup) {
+  const validation = validateBackup(rawBackup);
+  if (!validation.valid) throw new Error(validation.error);
+  return normalizePayloadData(rawBackup);
+}
+
+function normalizePayloadData(rawBackup) {
   const data = extractRawData(rawBackup) || {};
   const achievements = mergeAchievementsData(data, rawBackup);
   const wallet = resolveWallet(data);
@@ -595,22 +434,14 @@ export function migrateImportedData(normalizedBackup) {
   const inventory = normalizeInventory(normalizedBackup.inventory);
   const workshopStats = normalizeWorkshopStats(normalizedBackup.workshopStats);
   const dailyCheckIn = normalizeDailyCheckIn(normalizedBackup.dailyCheckIn);
-  // 若備份的 dateKey / weekKey 過期，匯入時直接 rollover 為今天 / 本週
-  const questProgress = rolloverQuestProgress(
-    normalizeQuestProgress(normalizedBackup.questProgress)
-  ).questProgress;
+  // Restore the snapshot's dates; normal app reads perform any subsequent rollover.
+  const questProgress = normalizeQuestProgress(normalizedBackup.questProgress);
   const explorationProgress = normalizeExplorationProgress(normalizedBackup.explorationProgress);
   const collectionMilestones = normalizeCollectionMilestoneState(normalizedBackup.collectionMilestones);
   const globalMailboxState = normalizeGlobalMailboxState(normalizedBackup.globalMailboxState);
   const poolDebutSeen = normalizePoolDebutSeen(normalizedBackup.poolDebutSeen);
   const poolUnlockState = normalizePoolUnlockState(normalizedBackup.poolUnlockState);
-  // 恢復時 lifetimeDraws 取較大值語意已由 normalize 保留；布林狀態以備份為準
   const idempotentGrants = normalizeIdempotentGrants(normalizedBackup.idempotentGrants);
-  // 確保 byPool lifetimeDraws 不會在 merge 過程被壓低（自我 max）
-  for (const [poolId, entry] of Object.entries(poolUnlockState.byPool || {})) {
-    entry.lifetimeDraws = mergeLifetimeDraws(entry.lifetimeDraws, entry.lifetimeDraws);
-    poolUnlockState.byPool[poolId] = entry;
-  }
 
   return {
     ...normalizedBackup,
@@ -708,6 +539,8 @@ export async function createAutoBackupBeforeImport() {
  * @param {object} migratedData
  */
 export async function safeReplaceAllData(migratedData) {
+  const errors = validateSnapshotData(migratedData);
+  if (errors.length) throw new Error('備份資料不完整或無效：' + errors.slice(0, 3).join('；'));
   await replaceAllStores({
     tasks: migratedData.tasks || [],
     collection: migratedData.collection || [],
@@ -736,9 +569,11 @@ export async function safeReplaceAllData(migratedData) {
  * @param {object} normalizedBackup
  */
 export async function restoreBackup(normalizedBackup) {
+  // Raw rows in a verified historical envelope still need their legacy adapter.
+  const errors = validateSnapshotData(normalizedBackup, undefined, normalizedBackup?.appVersion ?? 'current');
+  if (errors.length) throw new Error('備份資料不完整或無效：' + errors.slice(0, 3).join('；'));
   const migrated = migrateImportedData(normalizedBackup);
   await safeReplaceAllData(migrated);
-  await migrateTasks();
   return migrated;
 }
 

@@ -9,6 +9,7 @@
  * 5. 主動畫略過 ≠ SSR+ queue 略過（由呼叫端區分；本模組只處理 reveal queue skip）。
  */
 import { getPetImageSrc, preloadPetImage, delay } from './imagePreloadService.js';
+import { resolvePetRevealKey, resolvePetRevealPresentation } from './poolContentContract.js';
 
 const RARITY_RANK = { N: 0, R: 1, SR: 2, SSR: 3, UR: 4 };
 
@@ -30,9 +31,6 @@ const PRELOAD_TIMEOUT = 550;
 
 /** 粒子／花瓣數量上限（控制手機效能） */
 const PARTICLE_COUNT = { SSR: 12, UR: 16, UR_PETAL: 14, UR_MOON: 10 };
-
-const UR_NIGHT_ID = 'pet_ur05';
-const UR_DAWN_ID = 'pet_ur06';
 
 let summonRevealPlaying = false;
 let reduceMotionEnabled = false;
@@ -102,12 +100,8 @@ function getDuplicateCompensation(item) {
  * @returns {'ssr'|'ur'|'moon'|'petal'}
  */
 export function resolveRevealTheme(pet, item) {
-  const rarity = getItemRarity(item) || pet?.rarity;
-  if (rarity !== 'UR') return 'ssr';
-  const id = getPetId(pet, item);
-  if (id === UR_NIGHT_ID) return 'moon';
-  if (id === UR_DAWN_ID) return 'petal';
-  return 'ur';
+  const rarity = item?.rarity ?? pet?.rarity;
+  return resolvePetRevealKey({ ...pet, id: getPetId(pet, item), rarity }) || 'ssr';
 }
 
 /**
@@ -247,11 +241,11 @@ function themeClassName(theme) {
   return 'is-ssr';
 }
 
-function themeCaption(theme) {
-  if (theme === 'moon') return '月下沉眠 · 花庭主人';
-  if (theme === 'petal') return '晨曦綻放 · 花庭主人';
-  if (theme === 'ur') return '傳說夥伴降臨';
-  return '稀有夥伴降臨';
+function themeCaption(theme, pet) {
+  return resolvePetRevealPresentation({
+    ...pet, rarity: theme === 'ssr' ? 'SSR' : 'UR',
+    presentation: { ...pet?.presentation, revealKey: theme },
+  }).caption;
 }
 
 function durationForTheme(theme, reduce) {
@@ -281,7 +275,7 @@ export function createSummonRevealOverlay({ rarity, pet, reduceMotion, theme, pr
   overlay.setAttribute('aria-modal', 'true');
   overlay.setAttribute('aria-label', isUR ? '傳說召喚演出' : '稀有召喚演出');
 
-  const caption = fallback ? '演出簡化展示' : themeCaption(resolvedTheme);
+  const caption = fallback ? '演出簡化展示' : themeCaption(resolvedTheme, pet);
   const petName = pet?.name ? String(pet.name) : '';
   const petTitle = pet?.title ? String(pet.title) : '';
   const imgSrc = fallback ? '' : getPetImageSrc(pet, 'stage');
@@ -714,7 +708,5 @@ export function playURReveal(options = {}) {
 
 export {
   RARITY_RANK,
-  UR_NIGHT_ID,
-  UR_DAWN_ID,
   DURATION as SUMMON_REVEAL_DURATION,
 };

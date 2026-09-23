@@ -8,15 +8,6 @@
  */
 import { getPetImageSrc, preloadImage } from './imagePreloadService.js';
 
-const AWAKENING_PETS = [
-  { id: 'pet_r16', rarity: 'R', name: '曉露花蝟' },
-  { id: 'pet_sr12', rarity: 'SR', name: '晨鈴花雀' },
-  { id: 'pet_ssr07', rarity: 'SSR', name: '曦幕雲鶴' },
-  { id: 'pet_ur06', rarity: 'UR', name: '曙綻花后兔' },
-];
-
-const SLUMBER_HERO_ID = 'pet_ur05';
-
 const PHASE_MS = {
   full: {
     summonLight: 500,
@@ -98,13 +89,14 @@ function resolvePetMap(allPets) {
   return map;
 }
 
-function buildOverlay({ reduce, title, unlockMessage, rewardPet, allPets }) {
-  const byId = resolvePetMap(allPets);
+function buildOverlay({ reduce, model }) {
+  const { expansion, rewardPet, previewPets } = model.unlock;
+  const { title, unlockMessage } = expansion;
   const overlay = document.createElement('div');
   overlay.className = 'pool-awakening-overlay';
   overlay.setAttribute('role', 'dialog');
   overlay.setAttribute('aria-modal', 'true');
-  overlay.setAttribute('aria-label', title || '晨醒花庭解鎖');
+  overlay.setAttribute('aria-label', title);
   if (reduce) overlay.classList.add('is-reduced');
 
   const live = document.createElement('div');
@@ -127,8 +119,9 @@ function buildOverlay({ reduce, title, unlockMessage, rewardPet, allPets }) {
   mirror.className = 'pool-awakening-mirror';
   mirror.dataset.role = 'mirror';
 
-  const slumber = byId.get(SLUMBER_HERO_ID);
-  const dawn = byId.get('pet_ur06');
+  const slumber = model.hero;
+  const dawn = model.heroes.find((pet) => pet.id !== slumber?.id);
+  mirror.hidden = !slumber && !dawn;
   const slumberImg = document.createElement('img');
   slumberImg.className = 'pool-awakening-mirror__slumber';
   slumberImg.alt = '';
@@ -144,18 +137,17 @@ function buildOverlay({ reduce, title, unlockMessage, rewardPet, allPets }) {
   const cast = document.createElement('div');
   cast.className = 'pool-awakening-cast';
   cast.dataset.role = 'cast';
-  for (const meta of AWAKENING_PETS) {
-    const pet = byId.get(meta.id);
+  for (const pet of previewPets) {
     const item = document.createElement('div');
     item.className = 'pool-awakening-cast__item';
-    item.dataset.rarity = meta.rarity;
-    item.dataset.petId = meta.id;
+    item.dataset.rarity = pet.rarity;
+    item.dataset.petId = pet.id;
     const img = document.createElement('img');
-    img.alt = meta.name;
+    img.alt = pet.name;
     img.decoding = 'async';
     if (pet) img.src = getPetImageSrc(pet) || '';
     const label = document.createElement('span');
-    label.textContent = `${meta.rarity} ${meta.name}`;
+    label.textContent = `${pet.rarity} ${pet.name}`;
     item.append(img, label);
     cast.appendChild(item);
   }
@@ -163,23 +155,23 @@ function buildOverlay({ reduce, title, unlockMessage, rewardPet, allPets }) {
   const message = document.createElement('p');
   message.className = 'pool-awakening-message';
   message.dataset.role = 'message';
-  message.textContent = unlockMessage || '沉眠有歸，甦醒有時。';
+  message.textContent = unlockMessage || '';
 
   const heading = document.createElement('h2');
   heading.className = 'pool-awakening-title';
   heading.dataset.role = 'title';
-  heading.textContent = `${title || '晨醒花庭'}已解鎖`;
+  heading.textContent = `${title || '卡池擴充'}已解鎖`;
 
   const reward = document.createElement('div');
   reward.className = 'pool-awakening-reward';
   reward.dataset.role = 'reward';
   reward.hidden = true;
   const rewardImg = document.createElement('img');
-  rewardImg.alt = rewardPet?.name || '曉露花蝟';
+  rewardImg.alt = rewardPet?.name || '';
   rewardImg.decoding = 'async';
   if (rewardPet) rewardImg.src = getPetImageSrc(rewardPet) || '';
   const rewardText = document.createElement('p');
-  rewardText.textContent = `固定獲得 R｜${rewardPet?.name || '曉露花蝟'}`;
+  rewardText.textContent = `固定獲得 ${rewardPet.rarity}｜${rewardPet.name}`;
   reward.append(rewardImg, rewardText);
 
   const confirm = document.createElement('button');
@@ -205,22 +197,22 @@ function cleanup() {
 
 /**
  * @param {{
- *   allPets?: Array,
- *   expansion?: object|null,
- *   rewardPet?: object|null,
+ *   model: object,
  *   reduceMotion?: boolean,
  *   forceFallback?: boolean,
  * }} options
  * @returns {Promise<{ ok: boolean, skipped: boolean, fallback: boolean, seen: boolean }>}
  */
-export async function playMorningGardenUnlock(options = {}) {
+export async function playPoolUnlock(options = {}) {
+  const model = options.model;
+  if (!model?.unlock?.rewardPet) return { ok: false, skipped: false, fallback: true, seen: false };
   if (playing) {
     return { ok: false, skipped: false, fallback: true, seen: false };
   }
 
   playing = true;
   const reduce = isReduceMotion(options.reduceMotion);
-  const expansion = options.expansion || {};
+  const expansion = model.unlock.expansion;
   const unlockUnlockScroll = lockScroll();
   const controller = new AbortController();
   activeAbort = controller;
@@ -228,6 +220,7 @@ export async function playMorningGardenUnlock(options = {}) {
   let skipped = false;
   let fallback = false;
   let seen = false;
+  let onKey = null;
 
   const markSkip = () => {
     skipped = true;
@@ -241,10 +234,7 @@ export async function playMorningGardenUnlock(options = {}) {
 
     const overlay = buildOverlay({
       reduce,
-      title: expansion.title,
-      unlockMessage: expansion.unlockMessage,
-      rewardPet: options.rewardPet,
-      allPets: options.allPets,
+      model,
     });
     activeOverlay = overlay;
     document.body.appendChild(overlay);
@@ -262,14 +252,14 @@ export async function playMorningGardenUnlock(options = {}) {
       e.stopPropagation();
       markSkip();
     });
-    const onKey = (e) => {
+    onKey = (e) => {
       if (e.key === 'Escape') markSkip();
     };
     window.addEventListener('keydown', onKey);
 
     // 預載圖片（失敗不阻斷）
-    const preloadTargets = [SLUMBER_HERO_ID, ...AWAKENING_PETS.map((p) => p.id)];
-    const byId = resolvePetMap(options.allPets);
+    const byId = resolvePetMap([...model.heroes, ...model.unlock.previewPets, model.unlock.rewardPet]);
+    const preloadTargets = [...byId.keys()];
     await Promise.all(
       preloadTargets.map(async (id) => {
         const pet = byId.get(id);
@@ -283,7 +273,7 @@ export async function playMorningGardenUnlock(options = {}) {
       }),
     );
 
-    if (liveEl) liveEl.textContent = '晨醒花庭解鎖演出開始';
+    if (liveEl) liveEl.textContent = `${expansion.title}解鎖演出開始`;
 
     const run = async (phase, ms) => {
       overlay.dataset.phase = phase;
@@ -334,7 +324,7 @@ export async function playMorningGardenUnlock(options = {}) {
     if (rewardEl) rewardEl.hidden = false;
     if (confirmBtn) confirmBtn.hidden = false;
     if (skipBtn) skipBtn.hidden = true;
-    if (liveEl) liveEl.textContent = '晨醒花庭已解鎖';
+    if (liveEl) liveEl.textContent = `${expansion.title}已解鎖`;
 
     await new Promise((resolve) => {
       const done = () => resolve();
@@ -357,11 +347,11 @@ export async function playMorningGardenUnlock(options = {}) {
       simple.className = 'pool-awakening-fallback';
       simple.setAttribute('role', 'dialog');
       const h = document.createElement('h2');
-      h.textContent = `${expansion.title || '晨醒花庭'}已解鎖`;
+      h.textContent = `${expansion.title || '卡池擴充'}已解鎖`;
       const p = document.createElement('p');
-      p.textContent = expansion.unlockMessage || '沉眠有歸，甦醒有時。';
+      p.textContent = expansion.unlockMessage || '';
       const r = document.createElement('p');
-      r.textContent = `固定獲得 R｜${options.rewardPet?.name || '曉露花蝟'}`;
+      r.textContent = `固定獲得 ${model.unlock.rewardPet.rarity}｜${model.unlock.rewardPet.name}`;
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.textContent = '繼續';
@@ -379,6 +369,7 @@ export async function playMorningGardenUnlock(options = {}) {
     }
     return { ok: true, skipped, fallback: true, seen: true };
   } finally {
+    if (onKey) window.removeEventListener('keydown', onKey);
     unlockUnlockScroll();
     cleanup();
   }
@@ -390,4 +381,5 @@ export function skipPoolAwakening() {
   }
 }
 
-export { AWAKENING_PETS, SLUMBER_HERO_ID };
+/** Compatibility name; callers pass the same validated model. */
+export const playMorningGardenUnlock = playPoolUnlock;
