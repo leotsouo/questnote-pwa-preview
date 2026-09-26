@@ -1,7 +1,26 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-27T04:23:00+08:00",
+  "generatedAt": "2026-09-23T23:19:33+08:00",
   "messages": [
+    {
+      "id": "2026-09-v3411-frost-release",
+      "type": "update",
+      "title": "V3.4.11 更新｜霜誓峽灣召喚開放",
+      "body": "親愛的旅人：\n\n霜誓峽灣召喚現已開放，12 位新夥伴與新的故事正等待你相遇。你可以在召喚頁切換標準召喚、永眠花海與霜誓峽灣三個卡池。\n\n這次也修正了切換卡池時圖片延遲與底部導覽晃動，改善召喚結果及圖鑑圖片的載入，並調整版本資訊的手機排版。召喚結果畫面的「再召喚」按鈕已移除；關閉結果後，可回到召喚頁繼續抽卡。\n\n若仍看到舊版，請先連線，關閉所有 QuestNote 分頁與主畫面 App，再重新開啟。請勿清除網站資料，以免失去本機紀錄。\n\n謝謝你陪伴 QuestNote。願峽灣的風帶來新的相遇。\n\nQuestNote 開發團隊",
+      "publishedAt": "2026-09-23T23:19:33+08:00",
+      "expiresAt": null,
+      "priority": "high",
+      "enabled": true,
+      "minAppVersion": "3.4.11",
+      "maxAppVersion": null,
+      "icon": "❄️",
+      "reward": null,
+      "action": {
+        "type": "view",
+        "view": "gacha",
+        "label": "前往召喚"
+      }
+    },
     {
       "id": "system_mail_v342_eternal_slumber_launch",
       "type": "compensation",

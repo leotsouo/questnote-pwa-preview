@@ -17487,3 +17487,131 @@ body.reduce-motion [data-animation='glacier_arrival'] .glacier-scene__beacons i 
   [data-animation='glacier_arrival'] .dream-debut-copy { margin-bottom: 15vh; }
   [data-animation='glacier_arrival'] .dream-debut-line { font-size: clamp(1.2rem, 5.6vw, 1.7rem); }
 }
+
+/* First-use teaching uses the existing palette and leaves product controls interactive. */
+body.onboarding-dialog-open { overflow: hidden; }
+body.onboarding-active .view.active { padding-bottom: calc(var(--page-padding-bottom) + 250px); }
+
+.more-menu-icon--image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+}
+.more-menu-icon--image img { display: block; width: 28px; height: 28px; border-radius: 7px; }
+
+.guide-overview,
+.guide-more { margin: var(--space-4); padding: var(--space-5); }
+.guide-overview__eyebrow,
+.onboarding-eyebrow {
+  color: var(--color-primary-light);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--space-2);
+}
+.guide-overview h2,
+.guide-more h2 { font-size: 1.15rem; line-height: 1.35; margin: 0 0 var(--space-4); }
+.guide-steps { list-style: none; padding: 0; margin: 0 0 var(--space-5); }
+.guide-steps li {
+  display: grid;
+  grid-template-columns: 26px 1fr;
+  column-gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--color-border-soft);
+}
+.guide-step-number {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--color-primary-soft);
+  color: var(--color-primary-light);
+  font-weight: 700;
+  grid-row: span 2;
+}
+.guide-steps strong { font-size: 0.9rem; }
+.guide-steps span,
+.guide-overview__status { color: var(--color-text-secondary); font-size: 0.82rem; }
+.guide-overview__status { margin: 0 0 var(--space-3); }
+.guide-more details { border-top: 1px solid var(--color-border-soft); padding: var(--space-3) 0; }
+.guide-more summary { cursor: pointer; font-weight: 600; }
+.guide-more details p { margin: var(--space-2) 0 0; color: var(--color-text-secondary); font-size: 0.85rem; }
+
+.onboarding-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 13000;
+  display: grid;
+  place-items: center;
+  padding: max(16px, var(--safe-top)) 16px max(16px, var(--safe-bottom));
+  background: rgba(5, 8, 20, 0.82);
+  backdrop-filter: blur(8px);
+}
+.onboarding-dialog {
+  width: min(100%, 430px);
+  max-height: 92dvh;
+  overflow-y: auto;
+  border: 1px solid var(--color-primary-border);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(150deg, var(--color-bg-card-soft), var(--color-bg-surface));
+  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.45);
+  padding: clamp(20px, 6vw, 30px);
+}
+.onboarding-dialog__logo { display: block; border-radius: 16px; margin-bottom: var(--space-5); }
+.onboarding-dialog h2 { font-size: clamp(1.3rem, 5vw, 1.6rem); line-height: 1.3; margin: 0 0 var(--space-3); }
+.onboarding-dialog p { color: var(--color-text-secondary); margin: 0 0 var(--space-4); }
+.onboarding-dialog .onboarding-eyebrow { color: var(--color-primary-light); }
+.onboarding-dialog__hint { font-size: 0.82rem; }
+.onboarding-dialog__actions { display: grid; gap: var(--space-2); }
+.onboarding-dialog__actions .btn { width: 100%; min-height: 44px; }
+
+.onboarding-dock {
+  position: fixed;
+  z-index: 150;
+  left: 50%;
+  bottom: calc(var(--nav-height) + var(--safe-bottom) + 10px);
+  transform: translateX(-50%);
+  width: min(calc(100% - 24px), 418px);
+  max-height: min(45dvh, 300px);
+  overflow-y: auto;
+  border: 1px solid var(--color-primary-border);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(140deg, var(--color-bg-elevated), var(--color-bg-card));
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.42);
+  padding: var(--space-4);
+}
+.onboarding-dock[data-step='task'],
+.onboarding-dock[data-step='expedition'] {
+  top: calc(var(--safe-top) + 76px);
+  bottom: auto;
+}
+.onboarding-dock__top { display: flex; justify-content: space-between; gap: var(--space-2); color: var(--color-primary-light); font-size: 0.75rem; font-weight: 700; }
+.onboarding-dock__top button,
+.onboarding-dock__skip { border: 0; background: none; color: var(--color-text-secondary); cursor: pointer; text-decoration: underline; }
+.onboarding-dock h2 { font-size: 1rem; line-height: 1.35; margin: var(--space-2) 0 var(--space-1); }
+.onboarding-dock p { color: var(--color-text-secondary); font-size: 0.82rem; line-height: 1.5; margin: 0 0 var(--space-3); }
+.onboarding-dock__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.onboarding-dock__actions .btn { flex: 1 1 125px; min-height: 40px; }
+.onboarding-dock__skip { display: block; margin: var(--space-2) 0 0 auto; font-size: 0.75rem; }
+.onboarding-target { outline: 3px solid var(--color-accent); outline-offset: 3px; }
+.onboarding-dock :focus-visible,
+.onboarding-dialog :focus-visible,
+.guide-overview :focus-visible,
+.guide-more :focus-visible { outline: 3px solid var(--color-accent); outline-offset: 2px; }
+body.modal-open .onboarding-dock,
+body.global-mailbox-open .onboarding-dock,
+body.expedition-dispatch-open .onboarding-dock,
+body.is-pet-image-viewer-open .onboarding-dock { visibility: hidden; }
+
+@media (max-width: 360px) {
+  .onboarding-dock { padding: var(--space-3); max-height: 46dvh; }
+  .onboarding-dock__actions .btn { flex-basis: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .onboarding-dock,
+  .onboarding-dialog,
+  .onboarding-target { animation: none !important; transition: none !important; }
+}

@@ -14,7 +14,7 @@
   <link rel="stylesheet" href="src/styles.css" />
   <link rel="stylesheet" href="src/ui-polish.css" />
   <link rel="stylesheet" href="src/summon-polish.css" />
-  <meta name="questnote-artifact" content="db2b88364437440eb06ae76644942d52df651ad3881c569c2a93d44242fccf3a">
+  <meta name="questnote-artifact" content="6b049f0f3811dc289a48f41a7419af717cf7c387737c9c81a47ef3e176fad979">
 </head>
 <body data-theme="default">
   <div id="app-loader" class="app-loader">
@@ -285,6 +285,14 @@
       </header>
 
       <section class="more-menu card">
+        <button class="more-menu-item" data-goto="guide" type="button">
+          <span class="more-menu-icon more-menu-icon--image"><img src="assets/icons/icon-192.png" alt="" width="28" height="28"></span>
+          <span class="more-menu-text">
+            <span class="more-menu-label">使用教學</span>
+            <span class="more-menu-desc">重看入門流程與其他功能</span>
+          </span>
+          <span class="more-menu-arrow">›</span>
+        </button>
         <button class="more-menu-item" data-goto="handbook" type="button">
           <span class="more-menu-icon">📖</span>
           <span class="more-menu-text">
@@ -340,6 +348,40 @@
 
       <section class="card more-version-section" aria-label="版本資訊">
         <div class="version-info-card version-info-card--compact" data-version-info data-version-info-compact></div>
+      </section>
+    </main>
+
+    <!-- 使用教學頁 -->
+    <main id="view-guide" class="view">
+      <header class="page-header page-header--with-back">
+        <button class="page-back-btn" data-goto="more" type="button" aria-label="返回更多">‹</button>
+        <div class="page-header__inner">
+          <h1 class="page-title">使用教學</h1>
+          <p class="page-subtitle">隨時回來查看下一步</p>
+        </div>
+      </header>
+
+      <section class="guide-overview card" aria-labelledby="guide-overview-title">
+        <p class="guide-overview__eyebrow">快速開始</p>
+        <h2 id="guide-overview-title">讓任務帶著夥伴一起成長</h2>
+        <ol class="guide-steps">
+          <li><b class="guide-step-number" aria-hidden="true">1</b><strong>記下任務</strong><span>按任務頁右下角「＋」；今天要做的事可加入今日計畫。</span></li>
+          <li><b class="guide-step-number" aria-hidden="true">2</b><strong>完成並領資源</strong><span>做完後點「完成」，獲得星塵與冒險能量。</span></li>
+          <li><b class="guide-step-number" aria-hidden="true">3</b><strong>召喚夥伴</strong><span>用星塵召喚；星塵不足時看看信箱、任務與每日祝福。</span></li>
+          <li><b class="guide-step-number" aria-hidden="true">4</b><strong>收藏與陪伴</strong><span>到圖鑑切換「已獲得」，選一隻設為陪伴。</span></li>
+          <li><b class="guide-step-number" aria-hidden="true">5</b><strong>派遣探險</strong><span>有寵物與足夠能量時選擇地區，派遣後回來領獎。</span></li>
+        </ol>
+        <p id="guide-tutorial-status" class="guide-overview__status"></p>
+        <button id="guide-tutorial-button" class="btn btn--primary btn--block" type="button" data-onboarding-action="replay">重新體驗引導</button>
+      </section>
+
+      <section class="guide-more card" aria-labelledby="guide-more-title">
+        <h2 id="guide-more-title">其他功能</h2>
+        <details><summary>每日祝福與信箱</summary><p>任務首頁可每日簽到並轉動幸運轉盤；右上角信箱可查看公告與領取可用補償。</p></details>
+        <details><summary>習慣與冒險任務</summary><p>在「更多 → 習慣」追蹤每日或每週習慣；任務首頁的冒險任務可查看每日、每週挑戰與可領獎勵。</p></details>
+        <details><summary>成就與稱號</summary><p>在「更多 → 成就」查看進度、領取已解鎖獎勵，並選擇喜歡的稱號。</p></details>
+        <details><summary>工坊與親密度</summary><p>探險帶回材料後，可在「更多 → 工坊」製作禮物並贈送寵物；完成任務也能提升陪伴寵物的親密度。</p></details>
+        <details><summary>資料備份與設定</summary><p>在「更多 → 設定」匯出 JSON 備份、恢復資料，以及調整主題和動畫偏好。資料主要保存在目前裝置的瀏覽器中。</p></details>
       </section>
     </main>
 
@@ -670,6 +712,9 @@
 
   <!-- Toast 容器 -->
   <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- 首次使用引導 -->
+  <div id="onboarding-root"></div>
 
   <!-- 通用彈窗 -->
   <div id="modal-overlay" class="modal-overlay" role="dialog" aria-modal="true">

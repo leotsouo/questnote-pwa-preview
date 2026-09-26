@@ -233,6 +233,12 @@ import {
   clearLocalDevMailboxMessages,
   getLocalDevMailboxMessages,
 } from './mailboxService.js';
+import {
+  recordOnboardingEvent,
+  refreshOnboarding,
+  showOnboardingAfterReset,
+  dismissOnboardingAfterRestore,
+} from './onboardingController.js';
 
 /** 稀有度中文與色彩 */
 export const RARITY_LABELS = {
@@ -577,6 +583,7 @@ export function initUI(appState, refreshCallback, achievementCheckCallback) {
       if (!btn) return;
       collectionFilter = btn.dataset.filter;
       renderCollectionView();
+      refreshOnboarding();
     });
 
     document.getElementById('collection-series-filters')?.addEventListener('click', (e) => {
@@ -773,6 +780,9 @@ function bindDelegatedEvents() {
         await notifyBondUnlocks(state.companion?.id);
       }
       await handleAchievementCheckAfterAction();
+      if (isCompleting && result.justCompleted) {
+        void recordOnboardingEvent('task-completed', { taskId: id });
+      }
     } else if (action === 'toggle-subtask' && id) {
       const subtaskId = target.dataset.subtaskId;
       if (!subtaskId) return;
@@ -968,6 +978,7 @@ function bindDelegatedEvents() {
         await setCompanion(petId);
         await onRefresh({ renderMode: ['collection', 'tasks'] });
         showToast('已設為陪伴寵物', 'success');
+        void recordOnboardingEvent('companion-set', { petId });
       }
       return;
     }
@@ -1057,6 +1068,11 @@ function bindDelegatedEvents() {
 
   document.getElementById('view-handbook')?.addEventListener('click', (e) => {
     handleHandbookClick(e);
+  });
+
+  document.getElementById('view-guide')?.addEventListener('click', (e) => {
+    const backBtn = e.target.closest('[data-goto]');
+    if (backBtn) switchView(backBtn.dataset.goto);
   });
 
   document.getElementById('view-achievements')?.addEventListener('click', async (e) => {
@@ -1221,14 +1237,17 @@ export function switchView(viewName) {
   document.querySelectorAll('.nav-item').forEach((n) => n.classList.remove('active'));
 
   const view = document.getElementById(`view-${viewName}`);
-  const navView = viewName === 'achievements' || viewName === 'settings' || viewName === 'habits' || viewName === 'workshop' || viewName === 'handbook' ? 'more' : viewName;
+  const navView = viewName === 'achievements' || viewName === 'settings' || viewName === 'habits' || viewName === 'workshop' || viewName === 'handbook' || viewName === 'guide' ? 'more' : viewName;
   const nav = document.querySelector(`.nav-item[data-view="${navView}"]`);
   if (view) view.classList.add('active');
   if (nav) nav.classList.add('active');
+  if (viewName === 'guide') window.scrollTo(0, 0);
 
   trackUserActivity();
 
   if (viewName === 'expedition') {
+    // Rebuild the hidden page with rewards earned since its last render.
+    renderExpeditionView();
     startExpeditionTimer();
   } else {
     stopExpeditionTimer();
@@ -1291,13 +1310,14 @@ export function switchView(viewName) {
     preloadCompanionImage(state).catch(() => {});
   }
 
-  currentTasksView = viewName === 'achievements' || viewName === 'settings' || viewName === 'habits' || viewName === 'workshop' || viewName === 'handbook' || viewName === 'more'
+  currentTasksView = viewName === 'achievements' || viewName === 'settings' || viewName === 'habits' || viewName === 'workshop' || viewName === 'handbook' || viewName === 'guide' || viewName === 'more'
     ? currentTasksView
     : viewName;
   if (viewName === 'tasks' || viewName === 'gacha' || viewName === 'collection' || viewName === 'expedition' || viewName === 'more') {
     currentTasksView = viewName;
   }
   renderNavBadges();
+  void recordOnboardingEvent('view-changed', { viewName });
 }
 
 function bindModals() {
@@ -1612,6 +1632,7 @@ export function renderSharedUI() {
   updateGachaAffordability();
   renderGachaDailyBlessingEntry();
   maybeRefreshExpeditionBubble();
+  refreshOnboarding();
 }
 
 /** 渲染指定 view */
@@ -1649,6 +1670,9 @@ export function renderView(viewName) {
       break;
     case 'handbook':
       renderHandbookView();
+      break;
+    case 'guide':
+      refreshOnboarding();
       break;
     default:
       uiDebugLog('[Render] renderAll fallback (unknown view:', viewName, ')');
@@ -3047,6 +3071,7 @@ function openTaskForm(taskId = null) {
       subtasks: finalSubtasks,
     };
 
+    let createdTask = null;
     try {
       if (isEdit) {
         const todayStr = getTodayDateString();
@@ -3062,12 +3087,15 @@ function openTaskForm(taskId = null) {
         });
         showToast('任務已更新', 'success');
       } else {
-        await createTask(payload);
+        createdTask = await createTask(payload);
         showToast('任務已新增', 'success');
       }
       closeModal();
       await onRefresh();
       await handleAchievementCheckAfterAction();
+      if (createdTask) {
+        void recordOnboardingEvent('task-created', { taskId: createdTask.id });
+      }
     } catch (err) {
       showToast(err.message || '儲存失敗', 'error');
     }
@@ -3661,6 +3689,13 @@ function getMailboxViewModel(filterOverride) {
   });
 }
 
+export function getMailboxGiftStatus(messageId) {
+  if (mailboxStateLocal?.claimedIds?.includes(messageId)) return 'claimed';
+  const gift = getMailboxViewModel('all').allVisible.find((message) => message.id === messageId);
+  if (gift) return gift.status?.claimable ? 'claimable' : 'unavailable';
+  return mailboxFetchFailed || mailboxPayload?.messages?.length ? 'unavailable' : 'unknown';
+}
+
 function updateMailboxEntryBadge() {
   const btn = document.getElementById('btn-global-mailbox');
   const badge = document.getElementById('mailbox-entry-badge');
@@ -3723,6 +3758,7 @@ export async function syncGlobalMailbox(options = {}) {
     mailboxFetchFailed = result.ok === false;
     mailboxStateLocal = await getGlobalMailboxState();
     updateMailboxEntryBadge();
+    refreshOnboarding();
 
     if (document.getElementById('global-mailbox-modal')?.classList.contains('open')) {
       renderGlobalMailboxModal();
@@ -3891,7 +3927,7 @@ async function handleMailboxRefresh() {
   }
 }
 
-export async function openGlobalMailbox() {
+export async function openGlobalMailbox({ focusClaimableId = null } = {}) {
   mailboxLastFocus = document.activeElement;
   ensureGlobalMailboxModal();
   mailboxSelectedId = null;
@@ -3907,6 +3943,11 @@ export async function openGlobalMailbox() {
   const vm = getMailboxViewModel('all');
   if (mailboxFilter == null) {
     mailboxFilter = vm.defaultFilter;
+  }
+  const focusedGift = vm.allVisible.find((message) => message.id === focusClaimableId && message.status?.claimable);
+  if (focusedGift) {
+    mailboxFilter = 'claimable';
+    mailboxSelectedId = focusedGift.id;
   }
 
   const modal = document.getElementById('global-mailbox-modal');
@@ -3934,7 +3975,9 @@ export async function openGlobalMailbox() {
   void syncGlobalMailbox({ force: false, silent: true });
 
   requestAnimationFrame(() => {
-    document.getElementById('mailbox-refresh-btn')?.focus();
+    (focusedGift
+      ? document.querySelector('.mailbox-detail__claim-btn')
+      : document.getElementById('mailbox-refresh-btn'))?.focus();
   });
 }
 
@@ -4316,6 +4359,7 @@ async function handleMailboxClaim(messageId, btnEl) {
   renderSharedUI();
   renderGlobalMailboxModal();
   updateMailboxEntryBadge();
+  void recordOnboardingEvent('mailbox-claimed', { messageId });
 }
 
 /**
@@ -5328,6 +5372,7 @@ async function handlePull() {
 
     showToast('召喚成功！', 'success', 2000);
     await handleAchievementCheckAfterAction();
+    void recordOnboardingEvent('summon-completed');
   } catch (err) {
     clearPendingAwakening();
     showToast(err.message || '召喚失敗', 'error');
@@ -5409,6 +5454,7 @@ async function handleTenPull() {
 
     showToast('10 連抽完成！', 'success', 2000);
     await handleAchievementCheckAfterAction();
+    void recordOnboardingEvent('summon-completed');
   } catch (err) {
     clearPendingAwakening();
     showToast(err.message || '10 連抽失敗', 'error');
@@ -6188,6 +6234,7 @@ function openPetDetailModal(petId) {
       closeModal();
       await onRefresh({ renderMode: ['collection', 'tasks'] });
       showToast('已設為陪伴寵物', 'success');
+      void recordOnboardingEvent('companion-set', { petId: id });
     }
   });
 
@@ -7080,6 +7127,7 @@ async function confirmExpeditionDispatch(areaId, petId) {
     await onRefresh({ renderMode: ['expedition', 'tasks'] });
     startExpeditionTimer();
     showToast(`已派遣 ${petDisplayName(pet)} 前往${area.name}`, 'success');
+    void recordOnboardingEvent('expedition-started', { areaId, petId });
   } catch (err) {
     if (confirmBtn) confirmBtn.disabled = false;
     showToast(err.message || '無法開始探險', 'warning');
@@ -8532,6 +8580,7 @@ async function executeRestoreBackup() {
 
   try {
     await restoreBackup(pendingImportBackup);
+    await dismissOnboardingAfterRestore();
     await onRefresh({ renderMode: 'full' });
     await applyTheme(state?.userPreferences?.theme ?? 'default', { silent: true });
     applyReduceMotionClass(state?.userPreferences?.reduceMotion ?? false);
@@ -8834,6 +8883,7 @@ async function handleReset() {
             await state.onReset();
             await onRefresh({ renderMode: 'full' });
             showToast('資料已重置', 'success');
+            await showOnboardingAfterReset();
           }
         },
         { confirmLabel: '確定重置', danger: true }

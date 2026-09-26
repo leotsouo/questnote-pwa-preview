@@ -105,7 +105,9 @@ import {
   hasLowMaterials,
 } from './workshopService.js';
 
-import { initUI, renderAfterRefresh, applyReduceMotionClass, syncGlobalMailbox } from './ui.js';
+import { initUI, renderAfterRefresh, applyReduceMotionClass, syncGlobalMailbox, switchView, openGlobalMailbox, getMailboxGiftStatus } from './ui.js';
+import { prepareOnboarding, resetOnboardingState } from './onboardingService.js';
+import { initOnboarding } from './onboardingController.js';
 import { runAppHealthCheck } from './healthCheckService.js';
 import { getServiceWorkerRegisterUrl } from './version.js';
 import { loadCatalogBundle } from './releaseCatalog.js';
@@ -408,6 +410,8 @@ async function resetAllData() {
 
   await initWorkshop();
 
+  await resetOnboardingState();
+
 }
 
 
@@ -533,11 +537,19 @@ async function initApp() {
 
   const hideLoader = () => loader?.remove();
 
+  let onboardingAtStartup = null;
+
 
 
   try {
 
     await openDB();
+
+    try {
+      onboardingAtStartup = await prepareOnboarding();
+    } catch (error) {
+      console.warn('[QuestNote] 新手教學狀態無法載入:', error);
+    }
 
     await initUserPreferences();
     appState.userPreferences = await getUserPreferences();
@@ -700,6 +712,8 @@ async function initApp() {
       await renderAfterRefresh('current');
 
     }
+
+    initOnboarding(appState, { switchView, openGlobalMailbox, getMailboxGiftStatus }, onboardingAtStartup);
 
 
 
