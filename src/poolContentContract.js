@@ -7,10 +7,11 @@ export const POOL_THEME_REGISTRY = Object.freeze({
   default: Object.freeze({ cssTheme: null }),
   dream_bloom: Object.freeze({ cssTheme: 'eternal_slumber_bloom' }),
   glacier_arrival: Object.freeze({ cssTheme: 'glacier_arrival' }),
+  honeylight_sugar: Object.freeze({ cssTheme: 'honeylight_sugar' }),
 });
-export const POOL_SUMMON_REGISTRY = Object.freeze({ none: true, dream_bloom: true, glacier_arrival: true });
+export const POOL_SUMMON_REGISTRY = Object.freeze({ none: true, dream_bloom: true, glacier_arrival: true, honeylight_sugar: true });
 export const POOL_UNLOCK_REGISTRY = Object.freeze({ pool_unlock: true, morning_garden_unlock: true });
-export const PET_REVEAL_REGISTRY = Object.freeze({ ssr: true, ur: true, moon: true, petal: true });
+export const PET_REVEAL_REGISTRY = Object.freeze({ ssr: true, ur: true, moon: true, petal: true, caramel: true, cream: true });
 
 const TOKEN = /^[a-z][a-z0-9_]*$/;
 const PET_ID = /^pet_(?:(?:n|r|sr|ssr|ur)\d{2,}|sp\d{2,})$/;

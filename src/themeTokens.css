@@ -2,9 +2,9 @@
 body[data-theme] {
   --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft JhengHei', sans-serif;
   --font-display: var(--font-body);
-  --type-display: 30px; --type-page: 28px; --type-section: 22px;
-  --type-quest: 16px; --type-body: 15px; --type-meta: 12px;
-  --type-reward: 12px; --type-button: 14px; --type-caption: 11px;
+  --type-display: 1.875rem; --type-page: 1.75rem; --type-section: 1.375rem;
+  --type-quest: 1rem; --type-body: 0.9375rem; --type-meta: 0.75rem;
+  --type-reward: 0.75rem; --type-button: 0.875rem; --type-caption: 0.6875rem;
   --space-unit: 4px; --page-padding-x: 22px; --nav-height: 72px;
   --page-padding-bottom: calc(96px + var(--safe-bottom));
   --motion-feedback: 160ms; --motion-page: 220ms; --motion-growth: 550ms;

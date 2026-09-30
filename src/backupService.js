@@ -363,6 +363,7 @@ function normalizePayloadData(rawBackup) {
     settings: {
       reduceMotion: userPreferences.reduceMotion,
       theme: userPreferences.theme,
+      fontSize: userPreferences.fontSize,
     },
     taskStats: data.taskStats ?? {},
     inventory: normalizeInventory(data.inventory),

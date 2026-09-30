@@ -79,73 +79,73 @@
       "level": "warning",
       "code": "IMAGE_LARGE",
       "message": "Review large image dimensions or byte size",
-      "path": "images/pet_n20.png"
+      "path": "images/pet_n26.png"
     },
     {
       "level": "warning",
       "code": "IMAGE_LARGE",
       "message": "Review large image dimensions or byte size",
-      "path": "images/pet_n21.png"
+      "path": "images/pet_n27.png"
     },
     {
       "level": "warning",
       "code": "IMAGE_LARGE",
       "message": "Review large image dimensions or byte size",
-      "path": "images/pet_n22.png"
+      "path": "images/pet_n28.png"
     },
     {
       "level": "warning",
       "code": "IMAGE_LARGE",
       "message": "Review large image dimensions or byte size",
-      "path": "images/pet_r17.png"
+      "path": "images/pet_r23.png"
     },
     {
       "level": "warning",
       "code": "IMAGE_LARGE",
       "message": "Review large image dimensions or byte size",
-      "path": "images/pet_r18.png"
+      "path": "images/pet_r24.png"
     },
     {
       "level": "warning",
       "code": "IMAGE_LARGE",
       "message": "Review large image dimensions or byte size",
-      "path": "images/pet_r19.png"
+      "path": "images/pet_r25.png"
     },
     {
       "level": "warning",
       "code": "IMAGE_LARGE",
       "message": "Review large image dimensions or byte size",
-      "path": "images/pet_sr13.png"
+      "path": "images/pet_sr19.png"
     },
     {
       "level": "warning",
       "code": "IMAGE_LARGE",
       "message": "Review large image dimensions or byte size",
-      "path": "images/pet_sr14.png"
+      "path": "images/pet_sr20.png"
     },
     {
       "level": "warning",
       "code": "IMAGE_LARGE",
       "message": "Review large image dimensions or byte size",
-      "path": "images/pet_sr15.png"
+      "path": "images/pet_ssr12.png"
     },
     {
       "level": "warning",
       "code": "IMAGE_LARGE",
       "message": "Review large image dimensions or byte size",
-      "path": "images/pet_ssr08.png"
+      "path": "images/pet_ssr13.png"
     },
     {
       "level": "warning",
       "code": "IMAGE_LARGE",
       "message": "Review large image dimensions or byte size",
-      "path": "images/pet_ssr09.png"
+      "path": "images/pet_ur09.png"
     },
     {
       "level": "warning",
       "code": "IMAGE_LARGE",
       "message": "Review large image dimensions or byte size",
-      "path": "images/pet_ur07.png"
+      "path": "images/pet_ur10.png"
     }
   ],
   "previews": [
@@ -163,55 +163,60 @@
       "poolId": "frost_oath_fjord",
       "locked": 12,
       "unlocked": 12
+    },
+    {
+      "poolId": "honeylight_sugar_garden_v2",
+      "locked": 12,
+      "unlocked": 12
     }
   ],
   "changes": {
     "pets": {
       "added": [
-        "pet_n20",
-        "pet_n21",
-        "pet_n22",
-        "pet_r17",
-        "pet_r18",
-        "pet_r19",
-        "pet_sr13",
-        "pet_sr14",
-        "pet_sr15",
-        "pet_ssr08",
-        "pet_ssr09",
-        "pet_ur07"
+        "pet_n26",
+        "pet_n27",
+        "pet_n28",
+        "pet_r23",
+        "pet_r24",
+        "pet_r25",
+        "pet_sr19",
+        "pet_sr20",
+        "pet_ssr12",
+        "pet_ssr13",
+        "pet_ur09",
+        "pet_ur10"
       ],
       "changed": [],
       "removed": []
     },
     "pools": {
       "added": [
-        "frost_oath_fjord"
+        "honeylight_sugar_garden_v2"
       ],
       "changed": [],
       "removed": []
     },
     "lore": {
       "added": [
-        "pet_n20",
-        "pet_n21",
-        "pet_n22",
-        "pet_r17",
-        "pet_r18",
-        "pet_r19",
-        "pet_sr13",
-        "pet_sr14",
-        "pet_sr15",
-        "pet_ssr08",
-        "pet_ssr09",
-        "pet_ur07"
+        "pet_n26",
+        "pet_n27",
+        "pet_n28",
+        "pet_r23",
+        "pet_r24",
+        "pet_r25",
+        "pet_sr19",
+        "pet_sr20",
+        "pet_ssr12",
+        "pet_ssr13",
+        "pet_ur09",
+        "pet_ur10"
       ],
       "changed": [],
       "removed": []
     },
     "series": {
       "added": [
-        "frost_oath_fjord"
+        "honeylight_sugar_garden_v2"
       ],
       "changed": [],
       "removed": []

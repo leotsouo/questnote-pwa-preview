@@ -19,6 +19,8 @@ const DURATION = {
   UR: 2200,
   UR_MOON: 2800,
   UR_PETAL: 2800,
+  UR_CARAMEL: 2600,
+  UR_CREAM: 2800,
   reducedSsr: 550,
   reducedUr: 750,
   queueGap: 280,
@@ -235,6 +237,8 @@ function buildFallingPetalsHtml(reduceMotion) {
 }
 
 function themeClassName(theme) {
+  if (theme === 'caramel') return 'is-ur is-caramel-ur';
+  if (theme === 'cream') return 'is-ur is-cream-ur';
   if (theme === 'moon') return 'is-ur is-moon-ur';
   if (theme === 'petal') return 'is-ur is-petal-ur';
   if (theme === 'ur') return 'is-ur';
@@ -254,6 +258,8 @@ function durationForTheme(theme, reduce) {
   }
   if (theme === 'moon') return DURATION.UR_MOON;
   if (theme === 'petal') return DURATION.UR_PETAL;
+  if (theme === 'caramel') return DURATION.UR_CARAMEL;
+  if (theme === 'cream') return DURATION.UR_CREAM;
   if (theme === 'ur') return DURATION.UR;
   return DURATION.SSR;
 }
@@ -263,7 +269,7 @@ function durationForTheme(theme, reduce) {
  * @param {{ rarity: string, pet: object|null, reduceMotion: boolean, theme?: string, progressText?: string, fallback?: boolean }} options
  * @returns {HTMLDivElement}
  */
-export function createSummonRevealOverlay({ rarity, pet, reduceMotion, theme, progressText = '', fallback = false }) {
+export function createSummonRevealOverlay({ rarity, pet, reduceMotion, theme, progressText = '', fallback = false, presentationKey }) {
   const resolvedTheme = theme || resolveRevealTheme(pet, { rarity, pet });
   const isUR = rarity === 'UR' || resolvedTheme !== 'ssr';
   const overlay = document.createElement('div');
@@ -271,6 +277,7 @@ export function createSummonRevealOverlay({ rarity, pet, reduceMotion, theme, pr
   if (reduceMotion) overlay.classList.add('is-reduced');
   if (fallback) overlay.classList.add('is-fallback');
   overlay.dataset.theme = resolvedTheme;
+  if (presentationKey === 'honeylight_sugar') overlay.classList.add('is-sugar-reveal');
   overlay.setAttribute('role', 'dialog');
   overlay.setAttribute('aria-modal', 'true');
   overlay.setAttribute('aria-label', isUR ? '傳說召喚演出' : '稀有召喚演出');
@@ -320,6 +327,13 @@ export function createSummonRevealOverlay({ rarity, pet, reduceMotion, theme, pr
   if (progressEl && progressText) progressEl.textContent = progressText;
 
   const frame = overlay.querySelector('.summon-reveal-pet-frame');
+  if (!fallback && ['caramel', 'cream'].includes(resolvedTheme)) {
+    const ornament = document.createElement('div');
+    ornament.className = `sugar-reveal-ornament sugar-reveal-ornament--${resolvedTheme}`;
+    ornament.setAttribute('aria-hidden', 'true');
+    ornament.innerHTML = Array.from({ length: 8 }, (_, i) => `<i style="--i:${i}"></i>`).join('') + '<b></b>';
+    overlay.querySelector('.summon-reveal-stage').prepend(ornament);
+  }
   if (frame && imgSrc) {
     const img = document.createElement('img');
     img.className = 'summon-reveal-pet-image';
@@ -329,7 +343,7 @@ export function createSummonRevealOverlay({ rarity, pet, reduceMotion, theme, pr
     img.addEventListener('load', () => img.classList.add('is-loaded'));
     img.addEventListener('error', () => {
       const original = getPetImageSrc(pet);
-      if (original && img.src !== new URL(original, location.href).href) {
+      if (original && img.src !== new URL(original, document.baseURI).href) {
         img.src = original;
         return;
       }
@@ -411,6 +425,7 @@ export async function playSummonReveal({
   progressText = '',
   queueMode = false,
   forceFallback = false,
+  presentationKey,
 } = {}) {
   void mode;
   void results;
@@ -437,6 +452,7 @@ export async function playSummonReveal({
   const resolvedTheme = theme || resolveRevealTheme(pet, { rarity, pet });
   let overlay = null;
   let useFallback = !!forceFallback;
+  const previousFocus = document.activeElement;
 
   try {
     if (!useFallback) {
@@ -460,6 +476,7 @@ export async function playSummonReveal({
         theme: resolvedTheme,
         progressText,
         fallback: useFallback,
+        presentationKey,
       });
     } catch (createErr) {
       console.warn('[SummonReveal] overlay 建立失敗，改用 fallback', createErr);
@@ -470,6 +487,7 @@ export async function playSummonReveal({
         theme: resolvedTheme,
         progressText,
         fallback: true,
+        presentationKey,
       });
       useFallback = true;
     }
@@ -477,6 +495,7 @@ export async function playSummonReveal({
     activeOverlay = overlay;
     document.body.appendChild(overlay);
     document.body.classList.add('summon-reveal-active');
+    overlay.querySelector('.summon-reveal-skip')?.focus();
 
     requestAnimationFrame(() => overlay?.isConnected && overlay.classList.add('is-active'));
 
@@ -623,6 +642,7 @@ export async function playSummonReveal({
     document.body.classList.remove('summon-reveal-active');
     activeFinish = null;
     summonRevealPlaying = false;
+    if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
   }
 }
 
@@ -637,6 +657,7 @@ export async function playSsrPlusRevealQueue({
   results = [],
   reduceMotion,
   forceFirstFallback = false,
+  presentationKey,
 } = {}) {
   const queue = collectSsrPlusRevealQueue(results);
   if (queue.length === 0) {
@@ -666,6 +687,7 @@ export async function playSsrPlusRevealQueue({
           progressText,
           queueMode: queue.length > 1,
           forceFallback: forceFirstFallback && i === 0,
+          presentationKey,
         });
         played += 1;
       } catch (itemErr) {

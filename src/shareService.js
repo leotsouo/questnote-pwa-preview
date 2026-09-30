@@ -1,9 +1,13 @@
 export const APP_SHARE_URL = 'https://leotsouo.github.io/questnote-pwa/';
+export const WEBSITE_SHARE_URL = 'https://questnote.taste-compare.com/';
+export const APP_SHARE_DESCRIPTION = '把生活裡的待辦，變成與夥伴一起成長的冒險。';
+export const APP_SHARE_TEXT = `一起試試 QuestNote。\n${APP_SHARE_DESCRIPTION}\n\n直接開始：${APP_SHARE_URL}`;
+export const APP_SHARE_MESSAGE = `${APP_SHARE_TEXT}\n\n認識 QuestNote：${WEBSITE_SHARE_URL}`;
 
 export const APP_SHARE_DATA = Object.freeze({
   title: 'QuestNote',
-  text: '用 QuestNote 記錄任務、養成習慣，和幻獸一起冒險。',
-  url: APP_SHARE_URL,
+  text: APP_SHARE_TEXT,
+  url: WEBSITE_SHARE_URL,
 });
 
 export async function shareQuestNote(navigatorLike = globalThis.navigator) {
@@ -16,10 +20,10 @@ export async function shareQuestNote(navigatorLike = globalThis.navigator) {
   }
 }
 
-export async function copyQuestNoteUrl(navigatorLike = globalThis.navigator, documentLike = globalThis.document) {
+export async function copyQuestNoteInvitation(navigatorLike = globalThis.navigator, documentLike = globalThis.document) {
   try {
     if (typeof navigatorLike?.clipboard?.writeText === 'function') {
-      await navigatorLike.clipboard.writeText(APP_SHARE_URL);
+      await navigatorLike.clipboard.writeText(APP_SHARE_MESSAGE);
       return true;
     }
   } catch {
@@ -29,7 +33,7 @@ export async function copyQuestNoteUrl(navigatorLike = globalThis.navigator, doc
   if (!documentLike?.body || typeof documentLike.execCommand !== 'function') return false;
   const previousFocus = documentLike.activeElement;
   const field = documentLike.createElement('textarea');
-  field.value = APP_SHARE_URL;
+  field.value = APP_SHARE_MESSAGE;
   field.setAttribute('readonly', '');
   field.setAttribute('aria-hidden', 'true');
   field.style.position = 'fixed';

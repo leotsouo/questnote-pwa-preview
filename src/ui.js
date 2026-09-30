@@ -1,6 +1,7 @@
 /**
  * UI 渲染與互動邏輯
  */
+import { buildWorkshopGiftView } from './workshopGiftView.js';
 import { initFilterGestures } from './filterGestureController.js';
 import { trackUpdateActivity } from './updateActivity.js';
 import { updateControlsHtml, refreshUpdateControls } from './updateController.js';
@@ -17,7 +18,7 @@ import {
 } from './taskService.js';
 import { getCategoryById } from './categoryService.js';
 import { initFeedback } from './feedbackController.js';
-import { shareQuestNote, copyQuestNoteUrl } from './shareService.js';
+import { APP_SHARE_URL, WEBSITE_SHARE_URL, APP_SHARE_DESCRIPTION, APP_SHARE_MESSAGE, shareQuestNote, copyQuestNoteInvitation } from './shareService.js';
 import { bindDialogFocus, isTopDialog, rememberDialogFocus, focusDialog, restoreDialogFocus } from './dialogFocus.js';
 import {
   getTodayDateString,
@@ -71,7 +72,7 @@ import {
   randomBubbleInterval,
   IDLE_THRESHOLD_MS,
 } from './companionDialogueService.js';
-import { setTheme, applyThemeToDocument, normalizeTheme } from './preferencesService.js';
+import { setTheme, applyThemeToDocument, normalizeTheme, setFontSize, applyFontSizeToDocument, normalizeFontSize } from './preferencesService.js';
 import { initQuestIconLanguage } from './iconPresentation.js';
 import { THEME_DIRECTIONS } from './themeRegistry.js';
 import { twilightIcon, getCompanionScene, initTwilightChrome, syncTwilightHome, syncTwilightGacha, setTwilightCompanionLine, reactTwilightCompanion } from './twilightPresentation.js';
@@ -196,6 +197,9 @@ import {
   getMaterialName,
   formatItemEffect,
   getFavoriteBonus,
+  getGiftAffinityTags,
+  getGiftThemeLabel,
+  GIFT_TAG_LABELS,
   getDailyBondItemUsage,
   getEnabledCraftables,
   getMaterialInventory,
@@ -414,6 +418,8 @@ let dailyBlessingCollapseDay = null;
 let homeHubActive = null;
 let selectedGiftPetId = null;
 let selectedGiftItemId = null;
+let workshopGiftMessage = '';
+let workshopGiftBusy = false;
 const expandedTaskIds = new Set();
 const recentlyCompletedTaskIds = new Set();
 
@@ -668,6 +674,12 @@ export function initUI(appState, refreshCallback, achievementCheckCallback) {
     document.getElementById('workshop-tabs')?.addEventListener('click', (e) => {
       const btn = e.target.closest('[data-workshop-tab]');
       if (!btn) return;
+      if (workshopGiftBusy) return;
+      if (btn.dataset.workshopTab === 'gift' && workshopTab !== 'gift') {
+        selectedGiftItemId = null;
+        selectedGiftPetId = null;
+        workshopGiftMessage = '';
+      }
       workshopTab = btn.dataset.workshopTab;
       document.querySelectorAll('#workshop-tabs .segmented-control__btn').forEach((b) => {
         b.classList.toggle('active', b.dataset.workshopTab === workshopTab);
@@ -1101,18 +1113,22 @@ function bindDelegatedEvents() {
     const backBtn = e.target.closest('[data-goto]');
     if (backBtn) switchView(backBtn.dataset.goto);
   });
+  document.getElementById('share-description').textContent = APP_SHARE_DESCRIPTION;
+  document.getElementById('share-website-link').href = WEBSITE_SHARE_URL;
+  document.getElementById('share-app-link').href = APP_SHARE_URL;
+  document.getElementById('share-message-text').textContent = APP_SHARE_MESSAGE;
   document.getElementById('btn-share-app')?.addEventListener('click', trackUpdateActivity(async () => {
     const result = await shareQuestNote();
     if (result === 'unsupported') {
-      const copied = await copyQuestNoteUrl();
-      showToast(copied ? '正式版連結已複製' : '無法自動複製，請長按下方連結', copied ? 'success' : 'warning');
+      const copied = await copyQuestNoteInvitation();
+      showToast(copied ? '邀請已複製，包含官網與 App 連結' : '無法自動複製，請展開分享內容並長按選取', copied ? 'success' : 'warning');
     } else if (result === 'failed') {
-      showToast('無法開啟分享，請使用複製連結', 'warning');
+      showToast('無法開啟分享，請使用「複製邀請內容」', 'warning');
     }
   }));
   document.getElementById('btn-copy-app-link')?.addEventListener('click', trackUpdateActivity(async () => {
-    const copied = await copyQuestNoteUrl();
-    showToast(copied ? '正式版連結已複製' : '無法自動複製，請長按下方連結', copied ? 'success' : 'warning');
+    const copied = await copyQuestNoteInvitation();
+    showToast(copied ? '邀請已複製，包含官網與 App 連結' : '無法自動複製，請展開分享內容並長按選取', copied ? 'success' : 'warning');
   }));
 
   document.getElementById('view-workshop')?.addEventListener('click', (e) => {
@@ -1176,6 +1192,27 @@ function bindDelegatedEvents() {
     if (themeCard) {
       const theme = themeCard.dataset.theme;
       if (theme) await applyTheme(theme);
+    }
+  }));
+
+  document.getElementById('font-size-picker')?.addEventListener('change', trackUpdateActivity(async (event) => {
+    if (event.target.name !== 'font-size') return;
+    const picker = event.currentTarget;
+    const previous = state.userPreferences?.fontSize;
+    picker.disabled = true;
+    try {
+      const prefs = await setFontSize(event.target.value);
+      state.userPreferences = prefs;
+      applyFontSizeToDocument(prefs.fontSize);
+      renderFontSizePickerState(prefs.fontSize);
+      setText('font-size-result', '字體大小已儲存');
+    } catch (error) {
+      applyFontSizeToDocument(previous);
+      renderFontSizePickerState(previous);
+      setText('font-size-result', '無法儲存字體大小，請再試一次。');
+      console.warn('[Preferences] Failed to save font size:', error);
+    } finally {
+      picker.disabled = false;
     }
   }));
 
@@ -1299,6 +1336,11 @@ function bindNavigation() {
 }
 
 export function switchView(viewName) {
+  if (viewName === 'workshop' && !document.getElementById('view-workshop')?.classList.contains('active')) {
+    selectedGiftItemId = null;
+    selectedGiftPetId = null;
+    workshopGiftMessage = '';
+  }
   document.querySelectorAll('.view').forEach((v) => v.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach((n) => { n.classList.remove('active'); n.removeAttribute('aria-current'); });
 
@@ -1395,7 +1437,8 @@ export async function openTeachingTarget({ view, filter, tab, hub, petId } = {})
   }
   if (view === 'workshop' && ['materials', 'craft', 'gift'].includes(tab)) {
     workshopTab = tab;
-    if (petId) selectedGiftPetId = petId;
+    selectedGiftPetId = null;
+    selectedGiftItemId = null;
     document.querySelectorAll('[data-workshop-tab]').forEach((button) => {
       const active = button.dataset.workshopTab === tab;
       button.classList.toggle('active', active);
@@ -1831,6 +1874,7 @@ export async function renderAll() {
   }
   uiDebugLog('[Render] renderAll fallback');
   applyThemeToDocument(state.userPreferences?.theme ?? 'default');
+  applyFontSizeToDocument(state.userPreferences?.fontSize);
   applyReduceMotionClass(state.userPreferences?.reduceMotion ?? false);
   renderTasksView();
   renderGachaView();
@@ -2121,11 +2165,11 @@ function buildDailyBlessingCardData() {
           <div class="daily-streak-row">
             <div class="daily-streak-stat">
               <span class="daily-streak-stat__label">連續簽到</span>
-              <span class="daily-streak-stat__value">連續簽到 <span class="daily-streak-number">${streak}</span> 天</span>
+              <span class="daily-streak-stat__value"><span class="daily-streak-number">${streak}</span> 天</span>
             </div>
             <div class="daily-streak-stat">
               <span class="daily-streak-stat__label">最高紀錄</span>
-              <span class="daily-streak-stat__value">最高紀錄 ${bestStreak} 天</span>
+              <span class="daily-streak-stat__value">${bestStreak} 天</span>
             </div>
           </div>
           <div class="daily-milestone-progress">
@@ -2940,6 +2984,7 @@ function renderTaskCard(task) {
     : '';
 
   const preview = task.content.split('\n').slice(1).filter((line) => line.trim()).slice(0, 2).join(' ');
+  const description = task.content.split('\n').slice(1).join('\n').trim();
   const rewardsHtml = task.completed ? doneInfo : task.rewardClaimed
     ? `<div class="task-card__rewards"><span>${twilightIcon('check')}獎勵已領取</span></div>`
     : `<div class="task-card__rewards"><span>${twilightIcon('spark')}${stardust} 星塵</span><span>${twilightIcon('energy')}${energy} 能量</span>${state.companion ? `<span>${twilightIcon('heart')}+${calculateBondAmount(task)} 親密度</span>` : ''}</div>`;
@@ -2950,6 +2995,7 @@ function renderTaskCard(task) {
       <div class="task-card__meta"><span>${formatCategoryLabel(category)}</span>${task.priority !== 'normal' ? `<span class="twilight-task-priority">${escapeHtml(PRIORITY_LABELS[task.priority])}</span>` : ''}${task.dueDate || task.startDate ? `<span class="${dateClass}">${escapeHtml(dateText)}</span>` : ''}${!inPlan && !task.completed ? '<span>未排入今日</span>' : ''}</div>
       <h3 class="task-card__title">${escapeHtml(task.title)}</h3>
       ${preview ? `<p class="task-card__preview">${escapeHtml(preview)}</p>` : ''}
+      ${description ? `<details class="task-card__description"><summary>任務說明</summary><p class="task-card__preview">${escapeHtml(description)}</p></details>` : ''}
       ${subtasksHtml}
       ${rewardsHtml}
       ${expandBtn ? `<div class="twilight-task-expander">${expandBtn}</div>` : ''}
@@ -3535,8 +3581,8 @@ function buildPetFeedSection(companion) {
   const options = bondItems
     .map((item) => {
       const stock = itemCounts[item.id] || 0;
-      const fav = getFavoriteBonus(item, companion).isFavorite;
-      const favMark = fav ? ' ★喜好' : '';
+      const bonus = getFavoriteBonus(item, companion);
+      const favMark = ` · +${bonus.bondExp} · ${bonus.reason}`;
       return `<option value="${item.id}">${escapeHtml(item.name)} ×${stock}${favMark}</option>`;
     })
     .join('');
@@ -4565,6 +4611,7 @@ export async function applyTheme(theme, options = {}) {
   }
 
   if (state) {
+    applyFontSizeToDocument(state.userPreferences?.fontSize);
     applyReduceMotionClass(state.userPreferences?.reduceMotion ?? false);
     await renderAll();
   } else {
@@ -4576,6 +4623,13 @@ export async function applyTheme(theme, options = {}) {
   }
 
   return valid;
+}
+
+function renderFontSizePickerState(fontSize) {
+  const valid = normalizeFontSize(fontSize);
+  document.querySelectorAll('input[name="font-size"]').forEach((input) => {
+    input.checked = input.value === valid;
+  });
 }
 
 function renderThemePickerState(activeTheme) {
@@ -6291,6 +6345,7 @@ function openPetDetailModal(petId) {
       ${personalityTags ? `<div class="pet-detail__tags">${personalityTags}</div>` : ''}
       ${owned ? renderStars(pet.stars) : ''}
       ${owned ? `<p class="pet-detail__specialty">探險專長：${escapeHtml(getPetSpecialty(pet).label)} Lv.${getPetSpecialty(pet).level}。一星即可發揮效果，升星會強化專長；不同稀有度都能在合適隊伍中派上用場。</p>` : ''}
+      ${owned ? `<p class="pet-detail__gift-affinity">禮物喜好：${escapeHtml(getGiftAffinityTags(pet).map((tag) => GIFT_TAG_LABELS[tag]).join('、') || '通用禮物；目前沒有主題喜好')}</p>` : ''}
       ${owned ? `<p class="pet-detail__bond-lv">親密度 Lv.${bondLevel || 1}</p>` : ''}
       ${owned ? `<button type="button" class="btn btn--primary btn--block pet-detail__feed-button" data-action="detail-feed-pet" data-pet-id="${escapeHtml(pet.id)}">餵食</button>` : ''}
       <p class="pet-detail__desc">${escapeHtml(pet.description)}</p>
@@ -7206,7 +7261,10 @@ function renderExpeditionDispatchModal() {
           ${Object.entries(EXPEDITION_OBJECTIVES).map(([id, entry]) => `<button type="button" class="expedition-objective ${dispatchObjective === id ? 'is-selected' : ''}" data-action="dispatch-objective" data-objective="${id}" aria-pressed="${dispatchObjective === id}"><strong>${entry.label}</strong><span>${entry.description}</span></button>`).join('')}
         </div>
       </div>
-      <div class="expedition-dispatch-modal__preview">${previewHtml}</div>
+      <div class="expedition-dispatch-modal__preview">
+        <div class="expedition-dispatch-preview__full">${previewHtml}</div>
+        <div class="expedition-dispatch-preview__compact">${selectedPets.length} 隻同行 · ${EXPEDITION_OBJECTIVES[dispatchObjective].label}<br>消耗 ${terms.energyCost} 能量 · ${formatDuration(terms.durationMinutes)}<details><summary>隊伍與收穫</summary><p>${previewHtml}</p></details></div>
+      </div>
       <div class="expedition-dispatch-modal__footer">
         <button type="button" class="expedition-dispatch-cancel-button" data-action="dispatch-close">取消</button>
         <button type="button" class="expedition-dispatch-confirm-button" data-action="dispatch-confirm" ${canConfirm ? '' : 'disabled'}>${confirmLabel}</button>
@@ -7614,12 +7672,12 @@ function renderWorkshopView() {
         <span class="workshop-summary__label">道具庫存</span>
         <span class="workshop-summary__value">${totalItems}</span>
       </div>
-    </div>
-    <p class="workshop-summary__hint">使用探險取得的材料製作禮物，提升寵物親密度。</p>`;
+    </div>`;
 
   if (workshopTab === 'materials') {
     if (allMaterialEntries.length === 0) {
       contentEl.innerHTML = emptyStateHtml(
+        twilightIcon('workshop'),
         '目前還沒有材料',
         '派遣寵物探險，可以帶回製作禮物的材料。'
       );
@@ -7653,6 +7711,7 @@ function renderWorkshopView() {
     const enabled = craftables.filter((c) => c.enabled);
     if (enabled.length === 0) {
       contentEl.innerHTML = emptyStateHtml(
+        twilightIcon('workshop'),
         '目前沒有可製作的道具',
         '等取得更多材料後再回來看看。'
       );
@@ -7666,11 +7725,6 @@ function renderWorkshopView() {
             const preview = getCraftingPreview(craftable.id, 1, wallet);
             const maxQty = preview.maxQuantity;
             const enough = preview.canCraft;
-            const favoriteHint =
-              craftable.type === 'favorite_bond_item'
-                ? `<p class="workshop-craft-card__favorite">喜歡的寵物可獲得 +${craftable.effect?.favoriteBonusBondExp ?? craftable.effect?.bondExp ?? 0}</p>`
-                : '';
-
             return `
               <article class="workshop-craft-card card ${enough ? '' : 'workshop-craft-card--disabled'}">
                 <div class="workshop-craft-card__header">
@@ -7678,7 +7732,10 @@ function renderWorkshopView() {
                   <span class="rarity-badge rarity-badge--${(craftable.rarity || 'n').toLowerCase()}">${escapeHtml(craftable.rarity || '?')}</span>
                 </div>
                 <p class="workshop-craft-card__effect">${escapeHtml(formatItemEffect(craftable))}</p>
-                ${favoriteHint}
+                <p class="workshop-craft-card__theme">主題：${escapeHtml(getGiftThemeLabel(craftable))}</p>
+                <p class="workshop-craft-card__desc">${escapeHtml(craftable.description || '')}</p>
+                <p class="workshop-craft-card__affinity">${craftable.type === 'favorite_bond_item' ? '已擁有 ' + (state.enrichedCollection || []).filter((pet) => pet.owned && getFavoriteBonus(craftable, pet).isFavorite).length + ' 位喜歡它的夥伴' : '通用禮物，所有夥伴效果相同'}</p>
+                <p class="workshop-craft-card__source">材料來源：${escapeHtml([...new Set(Object.keys(craftable.recipe || {}).map((id) => getMaterialInfo(id).sourceArea).filter(Boolean))].join('、'))}</p>
                 <ul class="workshop-recipe-list">
                   ${preview.materials
                     .map(
@@ -7699,100 +7756,21 @@ function renderWorkshopView() {
     return;
   }
 
-  // gift tab
-  const ownedPets = (state.enrichedCollection || []).filter((p) => p.owned);
-  const availableItems = bondItems.filter((c) => (itemCounts[c.id] || 0) > 0);
-
-  if (ownedPets.length === 0) {
-    contentEl.innerHTML = emptyStateHtml(
-      '還沒有可以贈送的寵物',
-      '先透過召喚獲得第一位夥伴。'
-    );
-    return;
-  }
-
-  if (availableItems.length === 0) {
-    contentEl.innerHTML = emptyStateHtml(
-      '目前沒有可贈送的道具',
-      '先到製作頁使用探險材料製作親密度道具。'
-    );
-    return;
-  }
-
-  if (!selectedGiftPetId || !ownedPets.some((p) => p.id === selectedGiftPetId)) {
-    selectedGiftPetId = ownedPets[0].id;
-  }
-  if (!selectedGiftItemId || !availableItems.some((c) => c.id === selectedGiftItemId)) {
-    selectedGiftItemId = availableItems[0].id;
-  }
-
-  const selectedPet = ownedPets.find((p) => p.id === selectedGiftPetId);
-  const selectedItem = getCraftableInfo(selectedGiftItemId);
-  const today = getTodayDateString();
-  const dailyUsed = getDailyBondItemUsage(selectedGiftPetId, today, inventory);
-  const bonus = getFavoriteBonus(selectedItem, selectedPet);
-  const bondProgress = getBondProgress(selectedPet.bondExp ?? 0, selectedPet.bondLevel ?? 1);
-  const previewExp = (selectedPet.bondExp ?? 0) + bonus.bondExp;
-  const previewLevel = previewExp >= 500 ? 5 : previewExp >= 300 ? 4 : previewExp >= 150 ? 3 : previewExp >= 50 ? 2 : 1;
-  const willLevelUp = previewLevel > (selectedPet.bondLevel ?? 1);
-  const atDailyLimit = dailyUsed >= DAILY_BOND_ITEM_LIMIT;
-  const itemStock = itemCounts[selectedGiftItemId] || 0;
-
-  contentEl.innerHTML = `
-    <div class="workshop-gift-layout">
-      <section class="workshop-gift-section card">
-        <h2 class="section-title">選擇夥伴</h2>
-        <div class="workshop-gift-pet-list">
-          ${ownedPets
-            .map((pet) => {
-              const used = getDailyBondItemUsage(pet.id, today, inventory);
-              const selected = pet.id === selectedGiftPetId;
-              return `
-                <button type="button" class="workshop-gift-pet ${selected ? 'workshop-gift-pet--selected' : ''}" data-action="select-gift-pet" data-pet-id="${pet.id}">
-                  <div class="workshop-gift-pet__img">${petImageHtml(pet, { size: 'sm' })}</div>
-                  <div class="workshop-gift-pet__info">
-                    <span class="workshop-gift-pet__name">${escapeHtml(petDisplayName(pet))}</span>
-                    ${pet.nickname ? `<span class="pet-original-name pet-original-name--xs">原名：${escapeHtml(petOriginalName(pet))}</span>` : ''}
-                    <span class="workshop-gift-pet__meta">Lv.${pet.bondLevel ?? 1} · 今日 ${used}/${DAILY_BOND_ITEM_LIMIT}</span>
-                    ${(pet.bondLevel ?? 0) >= 5 ? '<span class="workshop-gift-pet__liberated">羈絆解放</span>' : ''}
-                    ${pet.isCompanion ? '<span class="workshop-gift-pet__companion">陪伴中</span>' : ''}
-                  </div>
-                </button>`;
-            })
-            .join('')}
-        </div>
-      </section>
-
-      <section class="workshop-gift-section card">
-        <h2 class="section-title">選擇道具</h2>
-        <div class="workshop-gift-item-list">
-          ${availableItems
-            .map((item) => {
-              const selected = item.id === selectedGiftItemId;
-              const stock = itemCounts[item.id] || 0;
-              return `
-                <button type="button" class="workshop-gift-item ${selected ? 'workshop-gift-item--selected' : ''}" data-action="select-gift-item" data-item-id="${item.id}">
-                  <span class="workshop-gift-item__name">${escapeHtml(item.name)}</span>
-                  <span class="workshop-gift-item__stock">x${stock}</span>
-                  <span class="workshop-gift-item__effect">${escapeHtml(formatItemEffect(item))}</span>
-                </button>`;
-            })
-            .join('')}
-        </div>
-      </section>
-
-      <section class="workshop-gift-preview card ${bonus.isFavorite ? 'workshop-gift-preview--favorite' : ''}">
-        <h2 class="section-title">贈送預覽</h2>
-        <ul class="workshop-gift-preview__list">
-          <li>目前親密度：Lv.${selectedPet.bondLevel ?? 1}（${bondProgress.current}/${bondProgress.max || 'MAX'}）</li>
-          <li>使用後增加：+${bonus.bondExp}${bonus.isFavorite ? '（喜好加成）' : ''}</li>
-          <li>今日已使用：${dailyUsed} / ${DAILY_BOND_ITEM_LIMIT}</li>
-          ${willLevelUp ? `<li class="workshop-gift-preview__levelup">預計升級至 Lv.${previewLevel}</li>` : ''}
-        </ul>
-        <button class="btn btn--primary btn--block" data-action="gift-item" data-item-id="${selectedGiftItemId}" data-pet-id="${selectedGiftPetId}" ${atDailyLimit || itemStock <= 0 ? 'disabled' : ''}>贈送</button>
-        ${atDailyLimit ? '<p class="workshop-gift-preview__limit">今天這隻寵物已經收到足夠多禮物了，明天再來吧。</p>' : ''}
-      </section>
-    </div>`;
+  const model = buildWorkshopGiftView({
+    items: bondItems,
+    pets: state.enrichedCollection || [],
+    inventory,
+    date: getTodayDateString(),
+    itemId: selectedGiftItemId,
+    petId: selectedGiftPetId,
+    message: workshopGiftMessage,
+    busy: workshopGiftBusy,
+    imageHtml: (pet) => petImageHtml(pet, { size: 'sm' }),
+    displayName: petDisplayName,
+  });
+  selectedGiftItemId = model.itemId;
+  selectedGiftPetId = model.petId;
+  contentEl.innerHTML = model.html;
 }
 
 async function handleWorkshopClick(e) {
@@ -7806,16 +7784,20 @@ async function handleWorkshopClick(e) {
   if (!target || !state) return;
 
   const action = target.dataset.action;
+  if (target.disabled || workshopGiftBusy) return;
 
   if (action === 'select-gift-pet') {
     selectedGiftPetId = target.dataset.petId;
     renderWorkshopView();
+    document.querySelector(`.workshop-gift-pet[data-pet-id="${selectedGiftPetId}"]`)?.focus({ preventScroll: true });
     return;
   }
 
   if (action === 'select-gift-item') {
+    if (selectedGiftItemId !== target.dataset.itemId) selectedGiftPetId = null;
     selectedGiftItemId = target.dataset.itemId;
     renderWorkshopView();
+    document.querySelector(`.workshop-gift-item[data-item-id="${selectedGiftItemId}"]`)?.focus({ preventScroll: true });
     return;
   }
 
@@ -7852,13 +7834,16 @@ async function handleWorkshopClick(e) {
   if (action === 'gift-item') {
     const itemId = target.dataset.itemId;
     const petId = target.dataset.petId;
-    if (target.disabled) return;
+    if (target.disabled || workshopGiftBusy) return;
+    workshopGiftBusy = true;
+    renderWorkshopView();
     try {
       const result = await useBondItem(itemId, petId, state.allPets);
       if (!result.success) {
         showToast(result.message, 'warning');
         return;
       }
+      workshopGiftMessage = result.message;
       void recordOnboardingEvent('gift-given', { petId, itemId });
       await trackQuest('gift_pet');
       await onRefresh({ renderMode: ['workshop', 'tasks', 'collection'] });
@@ -7880,6 +7865,9 @@ async function handleWorkshopClick(e) {
       await handleAchievementCheckAfterAction();
     } catch (err) {
       showToast(err.message || '贈送失敗', 'error');
+    } finally {
+      workshopGiftBusy = false;
+      renderWorkshopView();
     }
   }
 }
@@ -8870,6 +8858,7 @@ function renderSettingsView() {
   setText('settings-achievements', `${achUnlocked}/${achTotal}`);
 
   renderThemePickerState(userPreferences?.theme ?? 'default');
+  renderFontSizePickerState(userPreferences?.fontSize);
 
   // 開發測試區：正式環境不可見；僅 localhost／127.0.0.1／::1（不得僅靠 CSS、不得用 ?debug 開正式 PWA）
   const localDevOn = isAuthorLocalDevMode();

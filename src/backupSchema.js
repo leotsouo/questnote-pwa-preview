@@ -1,5 +1,6 @@
 /** Backup profiles verified against historical exporters; no database or DOM access. */
 import { SUPPORTED_THEMES } from './themeRegistry.js';
+import { FONT_SIZES } from './preferencesService.js';
 const BASE_KEYS = ['tasks', 'wallet', 'collection', 'gachaStats', 'expeditions',
   'achievements', 'taskStats', 'userPreferences', 'habits'];
 const ADDITIONS = ['inventory', 'workshopStats', 'dailyCheckIn', 'questProgress',
@@ -226,7 +227,7 @@ export function validateSnapshotData(data, requiredKeys = SNAPSHOT_KEYS, profile
     subtasksCompletedTotal: integer, completedBeforeDueTotal: integer });
   state('userPreferences', { reduceMotion: bool,
     ...(['1.8.1', '2.1.1'].includes(profile) ? {} : { theme: oneOf(SUPPORTED_THEMES) }) },
-  { theme: oneOf(SUPPORTED_THEMES) });
+  { theme: oneOf(SUPPORTED_THEMES), fontSize: oneOf(FONT_SIZES) });
   state('inventory', { items: amounts,
     itemUsageLogs: map(map(shape({ bondItemsUsed: integer }), petId), dateKey) });
   state('workshopStats', { craftCount: integer, giftCount: integer, favoriteGiftCount: integer,

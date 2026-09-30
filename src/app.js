@@ -64,7 +64,7 @@ import {
 
 import { getWelcomeCompanionLine } from './companionDialogueService.js';
 
-import { initUserPreferences, getUserPreferences, applyThemeToDocument } from './preferencesService.js';
+import { initUserPreferences, getUserPreferences, applyThemeToDocument, applyFontSizeToDocument } from './preferencesService.js';
 
 import {
 
@@ -159,7 +159,7 @@ const appState = {
 
   availablePulls: 0,
 
-  userPreferences: { reduceMotion: false, theme: 'default' },
+  userPreferences: { reduceMotion: false, theme: 'default', fontSize: 'standard' },
 
   achievementSummary: null,
 
@@ -498,6 +498,7 @@ async function initApp() {
     await initUserPreferences();
     appState.userPreferences = await getUserPreferences();
     applyThemeToDocument(appState.userPreferences.theme);
+    applyFontSizeToDocument(appState.userPreferences.fontSize);
     applyReduceMotionClass(appState.userPreferences?.reduceMotion ?? false);
 
     // 儘早綁定 UI，確保畫面可互動
@@ -578,6 +579,7 @@ async function initApp() {
 
     appState.userPreferences = await getUserPreferences();
     applyThemeToDocument(appState.userPreferences.theme);
+    applyFontSizeToDocument(appState.userPreferences.fontSize);
     applyReduceMotionClass(appState.userPreferences?.reduceMotion ?? false);
 
     await loadAchievementsCatalog();

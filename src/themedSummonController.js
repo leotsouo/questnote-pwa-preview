@@ -8,6 +8,7 @@
  */
 import { getPetImageSrc, preloadImage, delay } from './imagePreloadService.js';
 import { createGlacierArrivalScene } from './glacierArrivalScene.js';
+import { createHoneylightSugarScene, sugarPreludeDurations } from './honeylightSugarScene.js';
 import {
   getHighestRarity,
   collectSsrPlusRevealQueue,
@@ -80,7 +81,7 @@ function setState(next, liveEl) {
   if (liveEl && (next === 'rarityOmen' || next === 'revealing' || next === 'summary' || next === 'complete')) {
     const labels = {
       rarityOmen: '稀有度預兆顯現',
-      revealing: activeOverlay?.dataset.animation === 'glacier_arrival' ? '遠航夥伴抵達' : '夥伴甦醒中',
+      revealing: activeOverlay?.dataset.animation === 'honeylight_sugar' ? '糖庭夥伴登場' : activeOverlay?.dataset.animation === 'glacier_arrival' ? '遠航夥伴抵達' : '夥伴甦醒中',
       summary: '召喚結果整理',
       complete: '召喚演出結束',
     };
@@ -119,7 +120,7 @@ function assignPetImage(img, src, original) {
   img.classList.remove('is-loaded');
   img.onload = () => img.classList.add('is-loaded');
   img.onerror = () => {
-    if (original && img.src !== new URL(original, location.href).href) {
+    if (original && img.src !== new URL(original, document.baseURI).href) {
       img.src = original;
     } else {
       img.onerror = null;
@@ -239,8 +240,8 @@ function createOverlay({ mode, reduceMotion, highestRarity, poolName, animationK
     </div>
   `;
 
-  if (glacier) {
-    overlay.querySelector('.dream-bloom-bg').replaceWith(createGlacierArrivalScene());
+  if (glacier || animationKey === 'honeylight_sugar') {
+    overlay.querySelector('.dream-bloom-bg').replaceWith(glacier ? createGlacierArrivalScene() : createHoneylightSugarScene());
     overlay.querySelectorAll('[data-role="dust"], [data-role="ripple"], [data-role="buds"], [data-role="crest"]').forEach((node) => node.remove());
   }
 
@@ -356,7 +357,7 @@ function setupBuds(container, count, reduceMotion) {
  */
 export async function playThemedSummon(options = {}) {
   const animationKey = options.animationKey || 'dream_bloom';
-  if (!['dream_bloom', 'glacier_arrival'].includes(animationKey)) {
+  if (!['dream_bloom', 'glacier_arrival', 'honeylight_sugar'].includes(animationKey)) {
     return { ok: false, fallback: true, state: STATES.FALLBACK };
   }
   const results = Array.isArray(options.results) ? options.results.slice() : [];
@@ -371,6 +372,9 @@ export async function playThemedSummon(options = {}) {
   const reduce = isReduceMotion(options.reduceMotion);
   const mode = options.mode === 'ten' || results.length > 1 ? 'ten' : 'single';
   const highestRarity = getHighestRarity(results);
+  const sugar = animationKey === 'honeylight_sugar';
+  const sugarMs = sugarPreludeDurations(highestRarity, mode, reduce);
+  const previousFocus = document.activeElement;
   const controller = new AbortController();
   activeAbort = controller;
   let overlay = null;
@@ -401,6 +405,7 @@ export async function playThemedSummon(options = {}) {
     activeOverlay = overlay;
     lockScroll();
     document.body.appendChild(overlay);
+    overlay.querySelector('[data-action="skip"]')?.focus();
     requestAnimationFrame(() => overlay?.isConnected && overlay.classList.add('is-active'));
 
     const liveEl = overlay.querySelector('[data-role="live"]');
@@ -427,6 +432,11 @@ export async function playThemedSummon(options = {}) {
       skipIntroRitual();
     };
     const onKey = (e) => {
+      if (e.key === 'Tab' && currentState !== STATES.REVEALING) {
+        e.preventDefault();
+        (btnClose && !btnClose.hidden ? btnClose : btnSkip)?.focus();
+        return;
+      }
       if (e.key === 'Escape') {
         e.preventDefault();
         if (btnClose && !btnClose.hidden) {
@@ -476,14 +486,14 @@ export async function playThemedSummon(options = {}) {
     if (!options.skipRitual) {
       await runPhase(
         STATES.DREAM_DUST,
-        reduce ? PHASE_MS.dreamDust.reduced : PHASE_MS.dreamDust[mode],
+        sugar ? sugarMs[0] : reduce ? PHASE_MS.dreamDust.reduced : PHASE_MS.dreamDust[mode],
       );
       await runPhase(
         STATES.MIRROR_RIPPLE,
-        reduce ? PHASE_MS.mirrorRipple.reduced : PHASE_MS.mirrorRipple[mode],
+        sugar ? sugarMs[1] : reduce ? PHASE_MS.mirrorRipple.reduced : PHASE_MS.mirrorRipple[mode],
       );
-      await runPhase(STATES.RARITY_OMEN, omenMs);
-      await runPhase(STATES.BLOOM, bloomMs);
+      await runPhase(STATES.RARITY_OMEN, sugar ? sugarMs[2] : omenMs);
+      await runPhase(STATES.BLOOM, sugar ? sugarMs[3] : bloomMs);
     } else {
       introSkipped = true;
     }
@@ -500,6 +510,7 @@ export async function playThemedSummon(options = {}) {
         await playSsrPlusRevealQueue({
           results,
           reduceMotion: reduce,
+          presentationKey: animationKey,
         });
       } catch (err) {
         console.warn('[DreamBloom] SSR+ reveal fallback，繼續結果畫面', err);
@@ -520,8 +531,8 @@ export async function playThemedSummon(options = {}) {
         const eyebrow = overlay.querySelector('[data-role="summary-eyebrow"]');
         const title = overlay.querySelector('[data-role="summary-title"]');
         const grid = overlay.querySelector('[data-role="summary-grid"]');
-        if (eyebrow) eyebrow.textContent = animationKey === 'glacier_arrival' ? '十連遠航契約' : '十連夢境花印';
-        if (title) title.textContent = animationKey === 'glacier_arrival' ? '遠航夥伴已抵達' : '沉睡生命已甦醒';
+        if (eyebrow) eyebrow.textContent = sugar ? '十連糖庭邀請' : animationKey === 'glacier_arrival' ? '十連遠航契約' : '十連夢境花印';
+        if (title) title.textContent = sugar ? '甜蜜夥伴已到來' : animationKey === 'glacier_arrival' ? '遠航夥伴已抵達' : '沉睡生命已甦醒';
         if (grid) buildSummaryCards(grid, results);
       }
     }
@@ -574,6 +585,7 @@ export async function playThemedSummon(options = {}) {
     unlockScroll();
     playing = false;
     currentState = STATES.IDLE;
+    if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
   }
 }
 
@@ -613,11 +625,13 @@ const DEBUT_DUST_COUNT = { full: 8, short: 3, reduced: 0 };
  */
 export async function playPoolDebutPresentation(options = {}) {
   const glacier = options.presentation?.animationKey === 'glacier_arrival';
+  const sugar = options.presentation?.animationKey === 'honeylight_sugar';
+  const previousFocus = document.activeElement;
   const reduce = isReduceMotion(options.reduceMotion);
   const full = options.full !== false;
   // 進入「可關閉」狀態前的演出時長（不含等待點擊）
-  const readyMs = reduce ? (full ? 1400 : 820) : full ? 3400 : 900;
-  const dissolveMs = reduce ? 240 : full ? 550 : 360;
+  const readyMs = reduce && sugar ? 240 : reduce ? (full ? 1400 : 820) : full ? 3400 : 900;
+  const dissolveMs = reduce && sugar ? 120 : reduce ? 240 : full ? 550 : 360;
 
   const panel = document.getElementById('gacha-panel');
   panel?.classList.add('is-pool-debut-veil');
@@ -625,7 +639,7 @@ export async function playPoolDebutPresentation(options = {}) {
 
   const overlay = document.createElement('div');
   overlay.className = 'dream-debut-overlay';
-  overlay.dataset.animation = glacier ? 'glacier_arrival' : 'dream_bloom';
+  overlay.dataset.animation = sugar ? 'honeylight_sugar' : glacier ? 'glacier_arrival' : 'dream_bloom';
   if (reduce) overlay.classList.add('is-reduced');
   if (!full) overlay.classList.add('is-short');
   overlay.setAttribute('role', 'dialog');
@@ -663,6 +677,7 @@ export async function playPoolDebutPresentation(options = {}) {
   `;
 
   if (glacier) overlay.querySelector('.dream-debut-stage').replaceWith(createGlacierArrivalScene());
+  if (sugar) overlay.querySelector('.dream-debut-stage').replaceWith(createHoneylightSugarScene());
   const lines = options.presentation?.debutLines || [];
   overlay.querySelectorAll('.dream-debut-line__seg').forEach((element, index) => {
     element.textContent = lines[index] || '';
@@ -779,6 +794,7 @@ export async function playPoolDebutPresentation(options = {}) {
 
   lockDebutScroll();
   document.body.appendChild(overlay);
+  skipBtn?.focus();
   requestAnimationFrame(() => overlay?.isConnected && overlay.classList.add('is-active', 'is-phase-night'));
 
   // 分鏡節奏：台詞完整顯現後進入可關閉狀態，等待使用者點擊
@@ -808,6 +824,7 @@ export async function playPoolDebutPresentation(options = {}) {
     overlay.remove();
     panel?.classList.remove('is-pool-debut-veil', 'is-pool-debut-reveal');
     unlockDebutScroll();
+    if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
   }
 }
 

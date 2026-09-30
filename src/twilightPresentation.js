@@ -47,6 +47,7 @@ export function initTwilightChrome() {
   });
   document.querySelectorAll('.home-hub__icon').forEach((button) => replace(button.querySelector('.home-hub__emoji'), { blessing: 'sun', quest: 'map', titles: 'award' }[button.dataset.hub]));
   replace(document.querySelector('.mailbox-entry-btn__icon'), 'mail');
+  document.querySelectorAll('.fab, .twilight-add-task').forEach((button) => replace(button, 'plus'));
 }
 
 export function buildTwilightHome(companion, hasOwnedPets = false, theme = 'twilight') {
@@ -62,17 +63,17 @@ export function buildTwilightHome(companion, hasOwnedPets = false, theme = 'twil
       <div class="twilight-scene-shade" aria-hidden="true"></div>
       <div class="twilight-greeting"><p class="twilight-eyebrow" id="twilight-date"></p><h1>${greeting}</h1><p>每一件小事，都有人陪你完成。</p></div>
       <div class="twilight-companion-caption"><p class="twilight-eyebrow">${companion ? '今日同行' : '冒險的起點'}</p>
-        <button type="button" class="twilight-pet-name" data-action="${companion ? 'companion-view-detail' : emptyAction}" ${companion ? `data-pet-id="${escapeHtml(companion.id)}"` : ''}>${escapeHtml(name)} ${companion ? `<span class="twilight-rarity">${escapeHtml(companion.rarity)}</span>` : ''}${twilightIcon('arrow')}</button>
+        <button type="button" class="twilight-pet-name" data-action="${companion ? 'companion-view-detail' : emptyAction}" ${companion ? `data-pet-id="${escapeHtml(companion.id)}"` : ''}><span class="twilight-pet-name__text">${escapeHtml(name)}</span>${companion ? `<span class="twilight-rarity">${escapeHtml(companion.rarity)}</span>` : ''}${twilightIcon('arrow')}</button>
         <p>${escapeHtml(companion?.title || emptyHint)}</p>
         ${companion ? `<button type="button" class="qn-companion-feed" data-action="companion-feed" aria-label="餵食 ${escapeHtml(name)}">${twilightIcon('gift')}<span>餵食</span></button>` : ''}
       </div>
     </div>
     <div class="twilight-companion-footer">
-      <div class="twilight-voice"><span aria-hidden="true">“</span><p id="twilight-companion-line" aria-live="polite"></p></div>
+      <div class="twilight-voice ${companion ? '' : 'twilight-voice--intro'}"><span aria-hidden="true">“</span><p id="twilight-companion-line" aria-live="polite"></p></div>
       ${companion ? `<button type="button" class="twilight-pet-touch" data-action="companion-pet" aria-label="撫摸 ${escapeHtml(name)}"><span id="twilight-pet-label">輕觸，打個招呼</span> ${twilightIcon('arrow')}</button>` : ''}
     </div>
     <div class="twilight-journey"><div class="twilight-journey-label"><span>今日旅程</span><strong><span id="twilight-done"></span> / <span id="twilight-total"></span> <small>件完成</small></strong></div>
-      <div id="twilight-progress" class="twilight-journey-track" role="progressbar" aria-label="今日任務進度" aria-valuemin="0" aria-valuemax="100"><span></span><i aria-hidden="true">✦</i></div>
+      <div id="twilight-progress" class="twilight-journey-track" role="progressbar" aria-label="今日任務進度" aria-valuemin="0" aria-valuemax="100"><span></span><i aria-hidden="true">${twilightIcon('spark')}</i></div>
       <div class="twilight-bond">${companion ? `${twilightIcon('heart')}<span id="twilight-bond-level"></span><span id="twilight-bond-progress"></span>` : '<span>從一件小事，展開你的旅程。</span>'}</div>
     </div>`;
 }

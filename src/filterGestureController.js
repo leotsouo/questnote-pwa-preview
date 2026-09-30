@@ -1,5 +1,49 @@
 /** Keep edge gestures on filter rows inside the app instead of Safari history. */
 export function initFilterGestures(root = document) {
+  let mouseGesture = null;
+  let suppressedBar = null;
+  root.addEventListener('pointerdown', (event) => {
+    suppressedBar = null;
+    if (event.pointerType !== 'mouse' || event.button !== 0) return;
+    const bar = event.target.closest?.('.filter-bar');
+    if (!bar) return;
+    mouseGesture = { bar, id: event.pointerId, x: event.clientX, y: event.clientY,
+      left: bar.scrollLeft, dragging: false };
+  });
+  root.addEventListener('pointermove', (event) => {
+    const current = mouseGesture;
+    if (!current || event.pointerId !== current.id) return;
+    const dx = event.clientX - current.x;
+    const dy = event.clientY - current.y;
+    if (!current.dragging) {
+      if (Math.max(Math.abs(dx), Math.abs(dy)) < 6) return;
+      if (Math.abs(dy) > Math.abs(dx)) { mouseGesture = null; return; }
+      current.dragging = true;
+      current.bar.setPointerCapture(event.pointerId);
+      current.bar.classList.add('is-dragging');
+    }
+    event.preventDefault();
+    current.bar.scrollLeft = current.left - dx;
+  });
+  const finishMouseGesture = (event) => {
+    const current = mouseGesture;
+    if (!current || event.pointerId !== current.id) return;
+    mouseGesture = null;
+    current.bar.classList.remove('is-dragging');
+    if (current.dragging && event.type === 'pointerup') suppressedBar = current.bar;
+    if (current.bar.hasPointerCapture(current.id)) current.bar.releasePointerCapture(current.id);
+  };
+  root.addEventListener('pointerup', finishMouseGesture);
+  root.addEventListener('pointercancel', finishMouseGesture);
+  root.addEventListener('lostpointercapture', finishMouseGesture);
+  root.addEventListener('click', (event) => {
+    if (!suppressedBar || event.detail === 0) return;
+    const bar = suppressedBar;
+    suppressedBar = null;
+    if (!bar.contains(event.target)) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  }, true);
   let gesture = null;
   root.addEventListener('touchstart', (event) => {
     gesture = null;

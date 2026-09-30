@@ -23,11 +23,13 @@
   <link rel="stylesheet" href="src/styles.css" />
   <link rel="stylesheet" href="src/ui-polish.css" />
   <link rel="stylesheet" href="src/summon-polish.css" />
+  <link rel="stylesheet" href="src/honeylight-sugar.css" />
   <link rel="stylesheet" href="src/themeTokens.css" />
   <link rel="stylesheet" href="src/theme-system.css" />
   <link rel="stylesheet" href="src/theme-refinements.css" />
   <link rel="stylesheet" href="src/reminder-settings.css" />
-  <meta name="questnote-artifact" content="2e0edb41bb6e27c56a6a485c2a958353d4467a44e064f90423f5fb65285d2e98">
+  <link rel="stylesheet" href="src/font-size-settings.css" />
+  <meta name="questnote-artifact" content="2b58db2d43bc7898be2249d6b8b30fcf389f6f068ba12ba36a410b61cbd7f639">
 </head>
 <body data-theme="default">
   <div id="app-loader" class="app-loader">
@@ -395,17 +397,26 @@
         <button class="page-back-btn" data-goto="more" type="button" aria-label="返回更多">‹</button>
         <div class="page-header__inner">
           <h1 class="page-title">分享 QuestNote</h1>
-          <p class="page-subtitle">邀請朋友一起展開任務冒險</p>
+          <p class="page-subtitle">把這場小冒險，介紹給朋友</p>
         </div>
       </header>
       <section class="card share-card" aria-labelledby="share-card-title">
-        <h2 id="share-card-title" class="section-title">分享正式版</h2>
-        <p class="settings-section-note">傳送的是 App 連結。每個人的任務和收藏保存在自己的瀏覽器，分享連結不會傳送你的資料。</p>
+        <h2 id="share-card-title" class="section-title">一份小小的邀請</h2>
+        <div class="share-invitation">
+          <img src="assets/icons/icon-192.png" alt="" width="48" height="48">
+          <p class="share-invitation__name">QuestNote</p>
+          <p id="share-description" class="share-invitation__description"></p>
+          <div class="share-destinations">
+            <a id="share-website-link" class="share-link"><strong>認識 QuestNote</strong><span>看看夥伴與生活任務如何一起成長 ↗</span></a>
+            <a id="share-app-link" class="share-link"><strong>直接開始</strong><span>開啟 App，從今天的一件小事開始 ↗</span></a>
+          </div>
+        </div>
+        <p class="settings-section-note">分享會帶上官網介紹與 App 連結。你的任務、存檔和收藏不會一起傳送。</p>
         <div class="share-actions">
           <button id="btn-share-app" class="btn btn--primary btn--block" type="button">分享 App</button>
-          <button id="btn-copy-app-link" class="btn btn--secondary btn--block" type="button">複製連結</button>
+          <button id="btn-copy-app-link" class="btn btn--secondary btn--block" type="button">複製邀請內容</button>
         </div>
-        <a class="share-link" href="https://leotsouo.github.io/questnote-pwa/">https://leotsouo.github.io/questnote-pwa/</a>
+        <details class="share-message"><summary>查看完整分享內容</summary><p id="share-message-text"></p></details>
       </section>
       <section class="card share-install" aria-labelledby="share-install-title">
         <h2 id="share-install-title" class="section-title">加入主畫面</h2>
@@ -590,6 +601,22 @@
           <p class="page-subtitle">備份、統計與顯示偏好</p>
         </div>
       </header>
+
+      <section class="card settings-font-size" aria-labelledby="font-size-heading">
+        <h2 id="font-size-heading" class="section-title">字體大小</h2>
+        <p class="settings-section-note">選擇看得舒服的文字大小，切換後立即生效，App 會記住你的選擇。</p>
+        <fieldset id="font-size-picker" class="font-size-picker">
+          <legend class="sr-only">字體大小</legend>
+          <label><input type="radio" name="font-size" value="standard" checked /><span>標準<small>目前大小</small></span></label>
+          <label><input type="radio" name="font-size" value="large" /><span>大<small>放大 25%</small></span></label>
+          <label><input type="radio" name="font-size" value="extra-large" /><span>特大<small>放大 50%</small></span></label>
+        </fieldset>
+        <div class="font-size-preview" aria-label="文字大小預覽">
+          <strong>今天，完成一件讓自己開心的小事。</strong>
+          <p>任務、說明與按鈕文字會一起調整，閱讀更輕鬆。</p>
+        </div>
+        <p id="font-size-result" class="settings-section-note" role="status" aria-live="polite"></p>
+      </section>
 
       <section class="card settings-reminders">
         <header class="reminder-heading">

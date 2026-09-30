@@ -172,7 +172,7 @@ export function getLessonStepContent(id, step, state = {}) {
     },
     'workshop/gift': {
       title: '選好夥伴與禮物，確認效果',
-      body: `切到「贈送」，先選夥伴，再選道具；預覽會顯示增加的親密度、喜好加成與可能升級。按「贈送」會消耗 1 份道具；每隻夥伴每天最多 ${DAILY_BOND_ITEM_LIMIT} 份。沒有庫存先製作，達上限可明天再來。`,
+      body: `切到「贈送」，先選禮物，再從推薦名單選夥伴；主題禮物會說明喜好理由，其他夥伴仍可獲得基本效果。預覽會顯示增加的親密度與可能升級。按「確認贈送 1 份」會消耗 1 份道具；每隻夥伴每天最多 ${DAILY_BOND_ITEM_LIMIT} 份。沒有庫存先製作，達上限可明天再來。`,
       target: { view: 'workshop', tab: 'gift' }, selector: '#workshop-content', action: '查看送禮與預覽',
     },
   };

@@ -25,6 +25,10 @@ export const DEFAULT_ITEM_IDS = [
   'item_fire_meat',
   'item_machine_biscuit',
   'item_astral_honey',
+  'item_leaf_dumpling',
+  'item_star_crisp',
+  'item_aurora_cream',
+  'item_harvest_rice_cake',
 ];
 
 const DEFAULT_WORKSHOP_STATS = {
@@ -47,6 +51,42 @@ let craftableById = null;
 
 let craftingLock = false;
 let usingLock = false;
+
+/** Stable gift themes; matching never depends on names, nicknames or pool membership. */
+export const GIFT_TAG_LABELS = Object.freeze({
+  nature: '自然', fire: '火系', machine: '機械', astral: '星界', frost: '冰霜', harvest: '田園',
+});
+let giftAffinities = null;
+let affinityLoading = null;
+
+export async function loadGiftAffinities() {
+  if (giftAffinities) return giftAffinities;
+  if (!affinityLoading) {
+    affinityLoading = (async () => {
+      const response = await fetch('./data/gift-affinities.json');
+      if (!response.ok) throw new Error('無法載入夥伴禮物喜好');
+      const catalog = await response.json();
+      if (catalog.schemaVersion !== 1 || !catalog.giftAffinityTags || Array.isArray(catalog.giftAffinityTags)
+        || typeof catalog.giftAffinityTags !== 'object') throw new Error('禮物喜好資料格式錯誤');
+      for (const tags of Object.values(catalog.giftAffinityTags)) {
+        if (!Array.isArray(tags) || tags.some((tag) => !Object.hasOwn(GIFT_TAG_LABELS, tag))) {
+          throw new Error('禮物喜好標籤無效');
+        }
+      }
+      giftAffinities = catalog.giftAffinityTags;
+      return giftAffinities;
+    })().finally(() => { affinityLoading = null; });
+  }
+  return affinityLoading;
+}
+
+export function getGiftAffinityTags(pet) {
+  return [...(giftAffinities?.[pet?.id] || [])];
+}
+
+export function getGiftThemeLabel(item) {
+  return (item?.favoriteTags || []).map((tag) => GIFT_TAG_LABELS[tag]).filter(Boolean).join('、') || '通用';
+}
 
 /** 未來用途標籤顯示 */
 export const FUTURE_TAG_LABELS = {
@@ -199,6 +239,7 @@ async function saveWorkshopStats(stats) {
 
 /** 初始化工坊資料（migration） */
 export async function initWorkshop() {
+  await loadGiftAffinities();
   await loadMaterials();
   await loadCraftables();
 
@@ -342,45 +383,41 @@ export async function craftItem(craftableId, quantity = 1) {
   }
 }
 
-/** 判斷寵物是否喜好道具 */
+/** One source of truth for actual gains, previews, feeding and recommendations. */
 export function getFavoriteBonus(item, pet) {
-  if (!item || !pet || item.type !== 'favorite_bond_item') {
-    return { isFavorite: false, bondExp: item?.effect?.bondExp ?? 0 };
-  }
+  const baseExp = item?.effect?.bondExp ?? 0;
+  const petTags = getGiftAffinityTags(pet);
+  const matchedTags = item?.type === 'favorite_bond_item'
+    ? [...new Set((item.favoriteTags || []).filter((tag) => petTags.includes(tag)))] : [];
+  const isFavorite = matchedTags.length > 0;
+  return {
+    isFavorite,
+    bondExp: isFavorite ? (item.effect?.favoriteBonusBondExp ?? baseExp) : baseExp,
+    matchedTags,
+    reason: isFavorite
+      ? '喜歡' + matchedTags.map((tag) => GIFT_TAG_LABELS[tag]).join('、') + '禮物'
+      : item?.type === 'favorite_bond_item' ? '非喜好禮物，獲得基本效果' : '通用禮物，所有夥伴皆可享用',
+  };
+}
 
-  const baseExp = item.effect?.bondExp ?? 0;
-  const bonusExp = item.effect?.favoriteBonusBondExp ?? baseExp;
-
-  const speciesTypes = item.favoriteSpeciesTypes || [];
-  const elements = item.favoriteElements || [];
-  const keywords = item.favoriteKeywords || [];
-
-  const petSpecies = (pet.speciesType || '').toLowerCase();
-  const petElement = (pet.element || '').toLowerCase();
-  const petTheme = (pet.visualTheme || '').toLowerCase();
-  const petName = pet.name || '';
-  const petDesc = pet.description || '';
-
-  if (speciesTypes.some((s) => s.toLowerCase() === petSpecies)) {
-    return { isFavorite: true, bondExp: bonusExp };
-  }
-
-  if (elements.some((el) => {
-    const lower = el.toLowerCase();
-    return petElement.includes(lower) || petTheme.includes(lower);
-  })) {
-    return { isFavorite: true, bondExp: bonusExp };
-  }
-
-  if (keywords.some((kw) => petName.includes(kw) || petDesc.includes(kw))) {
-    return { isFavorite: true, bondExp: bonusExp };
-  }
-
-  if (keywords.some((kw) => petTheme.includes(kw.toLowerCase()))) {
-    return { isFavorite: true, bondExp: bonusExp };
-  }
-
-  return { isFavorite: false, bondExp: baseExp };
+/** Pure ordering; only already-owned partners are eligible for presentation. */
+export function getGiftRecommendations(item, pets, inventory, date = getTodayDateString()) {
+  const candidates = (pets || []).filter((pet) => pet.owned).map((pet) => {
+    const dailyUsed = getDailyBondItemUsage(pet.id, date, inventory);
+    const bondLevel = pet.bondLevel ?? getBondLevelFromExp(pet.bondExp ?? 0);
+    return { pet, ...getFavoriteBonus(item, pet), dailyUsed, dailyLimit: DAILY_BOND_ITEM_LIMIT,
+      atDailyLimit: dailyUsed >= DAILY_BOND_ITEM_LIMIT, atMaxLevel: bondLevel >= 5, bondLevel };
+  });
+  candidates.sort((a, b) => Number(a.atDailyLimit) - Number(b.atDailyLimit)
+    || Number(a.atMaxLevel) - Number(b.atMaxLevel)
+    || a.bondLevel - b.bondLevel || (a.pet.bondExp ?? 0) - (b.pet.bondExp ?? 0)
+    || (a.pet.id < b.pet.id ? -1 : a.pet.id > b.pet.id ? 1 : 0));
+  const themed = item?.type === 'favorite_bond_item';
+  return {
+    themed,
+    recommended: candidates.filter((candidate) => !themed || candidate.isFavorite),
+    others: themed ? candidates.filter((candidate) => !candidate.isFavorite) : [],
+  };
 }
 
 /** 取得某寵物今日已使用道具數 */
@@ -393,6 +430,7 @@ export function getDailyBondItemUsage(petId, date, inventory) {
 
 /** 是否可使用親密度道具 */
 export async function canUseBondItem(itemId, petId, allPets = []) {
+  await loadGiftAffinities();
   const craftable = getCraftableInfo(itemId);
   if (craftable.type !== 'bond_item' && craftable.type !== 'favorite_bond_item') {
     return { ok: false, reason: '此道具無法贈送' };
@@ -422,6 +460,8 @@ export async function canUseBondItem(itemId, petId, allPets = []) {
     ok: true,
     bondExp: bonus.bondExp,
     isFavorite: bonus.isFavorite,
+    matchedTags: bonus.matchedTags,
+    reason: bonus.reason,
     dailyUsed: used,
     dailyLimit: DAILY_BOND_ITEM_LIMIT,
   };
@@ -441,6 +481,8 @@ export async function getGiftPreview(itemId, petId, allPets = []) {
     ok: true,
     bondExp: check.bondExp,
     isFavorite: check.isFavorite,
+    matchedTags: check.matchedTags,
+    reason: check.reason,
     dailyUsed: check.dailyUsed,
     dailyLimit: check.dailyLimit,
     currentBondExp: collection.bondExp ?? 0,
@@ -460,15 +502,11 @@ export async function useBondItem(itemId, petId, allPets = []) {
     return { success: false, message: '贈送進行中，請稍候' };
   }
 
-  const check = await canUseBondItem(itemId, petId, allPets);
-  if (!check.ok) {
-    return { success: false, message: check.reason };
-  }
-
-  const craftable = getCraftableInfo(itemId);
   usingLock = true;
-
   try {
+    const check = await canUseBondItem(itemId, petId, allPets);
+    if (!check.ok) return { success: false, message: check.reason };
+    const craftable = getCraftableInfo(itemId);
     const inventory = await getInventory();
     inventory.items[itemId] = (inventory.items[itemId] || 0) - 1;
     if (inventory.items[itemId] < 0) inventory.items[itemId] = 0;
@@ -496,6 +534,8 @@ export async function useBondItem(itemId, petId, allPets = []) {
       success: true,
       bondExp: check.bondExp,
       isFavorite: check.isFavorite,
+      matchedTags: check.matchedTags,
+      reason: check.reason,
       leveledUp: bondResult?.leveledUp ?? false,
       newLevel: bondResult?.newLevel,
       itemName: craftable.name,
@@ -581,7 +621,7 @@ export function formatItemEffect(craftable) {
   const base = craftable.effect.bondExp ?? 0;
   if (craftable.type === 'favorite_bond_item') {
     const bonus = craftable.effect.favoriteBonusBondExp ?? base;
-    return `親密度 +${base}（喜好 +${bonus}）`;
+    return `親密度 +${base}（喜好總計 +${bonus}）`;
   }
   return `親密度 +${base}`;
 }

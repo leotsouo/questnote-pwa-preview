@@ -5,10 +5,16 @@
     "type": "bond_item",
     "rarity": "N",
     "description": "用森林嫩葉製成的基礎靈食，味道清淡但很容易被各種寵物接受。",
-    "effect": { "bondExp": 10 },
-    "recipe": { "forest_leaf": 2 },
+    "effect": {
+      "bondExp": 10
+    },
+    "recipe": {
+      "forest_leaf": 2
+    },
     "enabled": true,
-    "futureTags": ["bond_item"]
+    "futureTags": [
+      "bond_item"
+    ]
   },
   {
     "id": "item_warm_snack",
@@ -16,10 +22,17 @@
     "type": "bond_item",
     "rarity": "R",
     "description": "嫩葉與熔岩核心混合烘焙，帶有溫暖的氣息。",
-    "effect": { "bondExp": 25 },
-    "recipe": { "forest_leaf": 4, "lava_core": 1 },
+    "effect": {
+      "bondExp": 25
+    },
+    "recipe": {
+      "forest_leaf": 4,
+      "lava_core": 1
+    },
     "enabled": true,
-    "futureTags": ["bond_item"]
+    "futureTags": [
+      "bond_item"
+    ]
   },
   {
     "id": "item_stardust_candy",
@@ -27,24 +40,41 @@
     "type": "bond_item",
     "rarity": "SR",
     "description": "星界碎片與機械零件調和而成的稀有糖果。",
-    "effect": { "bondExp": 50 },
-    "recipe": { "forest_leaf": 3, "machine_part": 2, "star_shard": 1 },
+    "effect": {
+      "bondExp": 50
+    },
+    "recipe": {
+      "forest_leaf": 3,
+      "machine_part": 2,
+      "star_shard": 1
+    },
     "enabled": true,
-    "futureTags": ["bond_item"]
+    "futureTags": [
+      "bond_item"
+    ]
   },
   {
     "id": "item_fire_meat",
     "name": "火光肉乾",
     "type": "favorite_bond_item",
     "rarity": "SR",
-    "description": "熔岩核心燻製的肉乾，火系與犬型夥伴尤其喜愛。",
-    "effect": { "bondExp": 75, "favoriteBonusBondExp": 150 },
-    "recipe": { "lava_core": 3, "forest_leaf": 2 },
-    "favoriteSpeciesTypes": ["dog"],
-    "favoriteElements": ["fire_motivation", "ember_stone", "fire", "lava"],
-    "favoriteKeywords": ["火", "焰", "熔岩", "炭", "柴"],
+    "description": "熔岩核心燻製的肉乾，喜歡火系禮物的夥伴尤其喜愛。",
+    "effect": {
+      "bondExp": 75,
+      "favoriteBonusBondExp": 150
+    },
+    "recipe": {
+      "lava_core": 3,
+      "forest_leaf": 2
+    },
     "enabled": true,
-    "futureTags": ["bond_item", "bond_unlock"]
+    "futureTags": [
+      "bond_item",
+      "bond_unlock"
+    ],
+    "favoriteTags": [
+      "fire"
+    ]
   },
   {
     "id": "item_machine_biscuit",
@@ -52,23 +82,132 @@
     "type": "favorite_bond_item",
     "rarity": "SR",
     "description": "古代齒輪與星界能量壓製的機械系專用能量餅。",
-    "effect": { "bondExp": 75, "favoriteBonusBondExp": 150 },
-    "recipe": { "machine_part": 4, "star_shard": 1 },
-    "favoriteSpeciesTypes": ["robot", "mechanical_owl", "mechanical", "machine"],
-    "favoriteElements": ["light_core", "clockwork_time", "machine", "mecha"],
-    "favoriteKeywords": ["機械", "機神", "機梟", "齒輪", "靈械"],
+    "effect": {
+      "bondExp": 75,
+      "favoriteBonusBondExp": 150
+    },
+    "recipe": {
+      "machine_part": 4,
+      "star_shard": 1
+    },
     "enabled": true,
-    "futureTags": ["bond_item", "bond_unlock"]
+    "futureTags": [
+      "bond_item",
+      "bond_unlock"
+    ],
+    "favoriteTags": [
+      "machine"
+    ]
   },
   {
     "id": "item_astral_honey",
     "name": "星界蜜糖",
     "type": "bond_item",
     "rarity": "SSR",
-    "description": "星界碎片與多種材料慢火熬製的頂級蜜糖。",
-    "effect": { "bondExp": 100 },
-    "recipe": { "star_shard": 3, "forest_leaf": 8, "machine_part": 2 },
+    "description": "星界碎片與多種材料慢火熬製的高階通用蜜糖，所有夥伴皆可享用，沒有星界喜好加成。",
+    "effect": {
+      "bondExp": 100
+    },
+    "recipe": {
+      "star_shard": 3,
+      "forest_leaf": 8,
+      "machine_part": 2
+    },
     "enabled": true,
-    "futureTags": ["bond_item", "future_awakening"]
+    "futureTags": [
+      "bond_item",
+      "future_awakening"
+    ]
+  },
+  {
+    "id": "item_leaf_dumpling",
+    "name": "嫩葉靈糰",
+    "type": "favorite_bond_item",
+    "rarity": "SR",
+    "description": "森林嫩葉揉成的清香靈糰，喜歡自然禮物的夥伴尤其喜愛。",
+    "effect": {
+      "bondExp": 75,
+      "favoriteBonusBondExp": 150
+    },
+    "recipe": {
+      "forest_leaf": 8
+    },
+    "favoriteTags": [
+      "nature"
+    ],
+    "enabled": true,
+    "futureTags": [
+      "bond_item",
+      "bond_unlock"
+    ]
+  },
+  {
+    "id": "item_star_crisp",
+    "name": "星晶酥",
+    "type": "favorite_bond_item",
+    "rarity": "SR",
+    "description": "星界碎片點綴的酥點，與喜歡星界禮物的夥伴共鳴。",
+    "effect": {
+      "bondExp": 75,
+      "favoriteBonusBondExp": 150
+    },
+    "recipe": {
+      "star_shard": 1,
+      "forest_leaf": 6
+    },
+    "favoriteTags": [
+      "astral"
+    ],
+    "enabled": true,
+    "futureTags": [
+      "bond_item",
+      "bond_unlock"
+    ]
+  },
+  {
+    "id": "item_aurora_cream",
+    "name": "極光冰酪",
+    "type": "favorite_bond_item",
+    "rarity": "SR",
+    "description": "極光冰晶凝成的清涼冰酪，喜歡冰霜禮物的夥伴尤其喜愛。",
+    "effect": {
+      "bondExp": 75,
+      "favoriteBonusBondExp": 150
+    },
+    "recipe": {
+      "aurora_ice": 3,
+      "forest_leaf": 2
+    },
+    "favoriteTags": [
+      "frost"
+    ],
+    "enabled": true,
+    "futureTags": [
+      "bond_item",
+      "bond_unlock"
+    ]
+  },
+  {
+    "id": "item_harvest_rice_cake",
+    "name": "豐穗米餅",
+    "type": "favorite_bond_item",
+    "rarity": "SR",
+    "description": "帶有豐穗護符祝福的米餅，適合喜歡田園禮物的夥伴。",
+    "effect": {
+      "bondExp": 75,
+      "favoriteBonusBondExp": 150
+    },
+    "recipe": {
+      "harvest_charm": 3,
+      "forest_leaf": 2
+    },
+    "favoriteTags": [
+      "harvest"
+    ],
+    "enabled": true,
+    "futureTags": [
+      "bond_item",
+      "bond_unlock"
+    ]
   }
 ]
