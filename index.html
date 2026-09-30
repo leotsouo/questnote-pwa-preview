@@ -14,16 +14,20 @@
   <meta property="og:title" content="QuestNote 預覽" />
   <meta property="og:description" content="記錄任務、養成習慣，和幻獸一起冒險。" />
   <meta property="og:url" content="https://leotsouo.github.io/questnote-pwa-preview/" />
-  <meta property="og:image" content="https://leotsouo.github.io/questnote-pwa-preview/assets/icons/icon-512.png" />
+  <meta property="og:image" content="https://leotsouo.github.io/questnote-pwa-preview/assets/brand/questnote-icon-512.png" />
   <meta property="og:image:alt" content="QuestNote App 圖示" />
   <meta name="twitter:card" content="summary" />
   <link rel="manifest" href="manifest.webmanifest" />
-  <link rel="icon" href="assets/icons/icon-192.png" />
-  <link rel="apple-touch-icon" href="assets/icons/icon-192.png" />
+  <link rel="icon" href="assets/brand/questnote-icon-32.png" />
+  <link rel="apple-touch-icon" href="assets/brand/questnote-icon-180.png" />
   <link rel="stylesheet" href="src/styles.css" />
   <link rel="stylesheet" href="src/ui-polish.css" />
   <link rel="stylesheet" href="src/summon-polish.css" />
-  <meta name="questnote-artifact" content="f8e7b79ffb561c9e539d8cf23a3d111cdcca337305a17bade4446ffbd28e1208">
+  <link rel="stylesheet" href="src/themeTokens.css" />
+  <link rel="stylesheet" href="src/theme-system.css" />
+  <link rel="stylesheet" href="src/theme-refinements.css" />
+  <link rel="stylesheet" href="src/reminder-settings.css" />
+  <meta name="questnote-artifact" content="a265787d438074948bcbe36e3d37bf4bbd7c683f96f7935f312af784b645deb8">
 </head>
 <body data-theme="default">
   <div id="app-loader" class="app-loader">
@@ -34,6 +38,7 @@
   <div id="app" class="app">
     <!-- 任務頁 -->
     <main id="view-tasks" class="view active">
+      <section id="twilight-home" class="twilight-home" aria-label="今日的冒險與陪伴" hidden></section>
       <header class="page-header page-header--tasks">
         <div class="page-header__row">
           <div class="page-header__inner">
@@ -55,6 +60,7 @@
         </div>
       </header>
 
+      <div id="twilight-chapter-heading" class="twilight-chapter-heading" hidden><div><p>YOUR DAILY CHAPTER</p><h2>今日任務<span id="twilight-pending"></span></h2></div><button type="button" class="twilight-add-task" data-action="empty-add-task" aria-label="新增任務">＋</button></div>
       <section class="stats-bar" aria-label="資源統計">
         <div class="stat-card stat-card--stardust">
           <span class="stat-icon" aria-hidden="true">✦</span>
@@ -136,6 +142,7 @@
       </header>
 
       <section class="gacha-panel card" id="gacha-panel" data-pool-theme="">
+        <div id="twilight-gacha-scene" class="twilight-gacha-scene" hidden></div>
         <div class="gacha-pool-switcher" id="gacha-pool-switcher" hidden>
           <label class="gacha-pool-switcher__label" for="gacha-pool-select">選擇卡池</label>
           <select id="gacha-pool-select" class="gacha-pool-select" aria-label="選擇召喚卡池"></select>
@@ -251,6 +258,7 @@
 
       <section id="collection-companion" class="collection-companion card"></section>
 
+      <label class="collection-series-picker" for="collection-series-select">選擇系列<select id="collection-series-select" aria-label="選擇圖鑑系列"></select></label>
       <div class="filter-bar" id="collection-series-filters" aria-label="系列篩選"></div>
 
       <div class="filter-bar" id="collection-filters">
@@ -296,6 +304,11 @@
       </header>
 
       <section class="more-menu card">
+        <button class="more-menu-item" data-goto="settings" data-style-settings type="button">
+          <span class="more-menu-icon" aria-hidden="true">◐</span>
+          <span class="more-menu-text"><span class="more-menu-label">美術風格</span><span class="more-menu-desc" id="more-active-theme">深色幻想風 · 自由切換三種風格</span></span>
+          <span class="more-menu-arrow" aria-hidden="true">›</span>
+        </button>
         <button class="more-menu-item" data-goto="share" type="button">
           <span class="more-menu-icon" aria-hidden="true">🔗</span>
           <span class="more-menu-text">
@@ -313,7 +326,7 @@
           <span class="more-menu-arrow" aria-hidden="true">›</span>
         </button>
         <button class="more-menu-item" data-goto="guide" type="button">
-          <span class="more-menu-icon more-menu-icon--image"><img src="assets/icons/icon-192.png" alt="" width="28" height="28"></span>
+          <span class="more-menu-icon more-menu-icon--image"><img src="assets/brand/questnote-icon-192.png" alt="" width="28" height="28"></span>
           <span class="more-menu-text">
             <span class="more-menu-label">使用教學</span>
             <span class="more-menu-desc">重看入門流程與其他功能</span>
@@ -579,6 +592,62 @@
         </div>
       </header>
 
+      <section class="card settings-reminders">
+        <header class="reminder-heading">
+          <span class="reminder-heading__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9Z"/><path d="M10 21h4M12 2V1"/></svg></span>
+          <div><p class="reminder-eyebrow">讓每一天，從容開始</p><h2 class="section-title">每日任務與習慣提醒</h2></div>
+        </header>
+        <p class="reminder-intro">睡前安排好明天，醒來就有今日計畫。</p>
+        <p id="reminder-status" class="reminder-status" role="status" data-state="off">尚未啟用</p>
+        <form id="reminder-form">
+          <div class="reminder-time-card">
+            <div class="reminder-time-card__top"><label for="reminder-time">每天提醒時間</label><span>每天一則摘要</span></div>
+            <div class="reminder-time-card__clock"><input id="reminder-time" type="time" value="08:00" required aria-describedby="reminder-timezone" /><svg aria-hidden="true" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M8 43h48M15 49h34M22 55h20M19 37a13 13 0 0 1 26 0M32 9v7M10 17l5 5M54 17l-5 5M4 32h7M53 32h7"/><path d="M29 28c2-3 6-4 9-2"/></svg></div>
+            <p id="reminder-timezone" class="reminder-timezone"></p>
+          </div>
+          <fieldset class="reminder-fieldset">
+            <legend>想收到哪些提醒</legend>
+            <div class="reminder-options">
+              <label class="reminder-option" for="reminder-tasks"><span class="reminder-option__copy"><strong>今日任務</strong><small>安排在今天、今天開始或到期的待辦</small></span><input type="checkbox" id="reminder-tasks" role="switch" checked /><span class="reminder-switch" aria-hidden="true"></span></label>
+              <label class="reminder-option" for="reminder-habits"><span class="reminder-option__copy"><strong>每日習慣</strong><small>今天還沒完成的小習慣</small></span><input type="checkbox" id="reminder-habits" role="switch" checked /><span class="reminder-switch" aria-hidden="true"></span></label>
+              <label class="reminder-option" for="reminder-weekly"><span class="reminder-option__copy"><strong>本週習慣進度</strong><small>本週還沒達標、今天尚未完成的習慣</small></span><input type="checkbox" id="reminder-weekly" role="switch" checked /><span class="reminder-switch" aria-hidden="true"></span></label>
+              <label class="reminder-option" for="reminder-overdue"><span class="reminder-option__copy"><strong>逾期待處理</strong><small>也提醒超過截止日的任務</small></span><input type="checkbox" id="reminder-overdue" role="switch" /><span class="reminder-switch" aria-hidden="true"></span></label>
+            </div>
+          </fieldset>
+          <fieldset class="reminder-fieldset reminder-content">
+            <legend>通知內容</legend>
+            <label class="reminder-option" for="reminder-titles"><span class="reminder-option__copy"><strong>顯示項目名稱</strong><small>關閉時只顯示數量，保留鎖屏隱私</small></span><input type="checkbox" id="reminder-titles" role="switch" /><span class="reminder-switch" aria-hidden="true"></span></label>
+            <div class="reminder-preview" aria-label="通知內容示意">
+              <div class="reminder-preview__app"><img src="assets/icons/icon-192.png" width="22" height="22" alt="" /><span>QuestNote</span><small>內容示意</small></div>
+              <strong>今日計畫</strong><p id="reminder-preview-body">今天有 3 項任務、2 項每日習慣。</p>
+            </div>
+            <p class="reminder-note">今天沒有待辦時，就讓你安靜地開始一天。</p>
+          </fieldset>
+          <div class="reminder-privacy">
+            <label id="reminder-consent-label" class="reminder-consent"><input type="checkbox" id="reminder-consent" /><span><strong>允許同步提醒所需資料</strong><small>僅同步日期、完成狀態與習慣規則。</small></span></label>
+            <p id="reminder-privacy-receipt" hidden><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Z"/><path d="m8 12 3 3 5-6"/></svg>已允許同步必要提醒資料</p>
+            <details><summary>資料同步說明</summary><p>同步提醒所需的日期、完成狀態與習慣規則。開啟項目名稱時，另同步短標題；任務全文與遊戲資料不上傳。</p></details>
+          </div>
+          <div class="reminder-primary-actions">
+            <button id="reminder-enable" type="button" class="btn btn--primary">啟用每日提醒</button>
+            <button id="reminder-save" type="submit" class="btn btn--secondary">儲存提醒設定</button>
+          </div>
+          <p id="reminder-result" class="reminder-result" role="status" aria-live="polite"></p>
+          <div id="reminder-delivery" class="reminder-delivery" hidden>
+            <div class="reminder-delivery__next"><span>下一次提醒</span><strong id="reminder-next"></strong></div>
+            <p id="reminder-synced" class="reminder-note"></p>
+            <div class="reminder-tools">
+              <button id="reminder-test" type="button" class="btn btn--secondary btn--sm" hidden>發送測試通知</button>
+              <button id="reminder-sync" type="button" class="btn btn--ghost btn--sm">重新同步</button>
+              <button id="reminder-open-today" type="button" class="btn btn--ghost btn--sm">查看今日清單 <span aria-hidden="true">↗</span></button>
+            </div>
+          </div>
+          <p id="reminder-hint" class="reminder-note reminder-device-hint"></p>
+          <details class="reminder-help"><summary>使用與同步說明</summary><p>iPhone 請先「加入主畫面」，再從主畫面開啟 App 啟用通知。Android 可使用 Chrome。</p><p>依裝置時區提醒；更換時區後，開啟 App 會更新排程。持續 30 天未開啟 App 時，提醒會自動停用。</p></details>
+          <button id="reminder-disable" type="button" class="reminder-disable" hidden>關閉每日提醒</button>
+        </form>
+      </section>
+
       <section class="card settings-theme">
         <h2 class="section-title">美術風格</h2>
         <p class="settings-section-note">
@@ -586,32 +655,19 @@
         </p>
         <div class="theme-picker" role="radiogroup" aria-label="美術風格">
           <button type="button" class="theme-card" data-action="select-theme" data-theme="default" role="radio" aria-checked="false">
-            <div class="theme-card__header">
-              <span class="theme-card__title">深色幻想風</span>
-              <span class="theme-card__badge" data-theme-badge="default" hidden>使用中</span>
-            </div>
-            <p class="theme-card__desc">目前預設風格，適合任務、冒險與幻獸收藏。</p>
-            <div class="theme-card__preview" aria-hidden="true">
-              <div class="theme-card__preview-frame theme-card__preview-frame--default">
-                <span class="theme-card__preview-btn theme-card__preview-btn--default"></span>
-                <span class="theme-card__swatch theme-card__swatch--accent-default"></span>
-              </div>
-              <span class="theme-card__swatch theme-card__swatch--primary-default"></span>
-            </div>
+            <img class="qn-theme-preview" src="./assets/scenes/night-graywolf.webp" alt="" loading="lazy" width="354" height="135">
+            <div class="theme-card__header"><span class="theme-card__title">星夜遠行</span><span class="theme-card__badge" data-theme-badge="default" hidden>✓ 使用中</span></div>
+            <p class="theme-card__desc">原深色幻想風 · 星夜營地、清晰星光與沉穩探索。</p>
           </button>
           <button type="button" class="theme-card" data-action="select-theme" data-theme="sweet" role="radio" aria-checked="false">
-            <div class="theme-card__header">
-              <span class="theme-card__title">甜美可愛風</span>
-              <span class="theme-card__badge" data-theme-badge="sweet" hidden>使用中</span>
-            </div>
-            <p class="theme-card__desc">柔和粉彩、明亮可愛，適合喜歡輕鬆療癒感的介面。</p>
-            <div class="theme-card__preview" aria-hidden="true">
-              <div class="theme-card__preview-frame theme-card__preview-frame--sweet">
-                <span class="theme-card__preview-btn theme-card__preview-btn--sweet"></span>
-                <span class="theme-card__swatch theme-card__swatch--accent-sweet"></span>
-              </div>
-              <span class="theme-card__swatch theme-card__swatch--primary-sweet"></span>
-            </div>
+            <img class="qn-theme-preview" src="./assets/scenes/garden-graywolf.webp" alt="" loading="lazy" width="354" height="135">
+            <div class="theme-card__header"><span class="theme-card__title">晨光花園</span><span class="theme-card__badge" data-theme-badge="sweet" hidden>✓ 使用中</span></div>
+            <p class="theme-card__desc">原甜美可愛風 · 晨光花園、柔和色彩與日常照顧。</p>
+          </button>
+          <button type="button" class="theme-card" data-action="select-theme" data-theme="twilight" role="radio" aria-checked="false">
+            <img class="qn-theme-preview" src="./assets/scenes/twilight-graywolf.webp" alt="" loading="lazy" width="354" height="135">
+            <div class="theme-card__header"><span class="theme-card__title">暮光冒險手帳</span><span class="theme-card__badge" data-theme-badge="twilight" hidden>✓ 使用中</span></div>
+            <p class="theme-card__desc">森林暮色、溫暖紙頁與同行夥伴，把日常寫成共同成長的旅程。</p>
           </button>
         </div>
       </section>

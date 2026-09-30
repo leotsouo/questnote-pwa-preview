@@ -46,8 +46,8 @@ function buildTaskDefaults(data, now) {
     categoryId: data.categoryId || 'general',
     startDate: data.startDate || null,
     dueDate: data.dueDate || null,
-    isPlannedToday: planToday,
-    plannedDate: planToday ? today : null,
+    isPlannedToday: (data.plannedDate || (planToday ? today : null)) === today,
+    plannedDate: data.plannedDate || (planToday ? today : null),
     subtasks: (data.subtasks || []).map((s) => ({
       id: s.id || generateSubtaskId(),
       text: (s.text || '').trim(),

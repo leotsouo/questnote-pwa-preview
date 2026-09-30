@@ -1,3 +1,4 @@
+import { trackUpdateActivity } from './updateActivity.js';
 import {
   loadFeedbackDraft, saveFeedbackDraft, clearFeedbackDraft, normalizeFeedback,
   validateFeedback, collectFeedbackDiagnostics, buildFeedbackReport, sendFeedback,
@@ -73,7 +74,7 @@ export function initFeedback({ navigate }) {
     body.setSelectionRange(0, 0);
   });
   for (const event of ['online', 'offline']) window.addEventListener(event, syncSend);
-  send.addEventListener('click', async () => {
+  send.addEventListener('click', trackUpdateActivity(async () => {
     if (!report || sending || navigator.onLine === false) return;
     sending = true;
     for (const control of form.elements) control.disabled = true;
@@ -96,7 +97,7 @@ export function initFeedback({ navigate }) {
       for (const control of form.elements) control.disabled = false;
       syncSend();
     }
-  });
+  }));
   document.getElementById('feedback-copy').addEventListener('click', async () => {
     if (!report) return;
     try { await navigator.clipboard.writeText(report.body); status.textContent = '已複製回報內容。'; }

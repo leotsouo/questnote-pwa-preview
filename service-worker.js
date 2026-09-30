@@ -6,16 +6,42 @@
  * 寵物圖片不得加入 App Shell precache
  */
 
-const CACHE_NAME = 'questnote-preview-app-f8e7b79ffb561c9e539d8cf23a3d111cdcca337305a17bade4446ffbd28e1208';
+const CACHE_NAME = 'questnote-preview-app-a265787d438074948bcbe36e3d37bf4bbd7c683f96f7935f312af784b645deb8';
 const PET_IMAGE_CACHE = 'questnote-preview-pet-images-v1';
 const MAILBOX_RUNTIME_CACHE = 'questnote-preview-mailbox-runtime-v1';
 const MAILBOX_FETCH_TIMEOUT_MS = 7000;
+
+self.addEventListener('push', (event) => {
+  event.waitUntil((async () => {
+    let data = {};
+    try { data = event.data?.json() || {}; } catch { /* Always show a visible fallback. */ }
+    const expired = typeof data.expiresAt === 'number' && data.expiresAt < Date.now();
+    await self.registration.showNotification(expired ? 'QuestNote' : String(data.title || 'QuestNote 今日計畫').slice(0, 100), {
+      body: expired ? '開啟 QuestNote 查看最新計畫。' : String(data.body || '點開查看今日任務與習慣。').slice(0, 700),
+      icon: new URL('assets/brand/questnote-icon-192.png', self.registration.scope).href,
+      badge: new URL('assets/brand/questnote-icon-192.png', self.registration.scope).href,
+      tag: String(data.tag || 'questnote-daily').slice(0, 100),
+      data: { type: 'questnote-open-today' },
+    });
+  })());
+});
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil((async () => {
+    const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: false });
+    const client = windows.find((c) => c.url.startsWith(self.registration.scope));
+    if (client) { await client.focus(); client.postMessage({ type: 'questnote-open-today' }); return; }
+    const url = new URL('index.html', self.registration.scope);
+    url.searchParams.set('reminder', 'today');
+    await self.clients.openWindow(url.href);
+  })());
+});
 // Filled by the release assembler. Source checkouts are not release artifacts.
 const BUILD_PROFILE = {
   "schemaVersion": 1,
   "profile": "preview",
-  "artifactId": "f8e7b79ffb561c9e539d8cf23a3d111cdcca337305a17bade4446ffbd28e1208",
-  "sourceCommit": "4b995b2a7ef2a414b720f3c08045e817b734bfcc",
+  "artifactId": "a265787d438074948bcbe36e3d37bf4bbd7c683f96f7935f312af784b645deb8",
+  "sourceCommit": "bb968f292842673196e6de02ee867f0dde1764a8",
   "scopePath": "/questnote-pwa-preview/",
   "runtimeContentSchema": 1,
   "dbName": "QuestNotePreviewDB",
@@ -24,6 +50,12 @@ const BUILD_PROFILE = {
   "contentBundleUrl": "data/releases/3dfd5055f9c2d2d288ab7e235d4c85202899f0ecba49a1b2473d505ba3e9ff32/catalog.json"
 };
 const PRECACHE_HASHES = {
+  "assets/brand/questnote-icon-180.png": "568c5f586481050de3c0263794de557f36acb340346eba7db1a9cdc7b000f9bf",
+  "assets/brand/questnote-icon-192.png": "7a2c068ff50729b5b68aba6999ffed491234c11a267ddf26ee6f7a5bc0a1db11",
+  "assets/brand/questnote-icon-32.png": "0c09c5fef9a6c10f9e10fab7a923d6e84e06972791106a9960bfe062b83952fe",
+  "assets/brand/questnote-icon-512.png": "32c505609ea48e4ffab010e2fc53b184441a8bad39d79a45701b658b31040a06",
+  "assets/brand/questnote-icon-maskable-512.png": "54dc03e7eb13c3f4714bc276ea2b9bb1313ef171d27e06f6aa1f378931c6f506",
+  "assets/brand/questnote-icon-master-1024.png": "45eabdd090efcaee9c9305bca6d559983433c00db41c287f92f66fbac809adf3",
   "assets/expeditions/astral_rift.webp": "343c7342d7156be0fef42c809e0028811a936e2ba478b2785eaf498845dc4d2d",
   "assets/expeditions/harvest_fields.webp": "6196b84c367ff547d91741d36a57ed06aa34e15464ddafb071d4940d0014a29c",
   "assets/expeditions/lava_rift.webp": "9c14dd71f7752f8ca652992659ba929a094512ec5dc34b4d3806b90dabac904e",
@@ -32,6 +64,11 @@ const PRECACHE_HASHES = {
   "assets/expeditions/polar_shore.webp": "e963c18f17a9d60746f2601822f7e0ab18be730629b8de9a3fdf546381891506",
   "assets/icons/icon-192.png": "f47dd61d5e26732d2d20aba9051e7ce922449a6095a3715f7e803a2037857fb1",
   "assets/icons/icon-512.png": "8623855b674e1bb7c10525ff0118b0f4b1da5de551753d724238b62db8c403be",
+  "assets/icons/lucide/LICENSE": "6fc5b7332939dd5c61af3a5f97450f7bc05d4a396dd0bc21ac341716b3b05096",
+  "assets/icons/lucide/provenance.json": "9c24954b76dc53bae7fa00a2f9f60527197595b815c3e9ca0d86e30b8477a844",
+  "assets/scenes/garden-graywolf.webp": "6379b2ad98da53856816d0e11b0048af8a9632002a28c3d362f16fa98c2f5cdc",
+  "assets/scenes/night-graywolf.webp": "4dd1183fd2aa0db6ac52f845515c3c8e2e0fe2aced5a4a7d6a66732d5c114edb",
+  "assets/scenes/twilight-graywolf.webp": "f8000f2b473ec9eedb3bef4e1a34dc8354351041cfc5eb261d80f98271e84f9a",
   "data/achievements.json": "b7d57297344dc4223a8eefc72d42d9f9cdd44c4f812f1e59b3d7aeb2d592db6e",
   "data/categories.json": "166e8f4de44f41d6ec27b3a6b1780f9cd155aa599371b443c92537949276ebe1",
   "data/craftables.json": "7dcac55dcb152e38999596da48281900fdd04db5abd4f3ed6ffd23f9e654d569",
@@ -44,14 +81,14 @@ const PRECACHE_HASHES = {
   "data/pools.json": "4fd1cdc8674e5592b6b2256603bad59b5bf555650c482237eedb6a86b3867fcc",
   "data/releases/3dfd5055f9c2d2d288ab7e235d4c85202899f0ecba49a1b2473d505ba3e9ff32/catalog.json": "3dfd5055f9c2d2d288ab7e235d4c85202899f0ecba49a1b2473d505ba3e9ff32",
   "data/titles.json": "318675b79872dfabccc4b8beb99f77eb248a40e5e50bbbd4e4dc24886b3a1398",
-  "index.html": "6be4a0506c0fe5ca6bc223cbe0598dde03bdf01c616063f908b3742788130863",
-  "manifest.webmanifest": "d5b2f9a18fc8f0266706510c1a029c33c0754fdf9e38f081d96a2064f090cf90",
+  "index.html": "68673b42e6ef26f0fb8583d150b11c0df2b0aab6ef623ae4664e999ed3fd2457",
+  "manifest.webmanifest": "92eebd112db700add8829cda91380b117bcf4f4d91723ea899055ebde22caad0",
   "src/achievementService.js": "25eba10a95247380c424a59dd539b7c0e55b866992a2eb6404ac74d3fb4b0316",
   "src/adventureHandbookService.js": "d9dc8d34fc08a83c0c2f36682698fd4d96ebd0852c8cb0fde161a5a718d065b9",
-  "src/app.js": "f1ae1db55c2572aad3849e94d1d684b3b3e8109b602ddc7c4d46e97c1faf8c04",
-  "src/backupSchema.js": "dd1901bb7e37ec93a17c88e263ee6abc381e4984eb82448c17bb18f173bac958",
+  "src/app.js": "9b3076546693afa72e59f85937c75f1f4dbed036a849dda0a45a11f35b44eec9",
+  "src/backupSchema.js": "70448806c5b03d4cca512b9d856300ea9e3683301fd15a2b0aac201d0c0dd80e",
   "src/backupService.js": "e48da4ded47c5e6c984b8f09fcbe5b5f2deb7b8ecb2477c4d0169c11e2c7cfa1",
-  "src/bootstrap.js": "975974b344ff1f3e8100eed78a1fafa054b6b549c185dc03cd918dd31be6f08d",
+  "src/bootstrap.js": "383f8cd7295726c8796e421d748a01a2b9e0e82b3bf067f84f16618ed423cd6d",
   "src/campService.js": "fee6e4aeafbde7e3d356214099b50523d31089fb00e573c853810c32062a65b1",
   "src/categoryService.js": "8636cdb8453e0a383b813f99d117ead49911353bd6848de05d7f513c28713e32",
   "src/collectionMilestoneService.js": "2f9fe055d3facfb2ce5f6eee96ee0026eb41dab602f27a0eef104402dbe2db5f",
@@ -59,7 +96,7 @@ const PRECACHE_HASHES = {
   "src/companionDialogueService.js": "8fe79ef7d7d94e3a654b8f9ee43178cc4fac01bfbf1cc67b53b173be3f17c955",
   "src/companionService.js": "3974b56613aea67e80f7659caa9dbca0d9397f298948f1f98c9e60b8e446d6aa",
   "src/dailyCheckInService.js": "d994210565a779da2265f8a32334dc233a06b4dee037672ef433eb5fa123b62b",
-  "src/db.js": "5c84de76db373846b23686ae1ff3babca9da9df9bd2b24e7aa8ab1679b3e32c1",
+  "src/db.js": "646ad94adfaed2031d1c27a0d2bafb17f3830ef606b6bb091dc54d9ccc604c78",
   "src/deferredRenderGate.js": "cbbaf2e401be35eab6d673a935c13fef615286a554937dc497b02c4aa6aca6e5",
   "src/devService.js": "af56b92e6fcf886786f4a41d777dc355c35c0d0bd4b39fd72fc11217c4238dd4",
   "src/dialogFocus.js": "24eb36d909579732f8b9776c4f2e2a3fec8e112d8e96194257b6b16bee49eecf",
@@ -68,13 +105,15 @@ const PRECACHE_HASHES = {
   "src/expeditionStatusService.js": "6e45a6ec8e7b3bfa6018b431991b5540cc214e582e1113fe7636da2f95e141e9",
   "src/explorationService.js": "5ee9429d826df97d8bbe0b89fff95a9accc5aec23cd4d99f0105cb3bfaf0ab8f",
   "src/feedbackConfig.js": "77e9eda8efe76ad2ea3d1d216d10be01bb219c954c6c619e925d8e2aeafe49f7",
-  "src/feedbackController.js": "2d1d4956ba24a114bae0fffbe504ab83a55c58194dbf0a83dd3c0d5d774b757e",
+  "src/feedbackController.js": "9ff600987abd7476b7e6e1bfecb9610ba93588dc0b0930b3c3378c8c78b83e76",
   "src/feedbackService.js": "f96898f3d97d6dc86157f65aae8e8f2b763f222b04bf778aab386276d8bb9310",
+  "src/filterGestureController.js": "b5d4e69baf6d3b5d319f57c8cf43a848317f7ff1b881a235a0b5b658282068eb",
   "src/gachaService.js": "d631816bfcb980ecbe502cbecf867e0adf65871d00d6ef4e70adce22df9c9bf9",
   "src/gachaTransactionCore.js": "ac2b5db58e2cdec942bb28e0e7b8dae446282fd45518bdf6666fafdc6d579dde",
   "src/glacierArrivalScene.js": "bb3d646a9faaece23f41d29f6248b682fb67e3851e702ac3667f006c02d8b2bb",
   "src/habitService.js": "64d488828c26e49b47ec06d17ad853b473ea21aee2307b0cd5963fb225cc78de",
-  "src/healthCheckService.js": "e0ba5df1456288bfb509a6d9b2d42285e19cb1125492f12244deb07ac898d393",
+  "src/healthCheckService.js": "83e35ca90fb51b2029a82adac11cb96a4fec40063ce840081a05fb24092e365f",
+  "src/iconPresentation.js": "e093f1b2bfc0c300741644d881c6731f7b758be0e5917cf7cc1a036bd06e8013",
   "src/imagePreloadService.js": "73f6488373daac9b4134c4c7a9549da98f4974d3a4987b4698dc4a56680ad333",
   "src/loreService.js": "2beab9e2c2ab3418b16e638e247d1976c916b537e6a7a21d754751c54336541c",
   "src/mailboxSchema.js": "070e2c731ac75a6bdbecfc24afad986d0357e440d1449c374d898d7e0b0ccd15",
@@ -91,29 +130,48 @@ const PRECACHE_HASHES = {
   "src/poolPresentation.js": "db5c946949ca4336a290d5a7f53049666f759583683be18885965ba68ffe5998",
   "src/poolUnlockCore.js": "2be9a055162feaf7dd521a054e40853c2c3af1106a098708e40d33d2478b2c22",
   "src/poolUnlockService.js": "6e76ffc3c61f002c750435578a7ea5843c91df6f047b2ac2212b50bc150b800a",
-  "src/preferencesService.js": "b80fb8fffcc45ebd5692610885304298b82e19b1478711c3bf4f0bf42804e27d",
+  "src/preferencesService.js": "a6ae09d8f8f120a5c7c74da67f73fde022d053a398aed3bb972e343d0fdcc135",
+  "src/questIcons.js": "7f9395e0af7db0fda7fa273e793275c94d5b8e3bdd2fb249b726e5f6c2046ad0",
   "src/questService.js": "93e6c875b21a3fb6cf8d0c0ad2ddae2b4307cee870da3b1b92a2a0969977d8a6",
   "src/releaseCatalog.js": "38ac32aedef26d927638ef7413ec78520c0f9d114623a4a61283d488d99cbb4a",
-  "src/releaseProfile.js": "06512a1f46e69b90bc4854cae61736f64956e7b26321267d19a6e3f052a31936",
+  "src/releaseProfile.js": "7cc3ed9c26dfbc300c69214003eae77bc501107ed1f4cecb49c4f24baea97158",
+  "src/reminder-settings.css": "4b5053346fb0bc697af1455fa4a6e763d450045094f94a6f952b0721a385bd4a",
+  "src/reminderController.js": "4ba72d19acca52c417445956521d97ce57b3873b1a61924840fdc47b8a9ad5b5",
+  "src/reminderRules.js": "fb8939a256305ef880ecebf063d029dc8a1d37a58e330851b2d96ac001ee57bb",
+  "src/reminderService.js": "443462be0699934e7dc731b5a692381acb1f12f1499c237566a16b4ee2c0578b",
   "src/rewardService.js": "a245a6e08e6ead6aa65dc4dbb99e8c767fa81bd210e253955359be1a5442e0ff",
   "src/shareService.js": "04705dbca03c699f62781606b45d8bf483acb7463358750d6c9c4c0da47bcad1",
-  "src/styles.css": "79c500c311984f25957c4f4f615af7a53a9ef807f5a39840c3b729390a31c51a",
+  "src/styles.css": "89357cc3ddff508d9a1d2c5749600bc897c593e62cc6f0e9fa1cb5f0cfc53379",
   "src/summon-polish.css": "0d3cbae026034e11034be8ecabc6ff9613a461fbaee616376a26f90f4b924bda",
   "src/summonRevealService.js": "71d4828b6e0c4a89285f63a2781c67e7b96b7966c3e0c98312c4c037c1c1bed4",
   "src/taskFilterService.js": "687858edc36119afcb388fc3fd75ebd058d0a93117da42740c8a1f18d4b00471",
   "src/taskMigration.js": "67055f714b759d43e1a333ce7d039619eca3537f5e83ce46ee76a0d4692f25b1",
-  "src/taskService.js": "d706443822d95fc230e367cc3a42e64fcc460b129025a93fbd204fa13c0ee49f",
+  "src/taskService.js": "e12190eb4cf777b79e49d327547544be53af707e1237928b8d7c93c040ceca84",
   "src/taskStatsService.js": "1e61c0f67426459a73b2c6ec405dbfdef87b86840a519518d9f5432fb4d2cbb5",
+  "src/theme-refinements.css": "eed5fa0a70bcf2462fb9b9a9db4bfa02830f3436b1066db642b888dc10654340",
+  "src/theme-system.css": "095be05961cee522aa92130da47b8b597ade619a959509bd224e339d2dd3a3a9",
   "src/themedSummonController.js": "f2bcd1b922da8dee874ee5c2a678378f23841f44287b44b8d2b8f14014b3af6f",
+  "src/themeRegistry.js": "d4c935dd737d662dffc17bcd4fe6d243aac583095ab5ac2ec43b76126df7bafb",
+  "src/themeTokens.css": "7061e9c268ed909e3cae2738268dd2aeb44d0aca4810cfca22ddc9208a2f3c31",
+  "src/twilightPresentation.js": "68373c4d07a5a0dcd682c6bfac1cbd6888f5677e3b38004768a98bea077b8a54",
   "src/ui-polish.css": "d56b6c2dc56782a7833ee96c4573e7a4ffbc7b8580ab9e9e9d0bc08e1fe473f8",
-  "src/ui.js": "dfa87bcd9884ae121339db1d66b946cc874c822b26c11e4f618fba87ded613ed",
+  "src/ui.js": "c05a854511d1f93e124c438bc357d6022860249597f412925e1f32ba9b934e13",
   "src/uiHelpers.js": "875f08583510e7c246eebeff4b39d6a7273d2643f6a2a2931281672c6c4d7de6",
-  "src/version.js": "03dc7f669ade4836b409749d44d860e4036054e5e426bfb125ec202c60d3817c",
+  "src/updateActivity.js": "a7032e043a14561ad07ab521b649a2bd508aeca6801376066fcab701e3d2b641",
+  "src/updateController.js": "e038b05c3fa2e97158cb3a363996e34b10eba3f243dc5284ec540ea0753c93b9",
+  "src/updateProtocol.js": "53e770213f0074208c348d7d4a12d68cad79404637eddbe7c2f7c8d3c2cd39c0",
+  "src/version.js": "ab66d42aa7ec46e9d8a6c253c0d373bb5abaceaf91c52ba1e8f983ae4b624ffd",
   "src/workshopService.js": "9833bf353f6c13072f1c3995e2770408533be4e8ed19ea0d1e481740fb7e2e69"
 };
 
 /** 需要預快取的資源（相對於 SW 所在目錄） */
 const PRECACHE_URLS = [
+  "assets/brand/questnote-icon-180.png",
+  "assets/brand/questnote-icon-192.png",
+  "assets/brand/questnote-icon-32.png",
+  "assets/brand/questnote-icon-512.png",
+  "assets/brand/questnote-icon-maskable-512.png",
+  "assets/brand/questnote-icon-master-1024.png",
   "assets/expeditions/astral_rift.webp",
   "assets/expeditions/harvest_fields.webp",
   "assets/expeditions/lava_rift.webp",
@@ -122,6 +180,11 @@ const PRECACHE_URLS = [
   "assets/expeditions/polar_shore.webp",
   "assets/icons/icon-192.png",
   "assets/icons/icon-512.png",
+  "assets/icons/lucide/LICENSE",
+  "assets/icons/lucide/provenance.json",
+  "assets/scenes/garden-graywolf.webp",
+  "assets/scenes/night-graywolf.webp",
+  "assets/scenes/twilight-graywolf.webp",
   "data/achievements.json",
   "data/categories.json",
   "data/craftables.json",
@@ -160,11 +223,13 @@ const PRECACHE_URLS = [
   "src/feedbackConfig.js",
   "src/feedbackController.js",
   "src/feedbackService.js",
+  "src/filterGestureController.js",
   "src/gachaService.js",
   "src/gachaTransactionCore.js",
   "src/glacierArrivalScene.js",
   "src/habitService.js",
   "src/healthCheckService.js",
+  "src/iconPresentation.js",
   "src/imagePreloadService.js",
   "src/loreService.js",
   "src/mailboxSchema.js",
@@ -182,9 +247,14 @@ const PRECACHE_URLS = [
   "src/poolUnlockCore.js",
   "src/poolUnlockService.js",
   "src/preferencesService.js",
+  "src/questIcons.js",
   "src/questService.js",
   "src/releaseCatalog.js",
   "src/releaseProfile.js",
+  "src/reminder-settings.css",
+  "src/reminderController.js",
+  "src/reminderRules.js",
+  "src/reminderService.js",
   "src/rewardService.js",
   "src/shareService.js",
   "src/styles.css",
@@ -194,10 +264,18 @@ const PRECACHE_URLS = [
   "src/taskMigration.js",
   "src/taskService.js",
   "src/taskStatsService.js",
+  "src/theme-refinements.css",
+  "src/theme-system.css",
+  "src/themeRegistry.js",
+  "src/themeTokens.css",
   "src/themedSummonController.js",
+  "src/twilightPresentation.js",
   "src/ui-polish.css",
   "src/ui.js",
   "src/uiHelpers.js",
+  "src/updateActivity.js",
+  "src/updateController.js",
+  "src/updateProtocol.js",
   "src/version.js",
   "src/workshopService.js"
 ];
@@ -394,7 +472,44 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// Deliberately ignore legacy SKIP_WAITING messages from older open tabs.
+// Legacy SKIP_WAITING stays ignored. Only a deliberate, single-window update
+// can activate a fully installed generation; other windows keep their edits.
+self.addEventListener('message', (event) => {
+  if (!['QUESTNOTE_UPDATE_INFO', 'QUESTNOTE_APPLY_UPDATE'].includes(event.data?.type)) return;
+  event.waitUntil((async () => {
+    const reply = (data) => event.ports?.[0]?.postMessage(data);
+    const scope = self.registration.scope;
+    if (!event.source?.id || !event.source.url?.startsWith(scope) || !BUILD_PROFILE) {
+      reply({ status: 'unavailable' }); return;
+    }
+    if (event.data.type === 'QUESTNOTE_UPDATE_INFO') {
+      reply({ artifactId: BUILD_PROFILE.artifactId, scopePath: BUILD_PROFILE.scopePath }); return;
+    }
+    if (event.data.artifactId !== BUILD_PROFILE.artifactId
+      || !self.registration.waiting || self.registration.waiting.scriptURL !== self.location.href) {
+      reply({ status: 'unavailable' }); return;
+    }
+    // Eviction may happen after install. Do not switch to an incomplete shell.
+    const cache = await caches.open(CACHE_NAME);
+    const complete = await Promise.all(PRECACHE_URLS.map(async (path) => {
+      const response = await cache.match(resolveUrl(path));
+      if (!response?.ok) return false;
+      if (!PRECACHE_HASHES) return true;
+      const digest = await crypto.subtle.digest('SHA-256', await response.arrayBuffer());
+      const hash = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('');
+      return hash === PRECACHE_HASHES[path];
+    }));
+    if (complete.some((ok) => !ok)) { reply({ status: 'unavailable' }); return; }
+    // includeUncontrolled is needed because a waiting worker has no clients yet.
+    const windows = (await self.clients.matchAll({ type: 'window', includeUncontrolled: true }))
+      .filter((client) => client.url.startsWith(scope));
+    if (windows.length !== 1 || windows[0].id !== event.source.id) {
+      reply({ status: 'other-clients' }); return;
+    }
+    reply({ status: 'accepted' });
+    await self.skipWaiting();
+  })().catch(() => event.ports?.[0]?.postMessage({ status: 'unavailable' })));
+});
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(

@@ -194,7 +194,7 @@ async function checkUserPreferences() {
   const prefsRow = rows.find((r) => r.key === 'userPreferences');
   const prefs = normalizeUserPreferences(prefsRow);
   const theme = normalizeTheme(prefs.theme);
-  if (theme !== 'default' && theme !== 'sweet') {
+  if (theme !== 'default' && theme !== 'sweet' && theme !== 'twilight') {
     throw new Error(`userPreferences.theme 無效: ${prefs.theme}`);
   }
   return theme;

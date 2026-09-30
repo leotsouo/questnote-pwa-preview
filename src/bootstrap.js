@@ -1,4 +1,5 @@
 import { RELEASE_PROFILE } from './releaseProfile.js';
+import { askWorker } from './updateProtocol.js';
 
 /** Never open a release database from an uncontrolled, potentially mixed deployment. */
 export async function bootApplication({
@@ -19,7 +20,16 @@ export async function bootApplication({
   if (!serviceWorker) throw new Error('此發布版本需要安全連線與 Service Worker，請使用 HTTPS 開啟。');
   const expectedWorkerUrl = new URL(`service-worker.js?artifact=${profile.artifactId}`, baseUrl).href;
   const attemptKey = `questnote-boot:${profile.artifactId}`;
-  if (serviceWorker.controller?.scriptURL === expectedWorkerUrl) {
+  // update() may install new verified bytes at the previous worker's script URL.
+  // Confirm that generation before importing any application/data code.
+  let verifiedController = serviceWorker.controller?.scriptURL === expectedWorkerUrl;
+  if (!verifiedController && serviceWorker.controller?.postMessage) {
+    try {
+      const info = await askWorker(serviceWorker.controller, 'QUESTNOTE_UPDATE_INFO', {}, 2000);
+      verifiedController = info?.artifactId === profile.artifactId && info.scopePath === profile.scopePath;
+    } catch { /* Legacy workers must still follow the fail-closed bootstrap below. */ }
+  }
+  if (verifiedController) {
     attemptStorage.removeItem(attemptKey); await start(); return 'controlled';
   }
   const incompatibleController = !!serviceWorker.controller;

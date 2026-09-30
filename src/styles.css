@@ -164,9 +164,9 @@ html {
 }
 
 @media (pointer: coarse) {
-  /* Include nested scroll containers; keep specific custom gesture rules. */
+  /* Allow both scroll axes without enabling pinch zoom; descendants intersect ancestor rules. */
   :where(html, body, body *) {
-    touch-action: pan-y;
+    touch-action: pan-x pan-y;
   }
 
   /* Prevent iPhone focus zoom on small form text, including modal fields. */
@@ -17952,3 +17952,14 @@ body.is-pet-image-viewer-open .onboarding-dock { visibility: hidden; }
   flex: 0 0 auto;
   overflow-wrap: anywhere;
 }
+/* Daily reminder controls share the app's form and theme tokens. */
+.reminder-options { display: grid; gap: 12px; margin: 16px 0; }
+.reminder-options label, .reminder-consent { display: flex; align-items: flex-start; gap: 10px; line-height: 1.6; }
+.reminder-options input, .reminder-consent input { flex-shrink: 0; margin-top: 5px; }
+.reminder-actions { flex-wrap: wrap; }
+.settings-reminders .form-hint { overflow-wrap: anywhere; }
+
+/* Keep horizontal filter gestures within their own scroll row. */
+.filter-bar { overscroll-behavior-x: contain; }
+.collection-series-picker { display: flex; align-items: center; gap: 10px; margin-bottom: var(--space-3); }
+.collection-series-picker select { min-width: 0; flex: 1; min-height: 44px; color: var(--text-main); background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 8px 12px; }

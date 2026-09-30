@@ -1,6 +1,11 @@
 /**
  * UI 渲染與互動邏輯
  */
+import { initFilterGestures } from './filterGestureController.js';
+import { trackUpdateActivity } from './updateActivity.js';
+import { updateControlsHtml, refreshUpdateControls } from './updateController.js';
+import { initReminders, renderReminderSettings } from './reminderController.js';
+import { shiftDate } from './reminderRules.js';
 import {
   createTask,
   updateTask,
@@ -31,7 +36,7 @@ import {
   getTodayViewSections,
   validateDateRange,
 } from './taskFilterService.js';
-import { calculateRewardAmount, calculateAdventureEnergyAmount } from './rewardService.js';
+import { calculateRewardAmount, calculateAdventureEnergyAmount, calculateBondAmount } from './rewardService.js';
 import {
   pullOnce,
   performTenPull,
@@ -67,6 +72,9 @@ import {
   IDLE_THRESHOLD_MS,
 } from './companionDialogueService.js';
 import { setTheme, applyThemeToDocument, normalizeTheme } from './preferencesService.js';
+import { initQuestIconLanguage } from './iconPresentation.js';
+import { THEME_DIRECTIONS } from './themeRegistry.js';
+import { twilightIcon, getCompanionScene, initTwilightChrome, syncTwilightHome, syncTwilightGacha, setTwilightCompanionLine, reactTwilightCompanion } from './twilightPresentation.js';
 import {
   pickStatusLine,
   randomStatusInterval,
@@ -492,7 +500,7 @@ function openNicknameModal(petId) {
 
   document.getElementById('nickname-cancel')?.addEventListener('click', closeModal);
 
-  document.getElementById('nickname-clear')?.addEventListener('click', async () => {
+  document.getElementById('nickname-clear')?.addEventListener('click', trackUpdateActivity(async () => {
     const result = await clearPetNickname(petId);
     if (!result.success) {
       showToast(result.message || '暱稱儲存失敗，請稍後再試。', 'error');
@@ -502,9 +510,9 @@ function openNicknameModal(petId) {
     await onRefresh({ renderMode: ['collection'] });
     openPetDetailModal(petId);
     showToast('暱稱已清除', 'success');
-  });
+  }));
 
-  document.getElementById('nickname-save')?.addEventListener('click', async () => {
+  document.getElementById('nickname-save')?.addEventListener('click', trackUpdateActivity(async () => {
     const value = input?.value ?? '';
     const validation = validatePetNickname(value);
     if (!validation.valid) {
@@ -528,7 +536,7 @@ function openNicknameModal(petId) {
       }
     }
     await handleAchievementCheckAfterAction();
-  });
+  }));
 }
 
 export function showToast(message, type = 'info', duration = 2800) {
@@ -574,13 +582,17 @@ export function initUI(appState, refreshCallback, achievementCheckCallback) {
 
   uiInitialized = true;
   try {
+    initTwilightChrome();
+    initQuestIconLanguage();
     bindNavigation();
+    initFilterGestures();
     bindModals();
     bindDelegatedEvents();
     bindActivityTracking();
     bindAchievementClaimAll();
     bindGlobalMailboxEntry();
     initFeedback({ navigate: switchView });
+    initReminders({ openToday: () => { taskViewMode = 'today'; switchView('tasks'); renderTasksView(); } });
 
     document.getElementById('collection-filters')?.addEventListener('click', (e) => {
       const btn = e.target.closest('.filter-btn');
@@ -590,6 +602,11 @@ export function initUI(appState, refreshCallback, achievementCheckCallback) {
       refreshOnboarding();
     });
 
+    document.getElementById('collection-series-select')?.addEventListener('change', (e) => {
+      collectionSeriesFilter = e.target.value || 'all';
+      renderCollectionView();
+    });
+
     document.getElementById('collection-series-filters')?.addEventListener('click', (e) => {
       const btn = e.target.closest('.filter-btn');
       if (!btn) return;
@@ -597,7 +614,7 @@ export function initUI(appState, refreshCallback, achievementCheckCallback) {
       renderCollectionView();
     });
 
-    document.getElementById('gacha-pool-select')?.addEventListener('change', async (e) => {
+    document.getElementById('gacha-pool-select')?.addEventListener('change', trackUpdateActivity(async (e) => {
       const poolId = e.target.value;
       const selection = ++latestPoolSelection;
       if (!poolId || isGachaPullInProgress()) {
@@ -615,7 +632,7 @@ export function initUI(appState, refreshCallback, achievementCheckCallback) {
         if (selection !== latestPoolSelection) return;
         showToast(err.message || '切換卡池失敗', 'error');
       }
-    });
+    }));
 
     document.getElementById('gacha-theme-details-btn')?.addEventListener('click', () => {
       const details = document.getElementById('gacha-theme-details');
@@ -674,7 +691,7 @@ export function initUI(appState, refreshCallback, achievementCheckCallback) {
 
 /** 使用事件委派，避免重複渲染後按鈕失效 */
 function bindDelegatedEvents() {
-  document.getElementById('view-tasks')?.addEventListener('click', async (e) => {
+  document.getElementById('view-tasks')?.addEventListener('click', trackUpdateActivity(async (e) => {
     const target = e.target.closest('[data-action]');
     if (!target) return;
 
@@ -769,10 +786,13 @@ function bindDelegatedEvents() {
 
       await onRefresh();
 
+      if (isCompleting) {
+        reactTwilightCompanion(state.companion?.dialogues?.praise?.[0]);
+      }
       if (isCompleting && taskViewMode === 'today') {
         requestAnimationFrame(() => {
           document.querySelector(`.task-card[data-id="${CSS.escape(String(id))}"]`)
-            ?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            ?.scrollIntoView({ behavior: preferredScrollBehavior(), block: 'nearest' });
         });
       }
 
@@ -887,11 +907,11 @@ function bindDelegatedEvents() {
         showToast('任務已刪除', 'success');
       }, { danger: true, confirmLabel: '刪除' });
     }
-  });
+  }));
 
   document.getElementById('btn-add-task')?.addEventListener('click', () => openTaskForm());
 
-  document.getElementById('view-gacha')?.addEventListener('click', async (e) => {
+  document.getElementById('view-gacha')?.addEventListener('click', trackUpdateActivity(async (e) => {
     const target = e.target.closest('[data-action]');
     if (!target) return;
     const action = target.dataset.action;
@@ -902,17 +922,17 @@ function bindDelegatedEvents() {
       requestAnimationFrame(() => {
         renderDailyBlessingSection();
         renderHomeHub();
-        document.getElementById('homeDailyBlessingContainer')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        document.getElementById('homeDailyBlessingContainer')?.scrollIntoView({ behavior: preferredScrollBehavior(), block: 'start' });
       });
     } else if (action === 'daily-open-wheel') {
       await openDailyWheelModal();
     }
-  });
+  }));
 
-  document.getElementById('btn-pull')?.addEventListener('click', handlePull);
-  document.getElementById('btn-pull-ten')?.addEventListener('click', handleTenPull);
+  document.getElementById('btn-pull')?.addEventListener('click', trackUpdateActivity(handlePull));
+  document.getElementById('btn-pull-ten')?.addEventListener('click', trackUpdateActivity(handleTenPull));
 
-  document.getElementById('view-collection')?.addEventListener('click', async (e) => {
+  document.getElementById('view-collection')?.addEventListener('click', trackUpdateActivity(async (e) => {
     const milestoneAction = e.target.closest('[data-collection-milestone-action]');
     if (milestoneAction) {
       const action = milestoneAction.dataset.collectionMilestoneAction;
@@ -1016,9 +1036,9 @@ function bindDelegatedEvents() {
         showToast(error.message || '升星失敗，請稍後再試', 'error');
       }
     }, { confirmLabel: `花費 ${cost} 碎片升星` });
-  });
+  }));
 
-  document.getElementById('btn-export')?.addEventListener('click', async () => {
+  document.getElementById('btn-export')?.addEventListener('click', trackUpdateActivity(async () => {
     try {
       await downloadBackup();
       await markExportedBackup();
@@ -1027,24 +1047,24 @@ function bindDelegatedEvents() {
     } catch {
       showToast('匯出失敗，請稍後再試', 'error');
     }
-  });
+  }));
 
   initImportBackupHandlers();
 
-  document.getElementById('btn-reset')?.addEventListener('click', handleReset);
+  document.getElementById('btn-reset')?.addEventListener('click', trackUpdateActivity(handleReset));
 
-  document.getElementById('btn-dev-unlock')?.addEventListener('click', handleDevUnlock);
+  document.getElementById('btn-dev-unlock')?.addEventListener('click', trackUpdateActivity(handleDevUnlock));
 
-  document.getElementById('btn-dev-unlock-all')?.addEventListener('click', handleDevUnlockAll);
+  document.getElementById('btn-dev-unlock-all')?.addEventListener('click', trackUpdateActivity(handleDevUnlockAll));
 
-  document.getElementById('btn-dev-stardust')?.addEventListener('click', handleDevStardust);
-  document.getElementById('btn-dev-companion-bond')?.addEventListener('click', handleDevCompanionBond);
+  document.getElementById('btn-dev-stardust')?.addEventListener('click', trackUpdateActivity(handleDevStardust));
+  document.getElementById('btn-dev-companion-bond')?.addEventListener('click', trackUpdateActivity(handleDevCompanionBond));
 
-  document.getElementById('btn-dev-expedition')?.addEventListener('click', handleDevExpedition);
-  document.getElementById('btn-dev-daily-blessing')?.addEventListener('click', handleDevResetDailyBlessing);
-  document.getElementById('btn-dev-mailbox-announcement')?.addEventListener('click', handleDevMailboxAnnouncement);
-  document.getElementById('btn-dev-mailbox-compensation')?.addEventListener('click', handleDevMailboxCompensation);
-  document.getElementById('btn-dev-mailbox-clear')?.addEventListener('click', handleDevMailboxClear);
+  document.getElementById('btn-dev-expedition')?.addEventListener('click', trackUpdateActivity(handleDevExpedition));
+  document.getElementById('btn-dev-daily-blessing')?.addEventListener('click', trackUpdateActivity(handleDevResetDailyBlessing));
+  document.getElementById('btn-dev-mailbox-announcement')?.addEventListener('click', trackUpdateActivity(handleDevMailboxAnnouncement));
+  document.getElementById('btn-dev-mailbox-compensation')?.addEventListener('click', trackUpdateActivity(handleDevMailboxCompensation));
+  document.getElementById('btn-dev-mailbox-clear')?.addEventListener('click', trackUpdateActivity(handleDevMailboxClear));
 
   // 演出測試僅本機綁定；正式環境即使殘留 DOM 也不掛 listener
   if (isAuthorLocalDevMode()) {
@@ -1060,20 +1080,24 @@ function bindDelegatedEvents() {
       switchView('gacha');
       return;
     }
-    handleExpeditionClick(e);
+    void trackUpdateActivity(handleExpeditionClick)(e);
   });
 
   document.getElementById('view-more')?.addEventListener('click', (e) => {
     const item = e.target.closest('[data-goto]');
     if (!item) return;
     switchView(item.dataset.goto);
+    if (item.hasAttribute('data-style-settings')) {
+      document.querySelector('.settings-theme')?.scrollIntoView({ behavior: 'instant', block: 'start' });
+      document.querySelector('[data-action="select-theme"][aria-checked="true"]')?.focus({ preventScroll: true });
+    }
     if (item.hasAttribute('data-scroll-daily-blessing')) {
       homeHubActive = 'blessing';
       dailyBlessingCollapsed = false;
       requestAnimationFrame(() => {
         renderDailyBlessingSection();
         renderHomeHub();
-        document.getElementById('homeDailyBlessingContainer')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        document.getElementById('homeDailyBlessingContainer')?.scrollIntoView({ behavior: preferredScrollBehavior(), block: 'start' });
       });
     }
   });
@@ -1082,7 +1106,7 @@ function bindDelegatedEvents() {
     const backBtn = e.target.closest('[data-goto]');
     if (backBtn) switchView(backBtn.dataset.goto);
   });
-  document.getElementById('btn-share-app')?.addEventListener('click', async () => {
+  document.getElementById('btn-share-app')?.addEventListener('click', trackUpdateActivity(async () => {
     const result = await shareQuestNote();
     if (result === 'unsupported') {
       const copied = await copyQuestNoteUrl();
@@ -1090,18 +1114,18 @@ function bindDelegatedEvents() {
     } else if (result === 'failed') {
       showToast('無法開啟分享，請使用複製連結', 'warning');
     }
-  });
-  document.getElementById('btn-copy-app-link')?.addEventListener('click', async () => {
+  }));
+  document.getElementById('btn-copy-app-link')?.addEventListener('click', trackUpdateActivity(async () => {
     const copied = await copyQuestNoteUrl();
     showToast(copied ? '正式版連結已複製' : '無法自動複製，請長按下方連結', copied ? 'success' : 'warning');
-  });
+  }));
 
   document.getElementById('view-workshop')?.addEventListener('click', (e) => {
-    handleWorkshopClick(e);
+    void trackUpdateActivity(handleWorkshopClick)(e);
   });
 
   document.getElementById('view-handbook')?.addEventListener('click', (e) => {
-    handleHandbookClick(e);
+    void trackUpdateActivity(handleHandbookClick)(e);
   });
 
   document.getElementById('view-guide')?.addEventListener('click', (e) => {
@@ -1109,7 +1133,7 @@ function bindDelegatedEvents() {
     if (backBtn) switchView(backBtn.dataset.goto);
   });
 
-  document.getElementById('view-achievements')?.addEventListener('click', async (e) => {
+  document.getElementById('view-achievements')?.addEventListener('click', trackUpdateActivity(async (e) => {
     const backBtn = e.target.closest('[data-goto]');
     if (backBtn) {
       switchView(backBtn.dataset.goto);
@@ -1144,9 +1168,9 @@ function bindDelegatedEvents() {
         claimBtn.disabled = false;
       }
     }
-  });
+  }));
 
-  document.getElementById('view-settings')?.addEventListener('click', async (e) => {
+  document.getElementById('view-settings')?.addEventListener('click', trackUpdateActivity(async (e) => {
     const backBtn = e.target.closest('[data-goto]');
     if (backBtn) {
       switchView(backBtn.dataset.goto);
@@ -1158,7 +1182,20 @@ function bindDelegatedEvents() {
       const theme = themeCard.dataset.theme;
       if (theme) await applyTheme(theme);
     }
-  });
+  }));
+
+  document.querySelector('.theme-picker')?.addEventListener('keydown', trackUpdateActivity(async (event) => {
+    if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(event.key)) return;
+    const current = event.target.closest('[data-action="select-theme"]');
+    if (!current) return;
+    event.preventDefault();
+    const cards = [...document.querySelectorAll('.theme-picker [data-action="select-theme"]')];
+    const index = cards.indexOf(current);
+    const next = event.key === 'Home' ? 0 : event.key === 'End' ? cards.length - 1
+      : (index + (['ArrowRight', 'ArrowDown'].includes(event.key) ? 1 : -1) + cards.length) % cards.length;
+    await applyTheme(cards[next].dataset.theme);
+    cards[next].focus();
+  }));
 
   document.getElementById('achievement-strip')?.addEventListener('click', () => {
     switchView('achievements');
@@ -1180,7 +1217,7 @@ function bindDelegatedEvents() {
 
   document.getElementById('btn-add-habit')?.addEventListener('click', () => openHabitForm());
 
-  document.getElementById('view-habits')?.addEventListener('click', async (e) => {
+  document.getElementById('view-habits')?.addEventListener('click', trackUpdateActivity(async (e) => {
     const backBtn = e.target.closest('[data-goto]');
     if (backBtn) {
       switchView(backBtn.dataset.goto);
@@ -1254,7 +1291,7 @@ function bindDelegatedEvents() {
     } else if (action === 'habit-create-first') {
       openHabitForm();
     }
-  });
+  }));
 }
 
 function bindNavigation() {
@@ -1268,13 +1305,14 @@ function bindNavigation() {
 
 export function switchView(viewName) {
   document.querySelectorAll('.view').forEach((v) => v.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach((n) => n.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach((n) => { n.classList.remove('active'); n.removeAttribute('aria-current'); });
 
   const view = document.getElementById(`view-${viewName}`);
+  window.scrollTo(0, 0);
   const navView = viewName === 'achievements' || viewName === 'settings' || viewName === 'habits' || viewName === 'workshop' || viewName === 'handbook' || viewName === 'guide' || viewName === 'feedback' || viewName === 'share' ? 'more' : viewName;
   const nav = document.querySelector(`.nav-item[data-view="${navView}"]`);
   if (view) view.classList.add('active');
-  if (nav) nav.classList.add('active');
+  if (nav) { nav.classList.add('active'); nav.setAttribute('aria-current', 'page'); }
   if (viewName === 'guide') window.scrollTo(0, 0);
 
   trackUserActivity();
@@ -1596,10 +1634,10 @@ function openConfirmModal(title, message, onConfirm, options = {}) {
     closeModal();
     if (typeof onCancel === 'function') onCancel();
   });
-  document.getElementById('confirm-ok')?.addEventListener('click', async () => {
+  document.getElementById('confirm-ok')?.addEventListener('click', trackUpdateActivity(async () => {
     closeModal();
     await onConfirm();
-  });
+  }));
 }
 
 /** 寵物圖片含 fallback；preview 模式顯示模糊黑白預覽（未獲得） */
@@ -1645,9 +1683,9 @@ export function petImageHtml(pet, options = {}) {
 
 /** 星級顯示 */
 export function renderStars(count, max = 5) {
-  let html = '<span class="stars">';
+  let html = `<span class="stars" role="img" aria-label="${count} / ${max} 星">`;
   for (let i = 1; i <= max; i++) {
-    html += `<span class="star ${i <= count ? 'star--filled' : ''}">★</span>`;
+    html += `<span class="star ${i <= count ? 'star--filled' : ''}" aria-hidden="true">${twilightIcon('star')}</span>`;
   }
   html += '</span>';
   return html;
@@ -1688,6 +1726,7 @@ export function renderSharedUI() {
   updateGachaAffordability();
   renderGachaDailyBlessingEntry();
   maybeRefreshExpeditionBubble();
+  syncTwilightHome(state);
   refreshOnboarding();
 }
 
@@ -1847,6 +1886,7 @@ function renderTasksView() {
   renderTodayPlanSummary(tasks, today);
   renderHabitSummary();
   renderCategoryFilters(categories);
+  syncTwilightHome(state);
 
   const catFilterEl = document.getElementById('task-category-filters');
   if (catFilterEl) {
@@ -1855,6 +1895,7 @@ function renderTasksView() {
 
   const contentEl = document.getElementById('task-view-content');
   if (!contentEl) return;
+  contentEl.dataset.taskView = taskViewMode;
 
   if (taskViewMode === 'today') {
     contentEl.innerHTML = renderTodayView(tasks, today);
@@ -2609,7 +2650,7 @@ async function openDailyWheelModal() {
   if (!canSpin) return;
 
   const startBtn = document.getElementById('daily-wheel-start');
-  startBtn?.addEventListener('click', async () => {
+  startBtn?.addEventListener('click', trackUpdateActivity(async () => {
     if (startBtn.disabled || isWheelSpinning()) return;
     startBtn.disabled = true;
 
@@ -2649,7 +2690,7 @@ async function openDailyWheelModal() {
       showToast('轉盤發生錯誤，請稍後再試', 'error');
       startBtn.disabled = false;
     }
-  });
+  }));
 }
 
 function renderTodayPlanSummary(tasks, today) {
@@ -2739,11 +2780,15 @@ function renderTodayView(tasks, today) {
 
   let html = renderTaskListSection('今日計畫', sections.planned, plannedEmpty);
   html += renderTaskListSection('今天到期', sections.dueToday);
+  html += renderTaskListSection('今天開始', filtered.filter((task) => !task.completed && task.startDate === today
+    && task.plannedDate !== today && task.dueDate !== today));
   html += renderTaskListSection('逾期未完成', sections.overdue,
     sections.overdue.length === 0 && taskCategoryFilter !== 'all' ? '' :
     sections.overdue.length === 0 ? emptyStateHtml('✓', '沒有逾期任務', '目前節奏保持得不錯。') : ''
   );
   html += renderCollapsibleTaskSection('今日已完成', sections.completedToday);
+  const tomorrow = shiftDate(today, 1);
+  html += renderTaskListSection('明日計畫', sortTasks(filtered.filter((task) => !task.completed && task.plannedDate === tomorrow), tomorrow));
 
   if (!html.trim()) {
     return emptyStateHtml('📋', '目前沒有待辦任務', '新增一個小任務，讓你的夥伴開始累積能量吧。', '新增任務', 'empty-add-task');
@@ -2851,7 +2896,6 @@ function renderTaskCard(task) {
   const stardust = calculateRewardAmount(task);
   const energy = calculateAdventureEnergyAmount(task);
   const category = getCategoryById(task.categoryId || 'general', state.categories);
-  const catClass = `badge--category badge--category-${category?.color || 'gray'}`;
   const dateClass = getDateBadgeClass(task, today);
   const dateText = formatDateBadgeText(task, today);
   const inPlan = isInTodayPlan(task, today);
@@ -2889,9 +2933,6 @@ function renderTaskCard(task) {
     </div>
   ` : '';
 
-  const planBadge = inPlan
-    ? `<span class="badge badge--today-plan">${task.completed ? '今日完成' : '今日'}</span>`
-    : '';
 
   const planBtn = !task.completed
     ? inPlan
@@ -2904,43 +2945,22 @@ function renderTaskCard(task) {
     : '';
 
   const preview = task.content.split('\n').slice(1).filter((line) => line.trim()).slice(0, 2).join(' ');
+  const rewardsHtml = task.completed ? doneInfo : task.rewardClaimed
+    ? `<div class="task-card__rewards"><span>${twilightIcon('check')}獎勵已領取</span></div>`
+    : `<div class="task-card__rewards"><span>${twilightIcon('spark')}${stardust} 星塵</span><span>${twilightIcon('energy')}${energy} 能量</span>${state.companion ? `<span>${twilightIcon('heart')}+${calculateBondAmount(task)} 親密度</span>` : ''}</div>`;
 
-  return `
-    <article class="task-card card-animate ${priorityClass} ${task.completed ? 'task-card--done' : ''} ${justCompleted ? 'task-card--just-done' : ''}" data-id="${escapeHtml(task.id)}">
-      <div class="task-card__header">
-        <button class="task-check ${task.completed ? 'checked' : ''}" data-action="toggle" aria-label="完成任務">
-          ${task.completed ? '✓' : ''}
-        </button>
-        <div class="task-card__meta">
-          <span class="badge ${catClass}">${formatCategoryLabel(category)}</span>
-          <span class="badge ${priorityClass}">${PRIORITY_LABELS[task.priority]}</span>
-          <span class="badge ${dateClass}">${escapeHtml(dateText)}</span>
-          ${planBadge}
-        </div>
-      </div>
+  return `<article class="task-card twilight-task-card ${priorityClass} ${task.completed ? 'task-card--done' : ''} ${justCompleted ? 'task-card--just-done' : ''}" data-id="${escapeHtml(task.id)}">
+    <button type="button" class="task-check ${task.completed ? 'checked' : ''}" data-action="toggle" aria-pressed="${task.completed}" aria-label="${task.completed ? '取消完成' : '完成'} ${escapeHtml(task.title)}">${task.completed ? twilightIcon('check') : ''}</button>
+    <div class="twilight-task-body">
+      <div class="task-card__meta"><span>${formatCategoryLabel(category)}</span>${task.priority !== 'normal' ? `<span class="twilight-task-priority">${escapeHtml(PRIORITY_LABELS[task.priority])}</span>` : ''}${task.dueDate || task.startDate ? `<span class="${dateClass}">${escapeHtml(dateText)}</span>` : ''}${!inPlan && !task.completed ? '<span>未排入今日</span>' : ''}</div>
       <h3 class="task-card__title">${escapeHtml(task.title)}</h3>
       ${preview ? `<p class="task-card__preview">${escapeHtml(preview)}</p>` : ''}
       ${subtasksHtml}
-      ${
-        !task.completed
-          ? `<div class="task-card__rewards">
-              <span class="task-reward-tag task-reward-tag--stardust">✦ ${stardust} 星塵</span>
-              <span class="task-reward-tag task-reward-tag--energy">⚡ ${energy} 能量</span>
-            </div>`
-          : doneInfo
-      }
-      <div class="task-card__actions">
-        ${
-          !task.completed
-            ? `<button class="btn btn--primary btn--sm task-card__complete-btn" data-action="toggle" aria-label="完成任務">完成</button>`
-            : ''
-        }
-        ${planBtn}
-        ${expandBtn}
-        <button class="btn btn--ghost btn--sm" data-action="edit">編輯</button>
-        <button class="btn btn--ghost btn--sm btn--danger" data-action="delete">刪除</button>
-      </div>
-    </article>`;
+      ${rewardsHtml}
+      ${expandBtn ? `<div class="twilight-task-expander">${expandBtn}</div>` : ''}
+    </div>
+    <details class="twilight-task-menu"><summary aria-label="${escapeHtml(task.title)}：更多操作">${twilightIcon('more')}</summary><div class="task-card__actions">${planBtn}<button type="button" class="btn btn--ghost btn--sm" data-action="edit">編輯</button><button type="button" class="btn btn--ghost btn--sm btn--danger" data-action="delete">刪除</button></div></details>
+  </article>`;
 }
 
 function openTaskForm(taskId = null) {
@@ -3002,6 +3022,17 @@ function openTaskForm(taskId = null) {
         <span class="settings-toggle__switch" aria-hidden="true"></span>
       </label>
 
+      <div class="form-field">
+        <label class="form-label" for="task-plan-date">安排日期</label>
+        <input type="date" id="task-plan-date" class="form-input" value="${escapeHtml(task?.plannedDate || '')}" />
+        <div class="form-actions">
+          <button type="button" class="btn btn--secondary btn--sm" data-plan-date="today">今天</button>
+          <button type="button" class="btn btn--secondary btn--sm" data-plan-date="tomorrow">明天</button>
+          <button type="button" class="btn btn--ghost btn--sm" data-plan-date="clear">未安排</button>
+        </div>
+        <p class="form-hint">前一天選「明天」，隔天會加入今日計畫與每日提醒。</p>
+      </div>
+
       <label class="form-label">子任務</label>
       <div id="subtask-form-list" class="subtask-form-list">${subtaskListHtml}</div>
       <p class="form-hint subtask-form-empty" id="subtask-form-empty" ${subtasks.length ? 'hidden' : ''}>這個任務還沒有子任務，可以把大型任務拆成幾個小步驟。</p>
@@ -3018,6 +3049,18 @@ function openTaskForm(taskId = null) {
   `);
 
   document.getElementById('form-cancel')?.addEventListener('click', closeModal);
+
+  document.querySelectorAll('[data-plan-date]').forEach((button) => button.addEventListener('click', () => {
+    const date = button.dataset.planDate === 'clear' ? '' : shiftDate(getTodayDateString(), button.dataset.planDate === 'tomorrow' ? 1 : 0);
+    document.getElementById('task-plan-date').value = date;
+    document.getElementById('task-plan-today').checked = date === getTodayDateString();
+  }));
+  document.getElementById('task-plan-date')?.addEventListener('change', (event) => {
+    document.getElementById('task-plan-today').checked = event.target.value === getTodayDateString();
+  });
+  document.getElementById('task-plan-today')?.addEventListener('change', (event) => {
+    document.getElementById('task-plan-date').value = event.target.checked ? getTodayDateString() : '';
+  });
 
   document.querySelectorAll('#task-priority-group .segmented-control__btn').forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -3077,7 +3120,7 @@ function openTaskForm(taskId = null) {
 
   renderSubtaskFormList();
 
-  document.getElementById('task-form')?.addEventListener('submit', async (e) => {
+  document.getElementById('task-form')?.addEventListener('submit', trackUpdateActivity(async (e) => {
     e.preventDefault();
     const content = document.getElementById('task-content').value.trim();
     const priority = document.getElementById('task-priority').value;
@@ -3085,6 +3128,7 @@ function openTaskForm(taskId = null) {
     const startDate = document.getElementById('task-start-date').value || null;
     const dueDate = document.getElementById('task-due-date').value || null;
     const planToday = document.getElementById('task-plan-today').checked;
+    const plannedDate = document.getElementById('task-plan-date').value || null;
     const dateError = document.getElementById('task-date-error');
 
     if (!content) {
@@ -3126,6 +3170,7 @@ function openTaskForm(taskId = null) {
       startDate,
       dueDate,
       planToday,
+      plannedDate,
       subtasks: finalSubtasks,
     };
 
@@ -3141,7 +3186,7 @@ function openTaskForm(taskId = null) {
           dueDate,
           subtasks: finalSubtasks,
           isPlannedToday: planToday,
-          plannedDate: planToday ? todayStr : null,
+          plannedDate,
         });
         showToast('任務已更新', 'success');
       } else {
@@ -3157,7 +3202,7 @@ function openTaskForm(taskId = null) {
     } catch (err) {
       showToast(err.message || '儲存失敗', 'error');
     }
-  });
+  }));
 }
 
 /** 設定首頁中樞圖示的提示紅點 */
@@ -3284,6 +3329,7 @@ function getPetComfortLine(companion) {
 }
 
 function playHomeCompanionPetEffect() {
+  reactTwilightCompanion();
   const card = document.querySelector('.companion-card');
   const img = document.querySelector('.companion-card__image');
   triggerComfortVibration();
@@ -3530,7 +3576,7 @@ function bindPetFeedInteractions(companion) {
     void openTeachingTarget({ view: 'workshop', tab: 'craft' });
   });
 
-  feedBtn?.addEventListener('click', async (e) => {
+  feedBtn?.addEventListener('click', trackUpdateActivity(async (e) => {
     e.stopPropagation();
     if (feedBtn.disabled) return;
     const select = document.getElementById('companion-feed-select');
@@ -3575,7 +3621,7 @@ function bindPetFeedInteractions(companion) {
         ? '餵食已完成，畫面暫時無法更新，請重新開啟 App'
         : '餵食狀態無法確認，請重新開啟 App 檢查庫存', 'warning', 4000);
     }
-  });
+  }));
 }
 
 function openPetFeedModal(companion) {
@@ -4419,6 +4465,7 @@ function isModalOpen() {
 }
 
 function setCompanionBubbleText(text, animate = true) {
+  setTwilightCompanionLine(text);
   const bubbleText = document.getElementById('companion-bubble-text');
   if (!bubbleText) return;
 
@@ -4498,6 +4545,11 @@ export function applyReduceMotionClass(enabled) {
   document.body.classList.toggle('reduce-motion', !!enabled);
 }
 
+function preferredScrollBehavior() {
+  return state?.userPreferences?.reduceMotion || window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ? 'auto' : 'smooth';
+}
+
 /**
  * 套用美術風格主題
  * @param {string} theme
@@ -4538,6 +4590,7 @@ function renderThemePickerState(activeTheme) {
     const isActive = cardTheme === theme;
     card.classList.toggle('theme-card--active', isActive);
     card.setAttribute('aria-checked', isActive ? 'true' : 'false');
+    card.tabIndex = isActive ? 0 : -1;
   });
   document.querySelectorAll('[data-theme-badge]').forEach((badge) => {
     badge.hidden = badge.dataset.themeBadge !== theme;
@@ -4777,6 +4830,7 @@ function renderGachaPoolSwitcher() {
 
 function renderGachaView() {
   const pool = getSelectedGachaPool();
+  syncTwilightGacha(state, pool);
   if (!pool) { renderGachaUnavailable(); return; }
 
   const stats = ensurePoolPity(state.gachaStats || {}, pool.id);
@@ -5986,6 +6040,12 @@ function renderCollectionSeriesFilters() {
     ...seriesList.map((s) => ({ id: s.id, name: s.name })),
   ];
 
+  const picker = document.getElementById('collection-series-select');
+  if (picker) {
+    picker.innerHTML = buttons.map((item) => `<option value="${escapeHtml(item.id)}">${escapeHtml(item.name)}</option>`).join('');
+    picker.value = collectionSeriesFilter;
+  }
+
   bar.innerHTML = buttons.map((item) => {
     let label = item.name;
     if (item.id !== 'all') {
@@ -6034,14 +6094,14 @@ function renderCollectionView() {
   if (companionEl) {
     if (state.companion) {
       companionEl.innerHTML = `
-        <div>${petImageHtml(state.companion, { size: 'sm' })}</div>
-        <div>
-          <p class="collection-companion__label">目前陪伴寵物</p>
+        <img class="qn-collection-art" src="${escapeHtml(getCompanionScene(state.companion, state.userPreferences?.theme))}" alt="" decoding="async">
+        <div class="qn-collection-copy">
+          <p class="collection-companion__label">與你同行</p>
           <p class="collection-companion__name">${escapeHtml(petDisplayName(state.companion))}</p>
           ${state.companion.nickname ? `<p class="pet-original-name pet-original-name--sm">原名：${escapeHtml(petOriginalName(state.companion))}</p>` : ''}
-          ${bondBadgeHtml(state.companion)}
+          <p class="qn-collection-bond">${twilightIcon('heart')}親密度 Lv.${state.companion.bondLevel ?? 1}</p>
         </div>
-        <span class="badge badge--rarity rarity-${state.companion.rarity}">${state.companion.rarity}</span>`;
+        <button type="button" class="qn-collection-image" data-action="view-pet-image" data-pet-id="${escapeHtml(state.companion.id)}" aria-label="查看 ${escapeHtml(petDisplayName(state.companion))} 原圖">${twilightIcon('eye')}</button>`;
       companionEl.classList.remove('collection-companion--empty');
     } else {
       companionEl.innerHTML = '<p class="collection-companion--empty">尚未設定陪伴寵物</p>';
@@ -6268,7 +6328,7 @@ function openPetDetailModal(petId) {
     openPetFeedModal(pet);
   });
 
-  document.querySelector('[data-action="set-companion-detail"]')?.addEventListener('click', async (e) => {
+  document.querySelector('[data-action="set-companion-detail"]')?.addEventListener('click', trackUpdateActivity(async (e) => {
     const id = e.target.dataset.petId;
     if (id) {
       await setCompanion(id);
@@ -6277,14 +6337,14 @@ function openPetDetailModal(petId) {
       showToast('已設為陪伴寵物', 'success');
       void recordOnboardingEvent('companion-set', { petId: id });
     }
-  });
+  }));
 
   document.querySelector('[data-action="edit-nickname"]')?.addEventListener('click', (e) => {
     const id = e.target.dataset.petId;
     if (id) openNicknameModal(id);
   });
 
-  document.querySelector('[data-action="clear-nickname"]')?.addEventListener('click', async (e) => {
+  document.querySelector('[data-action="clear-nickname"]')?.addEventListener('click', trackUpdateActivity(async (e) => {
     const id = e.target.dataset.petId;
     if (!id) return;
     const result = await clearPetNickname(id);
@@ -6296,7 +6356,7 @@ function openPetDetailModal(petId) {
     await onRefresh({ renderMode: ['collection'] });
     openPetDetailModal(id);
     showToast('暱稱已清除', 'success');
-  });
+  }));
 }
 
 /* ─── 探險頁 ─── */
@@ -7002,7 +7062,7 @@ function openExpeditionDispatchModal(areaId) {
     overlay.id = 'expedition-dispatch-modal';
     overlay.className = 'expedition-dispatch-modal';
     document.body.appendChild(overlay);
-    overlay.addEventListener('click', handleDispatchModalClick);
+    overlay.addEventListener('click', trackUpdateActivity(handleDispatchModalClick));
   }
   rememberDialogFocus(overlay);
   document.body.classList.add('expedition-dispatch-open');
@@ -7492,7 +7552,7 @@ function openHabitForm(habitId = null) {
 
   document.getElementById('habit-form-cancel')?.addEventListener('click', closeModal);
 
-  document.getElementById('habit-form')?.addEventListener('submit', async (e) => {
+  document.getElementById('habit-form')?.addEventListener('submit', trackUpdateActivity(async (e) => {
     e.preventDefault();
     const errEl = document.getElementById('habit-form-error');
     const name = document.getElementById('habit-name')?.value?.trim();
@@ -7520,7 +7580,7 @@ function openHabitForm(habitId = null) {
         showToast(result.error || '儲存失敗', 'error');
       }
     }
-  });
+  }));
 }
 
 /* ─── 更多 / 成就頁 ─── */
@@ -7837,6 +7897,8 @@ async function handleWorkshopClick(e) {
 
 function renderMoreView() {
   renderVersionInfo();
+  const themeNames = Object.fromEntries(Object.entries(THEME_DIRECTIONS).map(([key, direction]) => [key, direction.name]));
+  setText('more-active-theme', `${themeNames[state?.userPreferences?.theme] || themeNames.default} · 自由切換三種風格`);
 
   const summary = state?.achievementSummary;
   const badge = document.getElementById('more-achievements-badge');
@@ -8162,7 +8224,7 @@ function bindAchievementClaimAll() {
     const btn = e.target.closest('[data-action="claim-all-achievements"]');
     if (!btn || btn.disabled) return;
     e.preventDefault();
-    handleClaimAllAchievements();
+    void trackUpdateActivity(handleClaimAllAchievements)();
   });
 }
 
@@ -8397,7 +8459,7 @@ function openTitleManagementModal() {
   `);
 
   document.querySelectorAll('.title-item .btn').forEach((btn) => {
-    btn.addEventListener('click', async () => {
+    btn.addEventListener('click', trackUpdateActivity(async () => {
       const titleId = btn.dataset.titleId;
       if (!titleId || btn.textContent === '已裝備') return;
       const result = await equipTitle(titleId);
@@ -8408,15 +8470,15 @@ function openTitleManagementModal() {
       } else {
         showToast(result.error || '設定失敗', 'error');
       }
-    });
+    }));
   });
 
-  document.getElementById('btn-clear-title')?.addEventListener('click', async () => {
+  document.getElementById('btn-clear-title')?.addEventListener('click', trackUpdateActivity(async () => {
     await equipTitle(null);
     await onRefresh({ renderMode: ['achievements', 'collection', 'tasks'] });
     closeModal();
     showToast('已清除稱號', 'info');
-  });
+  }));
 }
 
 async function handleAchievementCheckAfterAction() {
@@ -8616,7 +8678,7 @@ function initImportBackupHandlers() {
   fileInput?.addEventListener('change', (e) => {
     const file = e.target.files?.[0];
     if (file) {
-      handleImportFileSelect(file);
+      void trackUpdateActivity(handleImportFileSelect)(file);
     }
   });
 
@@ -8625,7 +8687,7 @@ function initImportBackupHandlers() {
       showToast('請先選擇有效的備份檔', 'warning');
       return;
     }
-    handleRestoreBackup();
+    void trackUpdateActivity(handleRestoreBackup)();
   });
 
   reloadBtn?.addEventListener('click', () => {
@@ -8735,7 +8797,7 @@ function buildVersionInfoHtml({ compact = false, serviceWorkerStatus = '檢查�
           <dt class="version-info-label">Service Worker</dt>
           <dd class="version-info-value" data-version-sw-status>${escapeHtml(serviceWorkerStatus)}</dd>
         </div>
-      </dl>`;
+      </dl>${updateControlsHtml()}`;
   }
 
   return `
@@ -8758,8 +8820,8 @@ function buildVersionInfoHtml({ compact = false, serviceWorkerStatus = '檢查�
       </div>
     </dl>
     <p class="settings-version__note version-info-note" data-version-update-hint>
-      若仍看到舊版，請先匯出 JSON 備份，再關閉所有 QuestNote 分頁與主畫面 App 後重新開啟。請勿為了更新而清除網站資料。
-    </p>`;
+      按「檢查並更新」即可取得新版。更新保留存檔，請勿清除網站資料。
+    </p>${updateControlsHtml()}`;
 }
 
 function updateVersionInfoServiceWorkerStatus(status) {
@@ -8788,6 +8850,7 @@ export function renderVersionInfo() {
     container.innerHTML = buildVersionInfoHtml({ compact, serviceWorkerStatus: '檢查中' });
   });
 
+  refreshUpdateControls();
   setText('settings-footer-note', `QuestNote ${formatDisplayVersion()} — 離線個人任務記事 App`);
 
   updateServiceWorkerStatusDisplay().catch((error) => {
@@ -8797,6 +8860,7 @@ export function renderVersionInfo() {
 }
 
 function renderSettingsView() {
+  void renderReminderSettings();
   renderVersionInfo();
 
   if (!state) return;

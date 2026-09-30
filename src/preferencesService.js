@@ -2,10 +2,9 @@
  * 使用者偏好設定 — 自動補齊舊資料預設值
  */
 import { dbGet, dbPut, STORES } from './db.js';
+import { SUPPORTED_THEMES, THEME_COLORS } from './themeRegistry.js';
 
 const PREFS_KEY = 'userPreferences';
-
-const VALID_THEMES = ['default', 'sweet'];
 
 const DEFAULT_PREFS = {
   key: PREFS_KEY,
@@ -18,7 +17,7 @@ const DEFAULT_PREFS = {
  * @param {string|undefined} theme
  */
 export function normalizeTheme(theme) {
-  return VALID_THEMES.includes(theme) ? theme : 'default';
+  return SUPPORTED_THEMES.includes(theme) ? theme : 'default';
 }
 
 /**
@@ -41,10 +40,12 @@ export function normalizeUserPreferences(prefs) {
  */
 export function applyThemeToDocument(theme) {
   const valid = normalizeTheme(theme);
+  // Root styling controls browser chrome; body styling keeps forms theme-specific.
+  document.documentElement.dataset.theme = valid;
   document.body.dataset.theme = valid;
   const metaTheme = document.querySelector('meta[name="theme-color"]');
   if (metaTheme) {
-    metaTheme.content = valid === 'sweet' ? '#FFF7FB' : '#080B16';
+    metaTheme.content = THEME_COLORS[valid];
   }
   return valid;
 }

@@ -4,7 +4,10 @@
 
  */
 
+import { initAppUpdates } from './updateController.js';
+import { openModal, closeModal } from './ui.js';
 import { openDB, clearAllData } from './db.js';
+import { getReminderState, disableReminders } from './reminderService.js';
 import { RELEASE_PROFILE } from './releaseProfile.js';
 
 import { getAllTasks } from './taskService.js';
@@ -395,6 +398,8 @@ async function refreshState(options = {}) {
 
 
 async function resetAllData() {
+  const reminderState = await getReminderState();
+  if (reminderState.token) await disableReminders();
 
   await clearAllData();
 
@@ -440,103 +445,34 @@ export async function runAchievementCheck() {
 
 
 
-// Waiting workers activate naturally after every previous client closes.
-
-
-
 async function registerServiceWorker() {
-
-  if (!('serviceWorker' in navigator)) return;
-
-
-
+  const options = { showIconGuide: openModal, openBackupSettings: () => {
+    closeModal(); switchView('settings');
+    document.getElementById('btn-export')?.scrollIntoView({ block: 'center' });
+    document.getElementById('btn-export')?.focus({ preventScroll: true });
+  } };
+  if (!('serviceWorker' in navigator)) { initAppUpdates(null, options); return; }
   try {
-
-    const reg = await navigator.serviceWorker.register(getServiceWorkerRegisterUrl());
-
-    console.log('[QuestNote] SW registered:', reg.scope);
-
-
-
-    if (reg.waiting) {
-
-      showUpdateBanner(reg);
-
-    }
-
-
-
-    reg.addEventListener('updatefound', () => {
-
-      const newWorker = reg.installing;
-
-      if (!newWorker) return;
-
-
-
-      newWorker.addEventListener('statechange', () => {
-
-        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-
-          showUpdateBanner(reg);
-
-        }
-
-      });
-
-    });
-
-
-
+    // Keep an existing registration's URL; update() fetches verified new bytes.
+    const scope = new URL('../', import.meta.url).href;
+    const existing = await navigator.serviceWorker.getRegistration(scope);
+    const reg = existing?.scope === scope ? existing
+      : await navigator.serviceWorker.register(getServiceWorkerRegisterUrl(), { updateViaCache: 'none' });
+    initAppUpdates(reg, options);
+    reg.update().catch(() => {});
     document.addEventListener('visibilitychange', () => {
-
-      if (document.visibilityState === 'visible') {
-
-        reg.update().catch(() => {});
-
-        const today = getTodayDateString();
-
-        if (today !== lastKnownDate) {
-
-          lastKnownDate = today;
-
-          refreshState({ renderMode: 'full' }).catch((err) => console.warn('[QuestNote] 跨日刷新失敗:', err));
-
-        }
-
-        // 信箱前景檢查改由 UI 層 visibility listener + 節流處理
-
+      if (document.visibilityState !== 'visible') return;
+      reg.update().catch(() => {});
+      const today = getTodayDateString();
+      if (today !== lastKnownDate) {
+        lastKnownDate = today;
+        refreshState({ renderMode: 'full' }).catch((err) => console.warn('[QuestNote] 跨日刷新失敗:', err));
       }
-
     });
-
-
-
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      // Never reload during an unsaved edit, draw, restore, or animation.
-      showUpdateBanner(reg);
-    });
-
   } catch (err) {
-
     console.warn('[QuestNote] SW registration failed:', err);
-
+    initAppUpdates(null, options);
   }
-
-}
-
-
-
-function showUpdateBanner(reg) {
-  if (document.getElementById('update-banner')) return;
-  const banner = document.createElement('div');
-  banner.id = 'update-banner';
-  banner.className = 'update-banner';
-  banner.setAttribute('role', 'status');
-  banner.innerHTML = '<p class="update-banner__text">新版本已準備。完成目前操作後，關閉所有 QuestNote 分頁與視窗，再重新開啟即可更新。</p><button type="button" class="btn btn--primary btn--sm" id="btn-update-dismiss">知道了</button>';
-  document.body.appendChild(banner);
-  requestAnimationFrame(() => banner.classList.add('show'));
-  document.getElementById('btn-update-dismiss').addEventListener('click', () => banner.remove());
 }
 
 async function initApp() {

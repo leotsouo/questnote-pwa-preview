@@ -1,0 +1,344 @@
+/* Shared QuestNote component coverage, derived from the approved Twilight experiment. */
+.twilight-icon { display: inline-flex; }
+.twilight-home[hidden], .twilight-chapter-heading[hidden], .twilight-gacha-scene[hidden] { display: none !important; }
+/* This swatch also appears while either older theme is selected. */
+.theme-card__preview-frame--twilight { background: radial-gradient(circle at 72% 27%, color-mix(in srgb, var(--qn-scene-accent) 38%, transparent), transparent 35%), var(--qn-scene); border: 1px solid var(--color-border); position: relative; overflow: hidden; }
+.theme-card__preview-frame--twilight::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 44%; background: var(--color-bg-main); border-radius: 12px 12px 0 0; }
+.theme-card__preview-btn--twilight { background: var(--color-primary); z-index: 1; }
+.theme-card__swatch--accent-twilight { background: var(--qn-scene-accent); z-index: 1; }
+.theme-card__swatch--primary-twilight { background: var(--color-primary); }
+
+
+body[data-theme]::before { display: none; }
+body[data-theme] #app { background: var(--tw-paper); }
+body[data-theme] #app::before { content: ''; pointer-events: none; position: absolute; inset: 0; opacity: .025; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Cpath fill='%23585858' filter='url%28%23grain%29' d='M0 0h160v160H0z'/%3E%3C/svg%3E"); }
+body[data-theme] #app .view { position: relative; padding: 24px; animation: twilight-page-enter .2s ease-out; }
+body[data-theme] #app .view > .page-header { background: var(--tw-night); margin: -24px -24px 26px; padding: 34px 24px 30px; min-height: 126px; border-radius: 0 0 26px 26px; position: relative; }
+body[data-theme] #app .page-title { font-family: var(--tw-serif); font-size: 30px; line-height: 1.3; font-weight: 400; letter-spacing: 1.5px; color: var(--qn-scene-text); background: none; -webkit-text-fill-color: currentColor; text-shadow: none; }
+body[data-theme] #app .page-subtitle { color: var(--qn-scene-muted); font-size: 12px; line-height: 1.7; margin-top: 8px; max-width: 310px; }
+body[data-theme] #app .page-back-btn { color: var(--qn-scene-accent); border: 1px solid color-mix(in srgb, var(--qn-scene-accent) 17%, transparent); background: #ffffff05; min-width: 44px; min-height: 44px; box-shadow: none; }
+body[data-theme] #app .section-title { font-family: var(--tw-serif); font-size: 20px; color: var(--tw-ink); letter-spacing: .5px; font-weight: 500; text-transform: none; }
+body[data-theme] #app :is(.card, .stat-card, .empty-state) { background: var(--color-bg-card); color: var(--tw-ink); border-color: var(--tw-line); box-shadow: none; }
+body[data-theme] #app .card { padding: 20px; }
+body[data-theme] #app .card-animate { animation: none; }
+body[data-theme] :is(.btn, .default-summon-btn, .expedition-dispatch-button, .expedition-confirm-button, .quest-claim-button) { min-height: 44px; border-radius: 10px; font-weight: 500; text-shadow: none; }
+body[data-theme] .btn--primary, body[data-theme] :is(#app, #modal-body) .btn--primary { background: var(--tw-green); color: var(--color-bg-card); box-shadow: none; border: 1px solid var(--tw-green); }
+body[data-theme] :is(#app, #modal-body) .btn--secondary { background: var(--color-bg-card-soft); color: var(--color-primary); box-shadow: none; border: 1px solid var(--color-border); }
+body[data-theme] :is(#app, #modal-body) .btn--ghost { background: transparent; color: var(--tw-muted); box-shadow: none; }
+body[data-theme] :is(#app, #modal-body) .btn--danger { color: var(--color-danger); border-color: var(--color-border); }
+body[data-theme] :is(.form-input, .form-textarea, .form-select, select, input[type="date"]) { color-scheme: light; color: var(--tw-ink); background: var(--color-bg-elevated); border-color: var(--color-border); box-shadow: none; }
+body[data-theme] :is(.form-input, .form-textarea)::placeholder { color: var(--color-text-muted); }
+body[data-theme] :is(button, a, input, textarea, select, summary):focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+body[data-theme] #app .fab { background: var(--tw-ink); color: var(--tw-paper); box-shadow: 0 4px 16px color-mix(in srgb, var(--color-text-main) 13%, transparent); border: 0; }
+body[data-theme] .twilight-icon { display: inline-flex; flex: none; align-items: center; justify-content: center; }
+body[data-theme] .twilight-icon svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.55; stroke-linecap: round; stroke-linejoin: round; }
+body[data-theme] #app :is(.segmented-control, .task-view-tabs) { background: transparent; border: 0; border-bottom: 1px solid var(--tw-line); padding: 0; border-radius: 0; box-shadow: none; gap: 12px; }
+body[data-theme] #app :is(.segmented-control__btn, .quest-tab) { min-height: 44px; background: transparent; color: var(--tw-muted); box-shadow: none; font-size: 12px; border-radius: 0; position: relative; }
+body[data-theme] #app :is(.segmented-control__btn.active, .quest-tab.is-active) { color: var(--tw-ink); border-bottom: 2px solid var(--tw-green); background: transparent; font-weight: 600; }
+body[data-theme] #app .filter-bar { gap: 8px; scrollbar-width: thin; scrollbar-color: var(--color-border) transparent; }
+body[data-theme] #app .filter-btn { background: transparent; color: var(--tw-muted); border: 1px solid var(--tw-line); border-radius: 8px; min-height: 44px; box-shadow: none; font-size: 12px; padding: 8px 12px; }
+body[data-theme] #app .filter-btn.active { background: var(--tw-green); color: var(--color-bg-card); border-color: var(--tw-green); }
+body[data-theme] #app .progress-bar { background: var(--color-bg-card-soft); height: 5px; }
+body[data-theme] #app .progress-bar__fill { background: var(--tw-green); box-shadow: none; }
+
+/* Shared navigation: same destinations and notification state, quieter identity. */
+body[data-theme] .bottom-nav { background: var(--color-bg-main); border-color: var(--tw-line); box-shadow: 0 -7px 24px color-mix(in srgb, var(--color-text-main) 3%, transparent); padding: 8px 10px max(8px, var(--safe-bottom)); backdrop-filter: none; -webkit-backdrop-filter: none; }
+body[data-theme] .nav-item { color: var(--color-text-muted); font-size: 11px; gap: 4px; padding: 0; min-height: 48px; flex-direction: column; }
+body[data-theme] .nav-item > .twilight-icon { order: -1; }
+body[data-theme] .nav-item .nav-icon { display: none; }
+body[data-theme] .nav-item.active { background: transparent; color: var(--tw-ink); border-radius: 0; font-weight: 600; }
+body[data-theme] .nav-item.active::before { content: ''; width: 24px; height: 2px; background: var(--tw-green); position: absolute; top: -9px; left: calc(50% - 12px); }
+body[data-theme] .nav-badge { box-shadow: none; width: 5px; height: 5px; }
+body[data-theme] .nav-badge--alert { background: var(--color-danger); }
+body[data-theme] .nav-badge--hint { background: var(--color-accent); }
+
+/* Task home: twilight scene above one continuous paper notebook. */
+body[data-theme] #app #view-tasks.active { display: flex; flex-direction: column; padding: 0; }
+body[data-theme] #app #view-tasks > .page-header--tasks { position: absolute; top: 12px; right: 18px; left: auto; z-index: 3; margin: 0; padding: 0; min-height: 44px; background: none; }
+body[data-theme] #view-tasks .page-header__inner { display: none; }
+body[data-theme] #view-tasks #btn-global-mailbox { width: 44px; height: 44px; background: #ffffff08; border: 0; border-radius: 50%; box-shadow: none; color: var(--qn-scene-text); }
+body[data-theme] .mailbox-entry-btn__icon { font-size: 0; }
+body[data-theme] #twilight-home { order: 0; background: var(--tw-night); color: var(--tw-paper); overflow: hidden; }
+body[data-theme] .twilight-masthead { height: 64px; display: flex; align-items: center; padding: 8px 25px 0; }
+body[data-theme] .twilight-wordmark { display: inline-flex; gap: 10px; align-items: center; font: 24px/1.2 Georgia, serif; letter-spacing: -.6px; }
+body[data-theme] .twilight-wordmark > span:last-child { color: var(--tw-gold); margin-left: -9px; }
+body[data-theme] .twilight-wordmark .twilight-icon { color: var(--tw-gold); }
+body[data-theme] .twilight-wordmark svg { width: 27px; height: 27px; stroke-width: 1.25; }
+body[data-theme] .twilight-scene { height: 250px; position: relative; overflow: hidden; }
+body[data-theme] .twilight-companion-art { position: absolute; width: 310px; height: 310px; right: -27px; top: -17px; object-fit: cover; opacity: .88; mask-image: linear-gradient(90deg,transparent,#000 30%,#000 94%,transparent); -webkit-mask-image: linear-gradient(90deg,transparent,#000 30%,#000 94%,transparent); }
+body[data-theme] .twilight-scene--empty .twilight-companion-art { width: 100%; height: 100%; right: 0; top: 0; opacity: .55; mask-image: none; -webkit-mask-image: none; }
+body[data-theme] .twilight-scene-shade { position: absolute; inset: -20px 0 0; pointer-events: none; background: linear-gradient(90deg,var(--tw-night),color-mix(in srgb, var(--qn-scene) 73%, transparent) 20%,color-mix(in srgb, var(--qn-scene) 0%, transparent) 65%),linear-gradient(0deg,var(--tw-night),color-mix(in srgb, var(--qn-scene) 0%, transparent) 35%,color-mix(in srgb, var(--qn-scene) 0%, transparent) 84%,var(--tw-night)); }
+body[data-theme] .twilight-greeting { position: relative; padding: 19px 25px 0; pointer-events: none; }
+body[data-theme] .twilight-eyebrow { color: var(--qn-scene-muted); font-size: 10px; line-height: 1.6; font-weight: 500; letter-spacing: 1.6px; }
+body[data-theme] .twilight-greeting h1 { color: var(--qn-scene-text); font: 400 31px/1.46 var(--tw-serif); letter-spacing: 1.4px; margin-top: 12px; }
+body[data-theme] .twilight-greeting h1 span { color: var(--tw-gold); }
+body[data-theme] .twilight-greeting > p:last-child { color: var(--qn-scene-muted); font-size: 10px; line-height: 1.8; margin-top: 12px; }
+body[data-theme] .twilight-companion-caption { position: absolute; bottom: 0; left: 25px; right: 25px; }
+body[data-theme] .twilight-companion-caption .twilight-eyebrow { color: var(--tw-gold); font-size: 9px; letter-spacing: 1.8px; }
+body[data-theme] .twilight-pet-name { background: none; border: 0; min-height: 44px; color: var(--qn-scene-text); font-size: 19px; font-weight: 500; letter-spacing: .8px; display: flex; gap: 9px; align-items: center; max-width: 100%; padding: 0; text-align: left; }
+body[data-theme] .twilight-pet-name svg { width: 15px; height: 15px; }
+body[data-theme] .twilight-rarity { font: 10px/1.5 Georgia,serif; border: 1px solid color-mix(in srgb, var(--qn-scene-accent) 27%, transparent); border-radius: 4px; color: var(--qn-scene-accent); padding: 0 4px; }
+body[data-theme] .twilight-companion-caption > p:last-child { font-size: 10px; letter-spacing: .8px; color: var(--qn-scene-muted); }
+body[data-theme] .twilight-pet-touch { position: absolute; top: 42px; right: 18px; width: 174px; height: 140px; border: 0; background: none; color: var(--qn-scene-muted); display: flex; align-items: flex-end; justify-content: flex-end; gap: 4px; padding: 8px; font-size: 10px; border-radius: 25px; }
+body[data-theme] .twilight-pet-touch span:first-child { background: color-mix(in srgb, var(--qn-scene) 61%, transparent); border-radius: 15px; padding: 5px 8px; font-size: 9px; }
+body[data-theme] .twilight-pet-touch svg { width: 12px; height: 12px; color: var(--tw-gold); }
+body[data-theme] .twilight-pet-touch:disabled { opacity: .75; cursor: default; }
+body[data-theme] .twilight-voice { margin: 15px 25px 0; min-height: 29px; display: flex; gap: 9px; align-items: flex-start; }
+body[data-theme] .twilight-voice > span { font: 34px/1 Georgia,serif; color: var(--tw-gold); }
+body[data-theme] .twilight-voice p { color: var(--qn-scene-muted); font-size: 11px; line-height: 1.7; padding-top: 4px; }
+body[data-theme] .twilight-journey { padding: 14px 25px 22px; }
+body[data-theme] .twilight-journey-label { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+body[data-theme] .twilight-journey-label > span { color: var(--qn-scene-muted); font-size: 10px; letter-spacing: .8px; }
+body[data-theme] .twilight-journey-label strong { font-size: 15px; font-weight: 500; font-variant-numeric: tabular-nums; }
+body[data-theme] .twilight-journey-label small { color: var(--qn-scene-muted); font-size: 10px; font-weight: 400; }
+body[data-theme] .twilight-journey-track { height: 3px; background: #ffffff17; border-radius: 2px; margin-top: 12px; position: relative; --journey-progress: 0%; }
+body[data-theme] .twilight-journey-track > span { height: 100%; width: var(--journey-progress); display: block; background: var(--tw-gold); border-radius: 2px; transition: width .55s cubic-bezier(.2,.65,.25,1); }
+body[data-theme] .twilight-journey-track i { position: absolute; left: clamp(0px,var(--journey-progress),calc(100% - 12px)); top: -8px; font-size: 12px; font-style: normal; color: var(--tw-gold); transition: left .55s cubic-bezier(.2,.65,.25,1); }
+body[data-theme] .twilight-bond { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--qn-scene-muted); margin-top: 11px; }
+body[data-theme] .twilight-bond svg { width: 12px; height: 12px; }
+body[data-theme] #twilight-bond-progress { margin-left: auto; }
+body[data-theme] #twilight-chapter-heading { order: 2; background: var(--tw-paper); display: flex; align-items: center; justify-content: space-between; padding: 24px 25px 11px; margin-top: -3px; border-radius: 28px 28px 0 0; position: relative; }
+body[data-theme] .twilight-chapter-heading::after { content: ''; position: absolute; top: 0; right: 38px; width: 10px; height: 20px; background: var(--color-accent); clip-path: polygon(0 0,100% 0,100% 100%,50% 80%,0 100%); }
+body[data-theme] .twilight-chapter-heading p { font-size: 8px; letter-spacing: 1.9px; color: var(--tw-paper-gold); margin-bottom: 4px; }
+body[data-theme] .twilight-chapter-heading h2 { font: 500 24px/1.4 var(--tw-serif); letter-spacing: 1px; }
+body[data-theme] #twilight-pending { font: 11px/1.4 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; letter-spacing: 0; margin-left: 12px; color: var(--tw-muted); }
+body[data-theme] .twilight-add-task { width: 44px; height: 44px; background: var(--tw-ink); color: var(--tw-paper); border: 0; border-radius: 50%; font-size: 25px; font-weight: 300; }
+body[data-theme] #view-tasks #task-view-tabs { order: 3; margin: 0 25px 10px; }
+body[data-theme] #view-tasks #task-category-filters { order: 4; margin: 0 25px 8px; }
+body[data-theme] #view-tasks #task-category-filters .filter-btn { border: 0; background: none; padding: 4px 9px; font-size: 11px; }
+body[data-theme] #view-tasks #task-category-filters .filter-btn.active { background: var(--color-bg-card-soft); color: var(--tw-green); }
+body[data-theme] #view-tasks #task-view-content { order: 5; margin: 0 25px; }
+body[data-theme] #task-view-content[data-task-view="today"] > .task-section:first-child > .section-title { display: none; }
+body[data-theme] #app .filter-bar { scrollbar-width: none; padding-bottom: 0; }
+body[data-theme] #app .filter-bar::-webkit-scrollbar { display: none; }
+body[data-theme] #view-tasks .stats-bar { order: 6; margin: 12px 25px 20px; border-top: 1px solid var(--tw-line); border-bottom: 1px solid var(--tw-line); padding: 14px 0; gap: 14px; scrollbar-width: thin; }
+body[data-theme] #view-tasks .stat-card { background: transparent; border: 0; flex: 0 0 auto; min-width: 90px; padding: 0; text-align: left; }
+body[data-theme] #view-tasks .stat-icon { display: none; }
+body[data-theme] #view-tasks .stat-label { font-size: 10px; color: var(--tw-muted); }
+body[data-theme] #view-tasks .stat-value { font: 24px/1.3 Georgia,serif; color: var(--tw-ink); }
+body[data-theme] #view-tasks #habit-summary { order: 7; margin-inline: 25px; background: var(--color-bg-card-soft); color: var(--tw-green); border: 0; box-shadow: none; }
+body[data-theme] #view-tasks #home-hub { order: 8; margin: 0 25px 20px; }
+body[data-theme] #view-tasks :is(#today-plan-summary, #companion-section, #btn-add-task) { display: none; }
+body[data-theme] #view-tasks .task-list { gap: 0; }
+body[data-theme] #view-tasks .twilight-task-card { display: grid; grid-template-columns: 36px minmax(0,1fr) 30px; gap: 9px; border: 0; border-bottom: 1px solid var(--tw-line); padding: 19px 0; margin: 0; border-radius: 0; background: transparent; box-shadow: none; position: relative; overflow: visible; }
+body[data-theme] #view-tasks .twilight-task-card.task-card--done { opacity: 1; padding-block: 13px; }
+body[data-theme] #view-tasks .task-check { min-width: 44px; min-height: 44px; width: 44px; height: 44px; margin-left: -8px; border-radius: 50%; background: transparent; border: 0; position: relative; box-shadow: none; color: white; }
+body[data-theme] #view-tasks .task-check::before { content: ''; position: absolute; inset: 9px; border: 1.2px solid var(--color-text-muted); border-radius: 50%; }
+body[data-theme] #view-tasks .task-check.checked::before { background: var(--tw-green); border-color: var(--tw-green); }
+body[data-theme] #view-tasks .task-check .twilight-icon { position: relative; }
+body[data-theme] #view-tasks .task-check svg { width: 15px; height: 15px; }
+body[data-theme] #view-tasks .task-card__meta { color: var(--tw-muted); font-size: 10px; gap: 8px; min-height: 14px; margin: 0 0 5px; }
+body[data-theme] #view-tasks .twilight-task-priority { color: var(--priority-important); }
+body[data-theme] #view-tasks .priority-urgent .twilight-task-priority { color: var(--priority-urgent); }
+body[data-theme] #view-tasks .task-card__title { font-size: 15px; font-weight: 600; line-height: 1.65; color: var(--tw-ink); letter-spacing: .15px; margin: 0; overflow-wrap: anywhere; }
+body[data-theme] #view-tasks .task-card--done .task-card__title { color: var(--color-text-muted); font-weight: 400; }
+body[data-theme] #view-tasks .task-card__preview { font-size: 12px; color: var(--tw-muted); margin-top: 6px; line-height: 1.7; }
+body[data-theme] #view-tasks .task-card__rewards { gap: 12px; margin-top: 8px; color: var(--tw-paper-gold); font-size: 10px; display: flex; flex-wrap: wrap; }
+body[data-theme] #view-tasks .task-card__rewards > span { display: inline-flex; align-items: center; gap: 4px; }
+body[data-theme] #view-tasks .task-card__rewards > span:last-child { color: var(--tw-green); }
+body[data-theme] #view-tasks .task-card__rewards svg { width: 12px; height: 12px; }
+body[data-theme] #view-tasks .twilight-task-menu { position: relative; align-self: start; }
+body[data-theme] #view-tasks .twilight-task-menu summary { list-style: none; display: grid; place-items: center; width: 44px; height: 44px; margin-left: -7px; color: var(--tw-muted); cursor: pointer; }
+body[data-theme] .twilight-task-menu summary::-webkit-details-marker { display: none; }
+body[data-theme] #view-tasks .twilight-task-menu summary svg { width: 17px; height: 17px; }
+body[data-theme] #view-tasks .twilight-task-menu .task-card__actions { position: absolute; z-index: 5; right: 0; top: 44px; display: flex; flex-direction: column; align-items: stretch; flex-wrap: nowrap; gap: 2px; min-width: 132px; padding: 8px; margin: 0; border: 1px solid var(--tw-line); border-radius: 12px; background: var(--color-bg-elevated); box-shadow: 0 10px 25px color-mix(in srgb, var(--color-text-main) 13%, transparent); }
+body[data-theme] #view-tasks .task-card__subtasks { background: transparent; margin-top: 9px; border: 0; padding: 0; }
+body[data-theme] #view-tasks .twilight-task-expander .btn { padding: 0 5px; font-size: 11px; }
+body[data-theme] #view-tasks .section-toggle { background: transparent; color: var(--tw-muted); border: 0; font-size: 12px; }
+body[data-theme] #view-tasks .task-view-content > .empty-state:not(:first-child) { display: none; }
+body[data-theme] #view-tasks .empty-state { border: 0; background: transparent; padding: 20px 0; }
+body[data-theme] #view-tasks .home-hub__icons { border-top: 1px solid var(--tw-line); gap: 12px; }
+body[data-theme] #view-tasks .home-hub__icon { background: transparent; border-radius: 0; min-height: 54px; color: var(--tw-muted); box-shadow: none; }
+body[data-theme] #view-tasks .home-hub__emoji { font-size: 0; }
+body[data-theme] #view-tasks .home-hub__name { color: var(--tw-muted); font-size: 11px; }
+body[data-theme] #view-tasks .home-hub__icon.is-active { color: var(--tw-green); border-bottom: 2px solid var(--tw-green); background: transparent; }
+body[data-theme] #view-tasks .home-hub__dot { background: var(--color-accent); box-shadow: none; }
+body[data-theme] #view-tasks :is(.quest-panel__inner, .daily-blessing-card, .daily-blessing, .quest-card, .achievement-strip) { background: var(--color-bg-card); color: var(--tw-ink); border: 1px solid var(--tw-line); box-shadow: none; }
+body[data-theme] #view-tasks :is(.quest-card__title, .quest-card__description, .daily-blessing-card__title, .daily-blessing-card__subtitle, .daily-blessing-card__hint) { color: var(--tw-ink); }
+body[data-theme] #view-tasks .quest-claim-button { background: var(--tw-green); color: var(--color-bg-card); box-shadow: none; }
+
+/* Summoning: an actual catalog encounter, with prices/rates/pity unchanged. */
+body[data-theme] #view-gacha .gacha-panel { text-align: left; border: 0; background: var(--color-bg-card); padding: 20px; box-shadow: none; }
+body[data-theme] #view-gacha .twilight-gacha-scene { margin: -20px -20px 20px; height: 295px; padding: 35px 23px 23px; position: relative; overflow: hidden; border-radius: 18px 18px 0 0; background: var(--tw-night); color: var(--tw-paper); }
+body[data-theme] .twilight-gacha-art { position: absolute; inset: 0; pointer-events: none; }
+body[data-theme] .twilight-gacha-art img { position: absolute; width: 100%; height: 100%; object-fit: cover; opacity: .8; }
+body[data-theme] .twilight-gacha-art div { position: absolute; inset: 0; background: linear-gradient(90deg,color-mix(in srgb, var(--qn-scene) 86%, transparent),color-mix(in srgb, var(--qn-scene) 44%, transparent) 55%,color-mix(in srgb, var(--qn-scene) 0%, transparent)),linear-gradient(0deg,var(--qn-scene),color-mix(in srgb, var(--qn-scene) 0%, transparent) 60%); }
+body[data-theme] .twilight-gacha-scene > :not(.twilight-gacha-art) { position: relative; }
+body[data-theme] .twilight-gacha-scene h2 { font: 400 28px/1.5 var(--tw-serif); letter-spacing: 1px; margin: 12px 0 10px; color: var(--qn-scene-text); }
+body[data-theme] .twilight-gacha-scene h2 span { color: var(--tw-gold); }
+body[data-theme] .twilight-gacha-scene > p:not(.twilight-eyebrow) { font-size: 12px; line-height: 1.9; color: var(--qn-scene-muted); max-width: 210px; }
+body[data-theme] .twilight-gacha-caption { display: block; font-size: 10px; color: var(--qn-scene-accent); margin-top: 25px; }
+body[data-theme] #view-gacha .twilight-has-gacha-scene :is(.gacha-orb, .gacha-title, .gacha-subtitle) { display: none; }
+body[data-theme] #view-gacha .gacha-pool { color: var(--tw-paper-gold); text-shadow: none; font-size: 13px; }
+body[data-theme] #view-gacha :is(.gacha-info, .gacha-unlock, .gacha-pity, .gacha-pool-switcher) { background: transparent; border-color: var(--tw-line); box-shadow: none; }
+body[data-theme] #view-gacha .rate-tag { background: var(--color-bg-card-soft); color: var(--tw-ink); border-color: var(--tw-line); box-shadow: none; font-size: 11px; }
+body[data-theme] #view-gacha .rate-tag[data-rarity="SSR"] { color: var(--rarity-ssr); }
+body[data-theme] #view-gacha .rate-tag[data-rarity="UR"] { color: var(--rarity-ur); }
+body[data-theme] #view-gacha :is(.gacha-cost, .gacha-stardust, .gacha-pity__label, .gacha-pity__count) { color: var(--tw-ink); }
+body[data-theme] #view-gacha :is(.gacha-btn, .btn--pull, .btn--ten-pull) { background: var(--tw-green); color: var(--color-bg-card); box-shadow: none; border: 0; }
+body[data-theme] #view-gacha .gacha-theme-stage { border-radius: 18px; overflow: hidden; }
+body[data-theme] #view-gacha .gacha-theme-details { background: var(--color-bg-card); color: var(--tw-ink); border-color: var(--tw-line); }
+
+/* Collection: character artwork leads; ownership and lore remain meaningful. */
+body[data-theme] #view-collection .collection-companion { background: var(--tw-night); color: var(--tw-paper); border: 0; border-radius: 18px; box-shadow: none; }
+body[data-theme] #view-collection .collection-companion :is(.collection-companion__name, .collection-companion__title) { color: var(--qn-scene-text); text-shadow: none; }
+body[data-theme] #view-collection .collection-companion__meta { color: var(--qn-scene-muted); }
+body[data-theme] #view-collection :is(.collection-summary, .collection-milestone, .collection-milestones-panel) { background: transparent; color: var(--tw-ink); border-color: var(--tw-line); box-shadow: none; }
+body[data-theme] #view-collection .collection-summary__title { font-family: var(--tw-serif); font-size: 20px; font-weight: 500; color: var(--tw-ink); }
+body[data-theme] #view-collection :is(.collection-summary__next, .collection-milestone__description, .collection-milestone__progress) { color: var(--tw-muted); }
+body[data-theme] #view-collection .collection-summary__progress-fill { background: var(--tw-green); box-shadow: none; }
+body[data-theme] #view-collection .collection-rarity-chip { background: var(--color-bg-card-soft); border-color: var(--tw-line); color: var(--tw-muted); }
+body[data-theme] #view-collection .collection-grid { gap: 16px; }
+body[data-theme] #view-collection .collection-card { background: transparent; border: 0; border-bottom: 1px solid var(--tw-line); box-shadow: none; border-radius: 12px 12px 0 0; padding: 0 0 12px; animation: none; }
+body[data-theme] #view-collection .collection-card::before { display: none; }
+body[data-theme] #view-collection .collection-card__image { border-radius: 12px; background: var(--color-bg-card-soft); overflow: hidden; }
+body[data-theme] #view-collection .collection-card .pet-image-frame { border: 0; box-shadow: none; border-radius: 12px; }
+body[data-theme] #view-collection .collection-card__info { padding: 12px 0 0; }
+body[data-theme] #view-collection .collection-card__name { font: 500 16px/1.5 var(--tw-serif); color: var(--tw-ink); text-shadow: none; }
+body[data-theme] #view-collection :is(.collection-card__title, .collection-card__original-name, .fragments, .locked-label, .collection-card__state) { color: var(--tw-muted); font-size: 11px; line-height: 1.6; }
+body[data-theme] #view-collection .collection-card__actions { gap: 6px; padding: 12px 0 0; }
+body[data-theme] #view-collection :is(.btn--companion, .btn--upgrade, .collection-milestone__claim) { background: var(--color-bg-card-soft); color: var(--color-primary); border-color: var(--color-border); box-shadow: none; min-height: 44px; }
+body[data-theme] #view-collection .collection-card--locked { opacity: .8; }
+body[data-theme] .badge--rarity { background: var(--color-bg-card-soft); color: var(--tw-muted); border: 1px solid var(--tw-line); box-shadow: none; }
+body[data-theme] .badge--rarity.rarity-R { color: var(--rarity-r); }
+body[data-theme] .badge--rarity.rarity-SR { color: var(--rarity-sr); }
+body[data-theme] .badge--rarity.rarity-SSR { color: var(--rarity-ssr); }
+body[data-theme] .badge--rarity.rarity-UR { color: var(--rarity-ur); }
+
+/* Expedition: a field journal with existing region illustrations. */
+body[data-theme] #view-expedition .expedition-energy { background: transparent; border: 0; border-bottom: 1px solid var(--tw-line); box-shadow: none; padding: 0 0 18px; }
+body[data-theme] #view-expedition .expedition-energy__value { font: 30px/1.2 Georgia,serif; color: var(--tw-ink); }
+body[data-theme] #view-expedition .expedition-energy__icon { color: var(--tw-green); background: var(--color-bg-card-soft); box-shadow: none; }
+body[data-theme] #view-expedition :is(.expedition-energy__hint, .expedition-map__hint) { color: var(--tw-muted); }
+body[data-theme] #view-expedition .expedition-area-card { background: var(--color-bg-card); border: 0; border-radius: 18px; padding: 0; box-shadow: none; overflow: hidden; }
+body[data-theme] #view-expedition .expedition-area-card__art { height: 145px; }
+body[data-theme] #view-expedition .expedition-area-card__content { padding: 16px; }
+body[data-theme] #view-expedition .expedition-area-card__title { font: 500 20px/1.4 var(--tw-serif); color: var(--tw-ink); text-shadow: none; }
+body[data-theme] #view-expedition :is(.expedition-area-card__meta, .expedition-area-card__material) { color: var(--tw-muted); font-size: 12px; }
+body[data-theme] #view-expedition .expedition-area-card__status { background: color-mix(in srgb, var(--color-bg-main) 93%, transparent); color: var(--color-primary); border: 0; font-size: 10px; }
+body[data-theme] #view-expedition .expedition-area-card__progress { background: var(--color-bg-card-soft); height: 3px; }
+body[data-theme] #view-expedition .expedition-area-progress-fill { background: var(--tw-green); box-shadow: none; }
+body[data-theme] #view-expedition .expedition-explore-badge { color: var(--tw-paper-gold); background: var(--color-bg-card-soft); }
+body[data-theme] #view-expedition .expedition-dispatch-button { background: var(--tw-green); color: var(--color-bg-card); border: 0; box-shadow: none; }
+body[data-theme] #view-expedition :is(.expedition-active-card, .exploration-panel, .exploration-area-card, .camp-card, .journey-archive) { background: var(--color-bg-card); color: var(--tw-ink); border-color: var(--tw-line); box-shadow: none; }
+body[data-theme] #view-expedition .expedition-active-card__fx { display: none; }
+body[data-theme] #view-expedition :is(.expedition-active-card__pet-name, .expedition-active-card__area, .expedition-status-badge) { color: var(--tw-green); text-shadow: none; }
+body[data-theme] #view-expedition .journey-list button { border-color: var(--tw-line); border-radius: 8px; color: var(--tw-ink); }
+body[data-theme] #view-expedition :is(.camp-unlock, .camp-cost, .exploration-milestone) { background: var(--color-bg-card-soft); color: var(--tw-muted); border-color: var(--tw-line); }
+
+/* The remaining journal: habits, rewards, workshop, help, sharing and settings. */
+body[data-theme] #app :is(.habit-card, .achievement-card, .workshop-material-card, .workshop-craft-card, .workshop-gift-card, .handbook-card, .handbook-section, .guide-chapter) { background: var(--color-bg-card); border-color: var(--tw-line); box-shadow: none; }
+body[data-theme] #app :is(.habit-card__name, .habit-card__title, .achievement-card__title, .workshop-material-card h3, .workshop-craft-card h3, .handbook-section__title) { color: var(--tw-ink); font-weight: 500; text-shadow: none; }
+body[data-theme] #app :is(.habit-card__description, .habit-card__meta, .achievement-card__description, .workshop-material-card__desc, .workshop-material-card__source) { color: var(--tw-muted); }
+body[data-theme] #app .achievement-summary__value--claimable { color: var(--tw-green); }
+body[data-theme] #app .habit-stat-card__value--streak { color: var(--tw-paper-gold); }
+body[data-theme] #app :is(.habit-check, .habit-complete-btn, .achievement-claim-button) { min-width: 44px; min-height: 44px; box-shadow: none; }
+body[data-theme] #app :is(.habit-summary, .habit-stats, .workshop-summary, .achievement-summary, .handbook-hero) { background: var(--color-bg-card-soft); color: var(--tw-ink); border-color: var(--color-border); box-shadow: none; }
+body[data-theme] #app :is(.workshop-tag, .habit-streak, .handbook-chip, .achievement-reward-chip) { background: var(--color-bg-card-soft); color: var(--tw-paper-gold); border-color: var(--color-border); }
+body[data-theme] #app .more-menu { background: transparent; border: 0; padding: 0; }
+body[data-theme] #app .more-menu-item { min-height: 82px; padding: 18px 0; background: transparent; border-bottom: 1px solid var(--tw-line); border-radius: 0; }
+body[data-theme] #app .more-menu-icon { font-size: 0; background: var(--color-bg-card-soft); color: var(--color-primary); width: 42px; height: 42px; border-radius: 12px; box-shadow: none; display: flex; align-items: center; justify-content: center; }
+body[data-theme] #app .more-menu-icon > img { display: none; }
+body[data-theme] #app .more-menu-label { color: var(--tw-ink); font-size: 15px; font-weight: 500; }
+body[data-theme] #app .more-menu-desc { color: var(--tw-muted); font-size: 12px; margin-top: 4px; line-height: 1.6; }
+body[data-theme] #app .more-menu-arrow { color: var(--color-text-muted); }
+body[data-theme] #app .more-menu-badge { background: var(--color-accent); box-shadow: none; }
+body[data-theme] #app .theme-picker { grid-template-columns: 1fr; gap: 14px; }
+body[data-theme] #app .theme-card { background: var(--color-bg-elevated); border: 1px solid var(--tw-line); border-radius: 14px; box-shadow: none; padding: 16px; }
+body[data-theme] #app .theme-card--active { background: var(--color-bg-card-soft); border-color: var(--color-border); box-shadow: none; }
+body[data-theme] #app .theme-card__title { font: 500 18px/1.4 var(--tw-serif); color: var(--tw-ink); }
+body[data-theme] #app .theme-card__desc { color: var(--tw-muted); font-size: 11px; line-height: 1.6; }
+body[data-theme] #app .theme-card__preview-frame { height: 40px; }
+body[data-theme] #app .theme-card__badge { background: var(--tw-green); color: var(--color-bg-card); }
+body[data-theme] #app :is(.version-info-card, .settings-backup, .settings-theme, .feedback-card, .share-card, .share-install) { background: var(--color-bg-card); border-color: var(--tw-line); box-shadow: none; }
+body[data-theme] #app .settings-section-note { color: var(--tw-muted); font-size: 12px; line-height: 1.8; }
+body[data-theme] #app .version-info-card { color: var(--tw-muted); }
+body[data-theme] #app :is(.guide-overview, .guide-more, .onboarding-dock) { background: var(--color-bg-card); border-color: var(--tw-line); box-shadow: none; }
+body[data-theme] .onboarding-dock { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 18px; box-shadow: 0 6px 25px color-mix(in srgb, var(--qn-scene) 13%, transparent); }
+body[data-theme] .onboarding-dock__top button { min-height: 44px; }
+body[data-theme] .onboarding-dock__actions .btn { min-height: 44px; }
+
+/* Dialogs and feedback are part of the same world, including result screens. */
+body[data-theme] :is(.modal, .global-mailbox-modal__sheet, .expedition-dispatch-modal__content, .onboarding-dialog) { background: var(--tw-paper); color: var(--tw-ink); border-color: var(--tw-line); box-shadow: var(--shadow-lg); border-radius: 25px 25px 0 0; }
+body[data-theme] .modal-title { font: 500 24px/1.4 var(--tw-serif); letter-spacing: .8px; }
+body[data-theme] .modal-close { background: transparent; color: var(--tw-muted); border: 0; }
+body[data-theme] :is(.modal-overlay, .global-mailbox-modal, .expedition-dispatch-modal, .onboarding-scrim) { background-color: color-mix(in srgb, var(--qn-scene) 70%, transparent); }
+body[data-theme] #modal-body .pet-detail { background: transparent; }
+body[data-theme] #modal-body .pet-detail__name { font: 500 25px/1.4 var(--tw-serif); color: var(--tw-ink); text-shadow: none; }
+body[data-theme] #modal-body :is(.pet-detail__title, .pet-detail__desc, .pet-detail__lore, .pet-detail__summon-line, .bond-story, .bond-status-card, .companion-preview-feed) { color: var(--tw-ink); background: transparent; border-color: var(--tw-line); box-shadow: none; }
+body[data-theme] #modal-body :is(.pet-detail__image, .companion-image-preview__frame) { box-shadow: none; border-radius: 16px; border-color: var(--tw-line); }
+body[data-theme] #modal-body .pet-detail__info-row { background: var(--color-bg-surface); color: var(--tw-muted); border-color: var(--tw-line); }
+body[data-theme] .expedition-dispatch-area__title { color: var(--tw-ink); font-family: var(--tw-serif); }
+body[data-theme] :is(.expedition-pet-option, .expedition-dispatch-objective, .expedition-reward-item) { background: var(--color-bg-card); border-color: var(--tw-line); color: var(--tw-ink); box-shadow: none; }
+body[data-theme] :is(.expedition-pet-option.selected, .expedition-pet-option--selected) { background: var(--color-bg-card-soft); border-color: var(--color-border); }
+body[data-theme] .expedition-confirm-button { background: var(--tw-green); color: var(--color-bg-card); box-shadow: none; }
+body[data-theme] :is(.mailbox-list-item__btn, .mailbox-reward-preview) { background: var(--color-bg-card); color: var(--tw-ink); border-color: var(--tw-line); box-shadow: none; }
+body[data-theme] :is(.mailbox-list-item__title, .mailbox-detail__title) { color: var(--tw-ink); font-weight: 500; }
+body[data-theme] :is(.mailbox-list-item__meta, .mailbox-detail__body, .mailbox-detail__claim-note) { color: var(--tw-muted); }
+body[data-theme] .mailbox-claim-chip { background: var(--color-bg-card-soft); color: var(--color-primary); border-color: var(--color-border); }
+body[data-theme] :is(.daily-wheel-modal, .daily-wheel-card) { background: var(--tw-paper); color: var(--tw-ink); border-color: var(--tw-line); box-shadow: none; }
+body[data-theme] .default-summon-result { background: var(--tw-paper); color: var(--tw-ink); }
+body[data-theme] .default-summon-result::before { display: none; }
+body[data-theme] :is(.default-summon-result__title, .default-summon-showcase__name) { color: var(--tw-ink); font-family: var(--tw-serif); font-weight: 500; text-shadow: none; }
+body[data-theme] .default-summon-showcase { background: transparent; box-shadow: none; border-color: var(--tw-line); }
+body[data-theme] .default-summon-showcase__altar { opacity: .12; }
+body[data-theme] .default-summon-showcase__frame { border-radius: 16px; border-color: var(--color-border); box-shadow: none; background: var(--tw-night); }
+body[data-theme] :is(.default-summon-result__eyebrow, .default-summon-showcase__line, .summon-result-single__title, .default-summon-grid-card__name) { color: var(--tw-muted); text-shadow: none; }
+body[data-theme] .default-summon-grid-card { background: var(--color-bg-card); border-color: var(--tw-line); box-shadow: none; }
+body[data-theme] .default-summon-result__actions { background: var(--tw-paper); border-color: var(--tw-line); }
+body[data-theme] .default-summon-btn { background: var(--tw-green); color: var(--color-bg-card); border: 0; box-shadow: none; }
+body[data-theme] .default-summon-badge { background: var(--color-bg-card-soft); color: var(--color-primary); border-color: var(--color-border); box-shadow: none; }
+body[data-theme] .summon-reveal-overlay:is([data-theme="ssr"], [data-theme="ur"]) .summon-reveal-bg { background: color-mix(in srgb, var(--qn-scene) 96%, transparent); }
+body[data-theme] .summon-reveal-overlay:is([data-theme="ssr"], [data-theme="ur"]) .summon-reveal-aura { background: radial-gradient(circle, color-mix(in srgb, var(--qn-scene-accent) 11%, transparent), transparent 65%); filter: none; }
+body[data-theme] .summon-reveal-overlay:is([data-theme="ssr"], [data-theme="ur"]) .summon-reveal-ring { opacity: .15; box-shadow: none; }
+body[data-theme] .summon-reveal-overlay:is([data-theme="ssr"], [data-theme="ur"]) .summon-reveal-rarity { font: 400 36px/1.4 Georgia, serif; letter-spacing: 5px; color: var(--tw-gold); text-shadow: none; }
+body[data-theme] .summon-reveal-overlay:is([data-theme="ssr"], [data-theme="ur"]) .summon-reveal-pet-frame { border-radius: 16px; box-shadow: none; overflow: hidden; }
+body[data-theme] .summon-reveal-overlay:is([data-theme="ssr"], [data-theme="ur"]) .summon-reveal-name { font-family: var(--tw-serif); font-size: 24px; font-weight: 500; text-shadow: none; color: var(--qn-scene-text); }
+body[data-theme] .summon-reveal-overlay:is([data-theme="ssr"], [data-theme="ur"]) :is(.summon-reveal-title, .summon-reveal-caption) { color: var(--color-border); font-size: 12px; font-weight: 400; text-shadow: none; }
+body[data-theme] .summon-reveal-skip { min-height: 44px; color: var(--color-bg-card-soft); background: #ffffff0c; border-color: color-mix(in srgb, var(--color-bg-card-soft) 21%, transparent); box-shadow: none; }
+body[data-theme] .toast { background: var(--color-bg-card); color: var(--tw-ink); border: 1px solid var(--tw-line); box-shadow: 0 8px 25px color-mix(in srgb, var(--qn-scene) 15%, transparent); }
+body[data-theme] .toast--success { background: var(--color-bg-card-soft); color: var(--color-primary); }
+body[data-theme] :is(.toast--reward, .reward-toast) { background: var(--color-primary); color: var(--color-text-inverse); border: 1px solid color-mix(in srgb, var(--qn-scene-accent) 20%, transparent); box-shadow: 0 8px 25px color-mix(in srgb, var(--qn-scene) 15%, transparent); text-shadow: none; }
+body[data-theme] :is(.toast--warning, .toast--error) { background: var(--color-bg-card-soft); color: var(--color-danger); }
+body[data-theme] .toast--info { background: var(--color-bg-card-soft); color: var(--color-secondary); }
+
+body[data-theme] .twilight-is-reacting .twilight-companion-art { animation: twilight-companion-reaction .72s cubic-bezier(.2,.6,.3,1); }
+@keyframes twilight-companion-reaction { 0%,100% { transform: translateY(0); } 38% { transform: translateY(-5px); filter: brightness(1.12); } }
+@keyframes twilight-page-enter { from { opacity: .65; } to { opacity: 1; } }
+@media (max-width: 350px) {
+  body[data-theme] #app .view { padding-inline: 20px; }
+  body[data-theme] #app .view > .page-header { margin-inline: -20px; padding-inline: 20px; }
+  body[data-theme] #view-tasks > .page-header--tasks { margin: 0; padding: 0; }
+  body[data-theme] :is(.twilight-masthead, .twilight-greeting) { padding-left: 21px; }
+  body[data-theme] .twilight-greeting h1 { font-size: 28px; }
+  body[data-theme] .twilight-greeting > p:last-child { font-size: 9px; }
+  body[data-theme] .twilight-companion-art { right: -59px; }
+  body[data-theme] .twilight-companion-caption { left: 21px; right: 21px; }
+  body[data-theme] .twilight-pet-touch { width: 139px; right: 11px; }
+  body[data-theme] .twilight-voice { margin-inline: 21px; }
+  body[data-theme] .twilight-journey { padding-inline: 21px; }
+  body[data-theme] #twilight-chapter-heading { padding-inline: 21px; }
+  body[data-theme] #view-tasks :is(#task-view-tabs, #task-category-filters, #task-view-content, .stats-bar, #home-hub) { margin-left: 21px; margin-right: 21px; }
+  body[data-theme] #view-tasks .twilight-task-card { gap: 5px; grid-template-columns: 32px minmax(0,1fr) 28px; }
+  body[data-theme] #view-collection .collection-grid { gap: 12px; }
+  body[data-theme] #view-collection .collection-card__actions { flex-wrap: wrap; }
+}
+@media (max-height: 740px) and (max-width: 500px) {
+  body[data-theme] .twilight-masthead { height: 56px; }
+  body[data-theme] .twilight-scene { height: 185px; }
+  body[data-theme] .twilight-greeting { padding-top: 12px; }
+  body[data-theme] .twilight-greeting h1 { font-size: 26px; line-height: 1.34; margin-top: 6px; }
+  body[data-theme] .twilight-greeting > p:last-child { display: none; }
+  body[data-theme] .twilight-companion-art { width: 250px; height: 250px; top: -18px; }
+  body[data-theme] .twilight-scene--empty .twilight-companion-art { width: 100%; height: 100%; top: 0; }
+  body[data-theme] .twilight-pet-touch { top: 20px; height: 95px; }
+  body[data-theme] .twilight-voice { margin-top: 8px; }
+  body[data-theme] .twilight-voice p { font-size: 10px; line-height: 1.6; padding-top: 2px; }
+  body[data-theme] .twilight-journey { padding-top: 8px; padding-bottom: 10px; }
+  body[data-theme] #twilight-chapter-heading { padding-top: 16px; }
+  body[data-theme] #view-tasks .twilight-task-card { padding-block: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body[data-theme] *, body[data-theme] *::before, body[data-theme] *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+body[data-theme].reduce-motion *, body[data-theme].reduce-motion *::before, body[data-theme].reduce-motion *::after { animation: none !important; transition: none !important; }

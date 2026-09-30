@@ -26,6 +26,20 @@ const STORES = {
   HABITS: 'habits',
 };
 
+const REMINDER_KEY = 'dailyReminder';
+const affectsReminders = (name) => name === STORES.TASKS || name === STORES.HABITS;
+function reminderChanged() {
+  if (typeof window !== 'undefined') window.dispatchEvent(new Event('questnote-reminder-change'));
+}
+function markReminderDirty(tx) {
+  const meta = tx.objectStore(STORES.META);
+  const request = meta.get(REMINDER_KEY);
+  request.onsuccess = () => {
+    const state = request.result;
+    if (state?.enabled) meta.put({ ...state, revision: state.revision + 1, dirty: true });
+  };
+}
+
 /** @type {IDBDatabase|null} */
 let dbInstance = null;
 
@@ -91,10 +105,12 @@ export async function dbGet(storeName, key) {
 export async function dbPut(storeName, value) {
   const db = await openDB();
   return new Promise((resolve, reject) => {
-    const tx = db.transaction(storeName, 'readwrite');
+    const changed = affectsReminders(storeName);
+    const tx = db.transaction(changed ? [storeName, STORES.META] : storeName, 'readwrite');
     const store = tx.objectStore(storeName);
     const request = store.put(value);
-    tx.oncomplete = () => resolve(value);
+    if (changed) markReminderDirty(tx);
+    tx.oncomplete = () => { if (changed) reminderChanged(); resolve(value); };
     tx.onerror = () => reject(tx.error || request.error);
     tx.onabort = () => reject(tx.error || new Error('IndexedDB transaction aborted'));
   });
@@ -106,10 +122,12 @@ export async function dbPut(storeName, value) {
 export async function dbDelete(storeName, key) {
   const db = await openDB();
   return new Promise((resolve, reject) => {
-    const tx = db.transaction(storeName, 'readwrite');
+    const changed = affectsReminders(storeName);
+    const tx = db.transaction(changed ? [storeName, STORES.META] : storeName, 'readwrite');
     const store = tx.objectStore(storeName);
     const request = store.delete(key);
-    tx.oncomplete = () => resolve();
+    if (changed) markReminderDirty(tx);
+    tx.oncomplete = () => { if (changed) reminderChanged(); resolve(); };
     tx.onerror = () => reject(tx.error || request.error);
     tx.onabort = () => reject(tx.error || new Error('IndexedDB transaction aborted'));
   });
@@ -135,10 +153,12 @@ export async function dbGetAll(storeName) {
 export async function dbClear(storeName) {
   const db = await openDB();
   return new Promise((resolve, reject) => {
-    const tx = db.transaction(storeName, 'readwrite');
+    const changed = affectsReminders(storeName);
+    const tx = db.transaction(changed ? [storeName, STORES.META] : storeName, 'readwrite');
     const store = tx.objectStore(storeName);
     const request = store.clear();
-    tx.oncomplete = () => resolve();
+    if (changed) markReminderDirty(tx);
+    tx.oncomplete = () => { if (changed) reminderChanged(); resolve(); };
     tx.onerror = () => reject(tx.error || request.error);
     tx.onabort = () => reject(tx.error || new Error('IndexedDB transaction aborted'));
   });
@@ -154,6 +174,7 @@ export async function dbMutateRecords(reads, reduce) {
     throw new TypeError('Invalid IndexedDB mutation');
   }
   const names = [...new Set(reads.map((read) => read.store))];
+  if (names.some(affectsReminders) && !names.includes(STORES.META)) names.push(STORES.META);
   const db = await openDB();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(names, 'readwrite');
@@ -165,7 +186,7 @@ export async function dbMutateRecords(reads, reduce) {
       failure = error;
       try { tx.abort(); } catch { /* The native transaction may already be aborted. */ }
     };
-    tx.oncomplete = () => resolve(result);
+    tx.oncomplete = () => { if (names.some(affectsReminders)) reminderChanged(); resolve(result); };
     tx.onerror = () => reject(failure || tx.error || new Error('IndexedDB mutation failed'));
     tx.onabort = () => reject(failure || tx.error || new Error('IndexedDB mutation aborted'));
     try {
@@ -190,6 +211,7 @@ export async function dbMutateRecords(reads, reduce) {
               if (!names.includes(write.store)) throw new Error('Mutation writes outside locked stores');
               tx.objectStore(write.store).put(write.value);
             }
+            if ((update.puts || []).some((write) => affectsReminders(write.store))) markReminderDirty(tx);
             result = update.result;
           } catch (error) { abort(error); }
         };
@@ -257,12 +279,16 @@ export async function replaceAllStores(payload) {
     const tx = db.transaction(ALL_STORE_NAMES, 'readwrite');
     let writeError = null;
 
-    tx.oncomplete = () => resolve();
+    tx.oncomplete = () => { reminderChanged(); resolve(); };
     tx.onerror = () => reject(writeError || tx.error || new Error('IndexedDB transaction failed'));
     tx.onabort = () => reject(writeError || tx.error || new Error('IndexedDB transaction aborted'));
 
     // A synchronous DataError/DataCloneError must abort the queued clears too.
     try {
+      const reminderRead = tx.objectStore(STORES.META).get(REMINDER_KEY);
+      reminderRead.onsuccess = () => {
+        if (reminderRead.result) tx.objectStore(STORES.META).put({ ...reminderRead.result, revision: reminderRead.result.revision + 1, dirty: true });
+      };
       for (const storeName of ALL_STORE_NAMES) {
         tx.objectStore(storeName).clear();
       }
