@@ -6,7 +6,7 @@
  * 寵物圖片不得加入 App Shell precache
  */
 
-const CACHE_NAME = 'questnote-preview-app-a265787d438074948bcbe36e3d37bf4bbd7c683f96f7935f312af784b645deb8';
+const CACHE_NAME = 'questnote-preview-app-2e0edb41bb6e27c56a6a485c2a958353d4467a44e064f90423f5fb65285d2e98';
 const PET_IMAGE_CACHE = 'questnote-preview-pet-images-v1';
 const MAILBOX_RUNTIME_CACHE = 'questnote-preview-mailbox-runtime-v1';
 const MAILBOX_FETCH_TIMEOUT_MS = 7000;
@@ -40,8 +40,8 @@ self.addEventListener('notificationclick', (event) => {
 const BUILD_PROFILE = {
   "schemaVersion": 1,
   "profile": "preview",
-  "artifactId": "a265787d438074948bcbe36e3d37bf4bbd7c683f96f7935f312af784b645deb8",
-  "sourceCommit": "bb968f292842673196e6de02ee867f0dde1764a8",
+  "artifactId": "2e0edb41bb6e27c56a6a485c2a958353d4467a44e064f90423f5fb65285d2e98",
+  "sourceCommit": "47c5d8a9c7d4dbd0dcdbc1d19e79a0310ab94a35",
   "scopePath": "/questnote-pwa-preview/",
   "runtimeContentSchema": 1,
   "dbName": "QuestNotePreviewDB",
@@ -81,7 +81,7 @@ const PRECACHE_HASHES = {
   "data/pools.json": "4fd1cdc8674e5592b6b2256603bad59b5bf555650c482237eedb6a86b3867fcc",
   "data/releases/3dfd5055f9c2d2d288ab7e235d4c85202899f0ecba49a1b2473d505ba3e9ff32/catalog.json": "3dfd5055f9c2d2d288ab7e235d4c85202899f0ecba49a1b2473d505ba3e9ff32",
   "data/titles.json": "318675b79872dfabccc4b8beb99f77eb248a40e5e50bbbd4e4dc24886b3a1398",
-  "index.html": "68673b42e6ef26f0fb8583d150b11c0df2b0aab6ef623ae4664e999ed3fd2457",
+  "index.html": "9b4c2f6d40f6d00d1cdba50ff8ee0579863011fa2010397b76a68983ae1d837c",
   "manifest.webmanifest": "92eebd112db700add8829cda91380b117bcf4f4d91723ea899055ebde22caad0",
   "src/achievementService.js": "25eba10a95247380c424a59dd539b7c0e55b866992a2eb6404ac74d3fb4b0316",
   "src/adventureHandbookService.js": "d9dc8d34fc08a83c0c2f36682698fd4d96ebd0852c8cb0fde161a5a718d065b9",
@@ -134,14 +134,14 @@ const PRECACHE_HASHES = {
   "src/questIcons.js": "7f9395e0af7db0fda7fa273e793275c94d5b8e3bdd2fb249b726e5f6c2046ad0",
   "src/questService.js": "93e6c875b21a3fb6cf8d0c0ad2ddae2b4307cee870da3b1b92a2a0969977d8a6",
   "src/releaseCatalog.js": "38ac32aedef26d927638ef7413ec78520c0f9d114623a4a61283d488d99cbb4a",
-  "src/releaseProfile.js": "7cc3ed9c26dfbc300c69214003eae77bc501107ed1f4cecb49c4f24baea97158",
+  "src/releaseProfile.js": "080fdf421eafe5ae9a2cb2383a0d995956717ec8fb1a2f981c1f91542665b5f4",
   "src/reminder-settings.css": "4b5053346fb0bc697af1455fa4a6e763d450045094f94a6f952b0721a385bd4a",
   "src/reminderController.js": "4ba72d19acca52c417445956521d97ce57b3873b1a61924840fdc47b8a9ad5b5",
   "src/reminderRules.js": "fb8939a256305ef880ecebf063d029dc8a1d37a58e330851b2d96ac001ee57bb",
   "src/reminderService.js": "443462be0699934e7dc731b5a692381acb1f12f1499c237566a16b4ee2c0578b",
   "src/rewardService.js": "a245a6e08e6ead6aa65dc4dbb99e8c767fa81bd210e253955359be1a5442e0ff",
   "src/shareService.js": "04705dbca03c699f62781606b45d8bf483acb7463358750d6c9c4c0da47bcad1",
-  "src/styles.css": "89357cc3ddff508d9a1d2c5749600bc897c593e62cc6f0e9fa1cb5f0cfc53379",
+  "src/styles.css": "6a34fc35e8bd48674e40eddcc8ded5e14ca5e9286a2e16587670c2032c75555a",
   "src/summon-polish.css": "0d3cbae026034e11034be8ecabc6ff9613a461fbaee616376a26f90f4b924bda",
   "src/summonRevealService.js": "71d4828b6e0c4a89285f63a2781c67e7b96b7966c3e0c98312c4c037c1c1bed4",
   "src/taskFilterService.js": "687858edc36119afcb388fc3fd75ebd058d0a93117da42740c8a1f18d4b00471",
@@ -155,12 +155,12 @@ const PRECACHE_HASHES = {
   "src/themeTokens.css": "7061e9c268ed909e3cae2738268dd2aeb44d0aca4810cfca22ddc9208a2f3c31",
   "src/twilightPresentation.js": "68373c4d07a5a0dcd682c6bfac1cbd6888f5677e3b38004768a98bea077b8a54",
   "src/ui-polish.css": "d56b6c2dc56782a7833ee96c4573e7a4ffbc7b8580ab9e9e9d0bc08e1fe473f8",
-  "src/ui.js": "c05a854511d1f93e124c438bc357d6022860249597f412925e1f32ba9b934e13",
+  "src/ui.js": "d956f8be65a81bded0f367178654fa0b486aad3043e66b4aaadf7c8bee2119a8",
   "src/uiHelpers.js": "875f08583510e7c246eebeff4b39d6a7273d2643f6a2a2931281672c6c4d7de6",
   "src/updateActivity.js": "a7032e043a14561ad07ab521b649a2bd508aeca6801376066fcab701e3d2b641",
   "src/updateController.js": "e038b05c3fa2e97158cb3a363996e34b10eba3f243dc5284ec540ea0753c93b9",
   "src/updateProtocol.js": "53e770213f0074208c348d7d4a12d68cad79404637eddbe7c2f7c8d3c2cd39c0",
-  "src/version.js": "ab66d42aa7ec46e9d8a6c253c0d373bb5abaceaf91c52ba1e8f983ae4b624ffd",
+  "src/version.js": "760026311c4505fca37680db66072dac9b4936da2bb07ea775f0cf0154ef06ff",
   "src/workshopService.js": "9833bf353f6c13072f1c3995e2770408533be4e8ed19ea0d1e481740fb7e2e69"
 };
 

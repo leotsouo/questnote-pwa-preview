@@ -17961,5 +17961,3 @@ body.is-pet-image-viewer-open .onboarding-dock { visibility: hidden; }
 
 /* Keep horizontal filter gestures within their own scroll row. */
 .filter-bar { overscroll-behavior-x: contain; }
-.collection-series-picker { display: flex; align-items: center; gap: 10px; margin-bottom: var(--space-3); }
-.collection-series-picker select { min-width: 0; flex: 1; min-height: 44px; color: var(--text-main); background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 8px 12px; }

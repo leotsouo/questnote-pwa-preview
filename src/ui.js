@@ -602,11 +602,6 @@ export function initUI(appState, refreshCallback, achievementCheckCallback) {
       refreshOnboarding();
     });
 
-    document.getElementById('collection-series-select')?.addEventListener('change', (e) => {
-      collectionSeriesFilter = e.target.value || 'all';
-      renderCollectionView();
-    });
-
     document.getElementById('collection-series-filters')?.addEventListener('click', (e) => {
       const btn = e.target.closest('.filter-btn');
       if (!btn) return;
@@ -6039,12 +6034,6 @@ function renderCollectionSeriesFilters() {
     { id: 'all', name: '全部系列' },
     ...seriesList.map((s) => ({ id: s.id, name: s.name })),
   ];
-
-  const picker = document.getElementById('collection-series-select');
-  if (picker) {
-    picker.innerHTML = buttons.map((item) => `<option value="${escapeHtml(item.id)}">${escapeHtml(item.name)}</option>`).join('');
-    picker.value = collectionSeriesFilter;
-  }
 
   bar.innerHTML = buttons.map((item) => {
     let label = item.name;
