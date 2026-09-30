@@ -19,6 +19,7 @@ import { getTodayDateString } from './taskFilterService.js';
 import { normalizeDailyCheckIn } from './dailyCheckInService.js';
 import { normalizeQuestProgress } from './questService.js';
 import { normalizeExplorationProgress } from './explorationService.js';
+import { normalizeCampProgress } from './campService.js';
 import { normalizeCollectionMilestoneState } from './collectionMilestoneService.js';
 import { normalizeGlobalMailboxState } from './mailboxService.js';
 import { validateBackupEnvelope, validateSnapshotData, validateStoredSnapshot } from './backupSchema.js';
@@ -50,6 +51,7 @@ const DATA_KEYS = [
   'dailyCheckIn',
   'questProgress',
   'explorationProgress',
+  'campProgress',
   'collectionMilestones',
   'globalMailboxState',
   'poolDebutSeen',
@@ -75,6 +77,7 @@ function buildDataPayload({
   dailyCheckIn,
   questProgress,
   explorationProgress,
+  campProgress,
   collectionMilestones,
   globalMailboxState,
   poolDebutSeen,
@@ -125,6 +128,7 @@ function buildDataPayload({
     dailyCheckIn,
     questProgress,
     explorationProgress,
+    campProgress,
     collectionMilestones,
     // 備份含 readIds / claimedIds；不含遠端信件正文或 mailbox cache
     // once per local profile：匯入後已領補償不可再領
@@ -366,6 +370,7 @@ function normalizePayloadData(rawBackup) {
     dailyCheckIn: normalizeDailyCheckIn(data.dailyCheckIn),
     questProgress: normalizeQuestProgress(data.questProgress),
     explorationProgress: normalizeExplorationProgress(data.explorationProgress),
+    campProgress: normalizeCampProgress(data.campProgress),
     collectionMilestones: normalizeCollectionMilestoneState(data.collectionMilestones),
     // 舊版備份缺少 mailbox state 時建立空的 readIds / claimedIds
     globalMailboxState: normalizeGlobalMailboxState(data.globalMailboxState),
@@ -437,6 +442,7 @@ export function migrateImportedData(normalizedBackup) {
   // Restore the snapshot's dates; normal app reads perform any subsequent rollover.
   const questProgress = normalizeQuestProgress(normalizedBackup.questProgress);
   const explorationProgress = normalizeExplorationProgress(normalizedBackup.explorationProgress);
+  const campProgress = normalizeCampProgress(normalizedBackup.campProgress);
   const collectionMilestones = normalizeCollectionMilestoneState(normalizedBackup.collectionMilestones);
   const globalMailboxState = normalizeGlobalMailboxState(normalizedBackup.globalMailboxState);
   const poolDebutSeen = normalizePoolDebutSeen(normalizedBackup.poolDebutSeen);
@@ -460,6 +466,7 @@ export function migrateImportedData(normalizedBackup) {
     dailyCheckIn,
     questProgress,
     explorationProgress,
+    campProgress,
     collectionMilestones,
     globalMailboxState,
     poolDebutSeen,
@@ -556,6 +563,7 @@ export async function safeReplaceAllData(migratedData) {
     dailyCheckIn: migratedData.dailyCheckIn,
     questProgress: migratedData.questProgress,
     explorationProgress: migratedData.explorationProgress,
+    campProgress: migratedData.campProgress,
     collectionMilestones: migratedData.collectionMilestones,
     globalMailboxState: migratedData.globalMailboxState,
     poolDebutSeen: migratedData.poolDebutSeen,

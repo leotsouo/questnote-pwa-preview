@@ -2,19 +2,28 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="theme-color" content="#080B16" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="QuestNote" />
   <title>QuestNote</title>
+  <meta name="description" content="QuestNote 是個人任務記事 App：記錄任務、養成習慣，和幻獸一起冒險。" />
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="zh_TW" />
+  <meta property="og:title" content="QuestNote 預覽" />
+  <meta property="og:description" content="記錄任務、養成習慣，和幻獸一起冒險。" />
+  <meta property="og:url" content="https://leotsouo.github.io/questnote-pwa-preview/" />
+  <meta property="og:image" content="https://leotsouo.github.io/questnote-pwa-preview/assets/icons/icon-512.png" />
+  <meta property="og:image:alt" content="QuestNote App 圖示" />
+  <meta name="twitter:card" content="summary" />
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="assets/icons/icon-192.png" />
   <link rel="apple-touch-icon" href="assets/icons/icon-192.png" />
   <link rel="stylesheet" href="src/styles.css" />
   <link rel="stylesheet" href="src/ui-polish.css" />
   <link rel="stylesheet" href="src/summon-polish.css" />
-  <meta name="questnote-artifact" content="6b049f0f3811dc289a48f41a7419af717cf7c387737c9c81a47ef3e176fad979">
+  <meta name="questnote-artifact" content="f8e7b79ffb561c9e539d8cf23a3d111cdcca337305a17bade4446ffbd28e1208">
 </head>
 <body data-theme="default">
   <div id="app-loader" class="app-loader">
@@ -271,7 +280,9 @@
       <section id="expedition-energy" class="expedition-energy card"></section>
       <section id="expedition-active" class="expedition-active"></section>
       <section id="expedition-areas" class="expedition-areas"></section>
+      <section id="expedition-camp" class="expedition-camp"></section>
       <section id="exploration-panel" class="exploration-panel"></section>
+      <section id="expedition-archive" class="expedition-archive"></section>
       <section id="expedition-pets" class="expedition-pets"></section>
     </main>
 
@@ -285,6 +296,22 @@
       </header>
 
       <section class="more-menu card">
+        <button class="more-menu-item" data-goto="share" type="button">
+          <span class="more-menu-icon" aria-hidden="true">🔗</span>
+          <span class="more-menu-text">
+            <span class="more-menu-label">分享 QuestNote</span>
+            <span class="more-menu-desc">傳送正式版連結給朋友</span>
+          </span>
+          <span class="more-menu-arrow" aria-hidden="true">›</span>
+        </button>
+        <button class="more-menu-item" data-feedback-open type="button">
+          <span class="more-menu-icon" aria-hidden="true">💬</span>
+          <span class="more-menu-text">
+            <span class="more-menu-label">意見與問題回報</span>
+            <span class="more-menu-desc">免登入，直接把問題與建議交給開發者</span>
+          </span>
+          <span class="more-menu-arrow" aria-hidden="true">›</span>
+        </button>
         <button class="more-menu-item" data-goto="guide" type="button">
           <span class="more-menu-icon more-menu-icon--image"><img src="assets/icons/icon-192.png" alt="" width="28" height="28"></span>
           <span class="more-menu-text">
@@ -351,6 +378,74 @@
       </section>
     </main>
 
+    <main id="view-share" class="view">
+      <header class="page-header page-header--with-back">
+        <button class="page-back-btn" data-goto="more" type="button" aria-label="返回更多">‹</button>
+        <div class="page-header__inner">
+          <h1 class="page-title">分享 QuestNote</h1>
+          <p class="page-subtitle">邀請朋友一起展開任務冒險</p>
+        </div>
+      </header>
+      <section class="card share-card" aria-labelledby="share-card-title">
+        <h2 id="share-card-title" class="section-title">分享正式版</h2>
+        <p class="settings-section-note">傳送的是 App 連結。每個人的任務和收藏保存在自己的瀏覽器，分享連結不會傳送你的資料。</p>
+        <div class="share-actions">
+          <button id="btn-share-app" class="btn btn--primary btn--block" type="button">分享 App</button>
+          <button id="btn-copy-app-link" class="btn btn--secondary btn--block" type="button">複製連結</button>
+        </div>
+        <a class="share-link" href="https://leotsouo.github.io/questnote-pwa/">https://leotsouo.github.io/questnote-pwa/</a>
+      </section>
+      <section class="card share-install" aria-labelledby="share-install-title">
+        <h2 id="share-install-title" class="section-title">加入主畫面</h2>
+        <p>不用安裝也能直接在瀏覽器使用。</p>
+        <p><strong>iPhone／iPad：</strong>用 Safari 開啟連結，點「分享」，再選「加入主畫面」。</p>
+        <p><strong>Android：</strong>用 Chrome 開啟連結，從瀏覽器選單選「安裝應用程式」或「加入主畫面」。</p>
+        <p class="share-install__note">換裝置前，請到「更多 → 設定」匯出 JSON 備份；新裝置可從同一處恢復。</p>
+      </section>
+    </main>
+
+    <main id="view-feedback" class="view">
+      <header class="page-header page-header--with-back">
+        <button class="page-back-btn" data-goto="more" type="button" aria-label="返回更多">‹</button>
+        <div class="page-header__inner">
+          <h1 id="feedback-heading" class="page-title" tabindex="-1">意見與問題回報</h1>
+          <p class="page-subtitle">一起讓 QuestNote 更好用</p>
+        </div>
+      </header>
+      <section class="card feedback-card">
+        <h2 class="section-title">告訴我們發生了什麼</h2>
+        <p class="feedback-note">不用註冊或登入，直接把問題與想法告訴我們。回報只提供給開發者及其授權的 AI 助手協助除錯，不會公開。請勿填寫密碼或私人任務內容。</p>
+        <p id="feedback-receipt" class="feedback-receipt" role="status" hidden></p>
+        <form id="feedback-form" class="feedback-form">
+          <label for="feedback-type">回報類型</label>
+          <select id="feedback-type" name="type"><option value="bug">問題回報</option><option value="suggestion">功能建議</option><option value="other">其他意見</option></select>
+          <label for="feedback-title">標題 <span aria-hidden="true">*</span></label>
+          <input id="feedback-title" name="title" maxlength="100" required placeholder="例如：完成任務後，獎勵沒有更新" />
+          <label for="feedback-description">問題或建議 <span aria-hidden="true">*</span></label>
+          <textarea id="feedback-description" name="description" rows="5" maxlength="4000" required placeholder="發生了什麼？或你希望增加什麼功能？"></textarea>
+          <label for="feedback-steps">重現步驟（選填）</label>
+          <textarea id="feedback-steps" name="steps" rows="3" maxlength="2000" placeholder="1. 打開哪個頁面&#10;2. 按了什麼&#10;3. 出現什麼狀況"></textarea>
+          <label for="feedback-expected">預期結果（選填）</label>
+          <textarea id="feedback-expected" name="expected" rows="2" maxlength="1000" placeholder="你原本預期會發生什麼？"></textarea>
+          <label class="feedback-check"><input type="checkbox" name="includeDiagnostics" />附上版本與裝置資訊，協助找出問題</label>
+          <details><summary>查看會附上的資訊</summary><p class="feedback-note">只包含版本、瀏覽器、畫面尺寸、連線與安裝模式，不會讀取任務、存檔或備份。</p><pre id="feedback-diagnostics" class="feedback-diagnostics"></pre></details>
+          <p id="feedback-draft-status" class="feedback-note" role="status">填寫內容會自動儲存在這個瀏覽器，尚未送出。</p>
+          <div class="feedback-actions"><button class="btn btn--primary" type="submit">預覽回報</button><button id="feedback-clear" class="btn btn--ghost" type="button">清除草稿</button></div>
+        </form>
+        <p id="feedback-status" role="status" aria-live="polite"></p>
+        <p id="feedback-offline" class="feedback-note" hidden>目前離線。你仍可填寫、預覽或下載回報，連線後再按送出。</p>
+      </section>
+      <section id="feedback-preview" class="card feedback-card" hidden>
+        <h2 class="section-title">確認回報內容</h2>
+        <p id="feedback-report-title"></p>
+        <label for="feedback-report">將送出的完整內容</label>
+        <textarea id="feedback-report" rows="12" readonly></textarea>
+        <div class="feedback-actions"><button id="feedback-copy" type="button" class="btn btn--secondary">複製回報</button><button id="feedback-download" type="button" class="btn btn--ghost">下載回報檔</button></div>
+        <button id="feedback-send" type="button" class="btn btn--primary" disabled>送出回報</button>
+        <p class="feedback-note">按下送出即將以上內容交給開發者。收到後會顯示收件編號；若失敗可重試，草稿會保留。</p>
+      </section>
+    </main>
+
     <!-- 使用教學頁 -->
     <main id="view-guide" class="view">
       <header class="page-header page-header--with-back">
@@ -366,7 +461,7 @@
         <h2 id="guide-overview-title">讓任務帶著夥伴一起成長</h2>
         <ol class="guide-steps">
           <li><b class="guide-step-number" aria-hidden="true">1</b><strong>記下任務</strong><span>按任務頁右下角「＋」；今天要做的事可加入今日計畫。</span></li>
-          <li><b class="guide-step-number" aria-hidden="true">2</b><strong>完成並領資源</strong><span>做完後點「完成」，獲得星塵與冒險能量。</span></li>
+          <li><b class="guide-step-number" aria-hidden="true">2</b><strong>完成並領資源</strong><span>做完後點「完成」，獲得星塵、冒險能量與陪伴夥伴的親密度。</span></li>
           <li><b class="guide-step-number" aria-hidden="true">3</b><strong>召喚夥伴</strong><span>用星塵召喚；星塵不足時看看信箱、任務與每日祝福。</span></li>
           <li><b class="guide-step-number" aria-hidden="true">4</b><strong>收藏與陪伴</strong><span>到圖鑑切換「已獲得」，選一隻設為陪伴。</span></li>
           <li><b class="guide-step-number" aria-hidden="true">5</b><strong>派遣探險</strong><span>有寵物與足夠能量時選擇地區，派遣後回來領獎。</span></li>
@@ -375,13 +470,20 @@
         <button id="guide-tutorial-button" class="btn btn--primary btn--block" type="button" data-onboarding-action="replay">重新體驗引導</button>
       </section>
 
+      <section class="guide-growth" aria-labelledby="guide-growth-title">
+        <h2 id="guide-growth-title">帶著夥伴繼續成長</h2>
+        <p>建議依序閱讀，也能自由選章。每章約 1–2 分鐘；等待探險與累積資源的時間另計。先了解或自願實作，進度都會保留。</p>
+        <div id="guide-chapters" class="guide-chapters"></div>
+      </section>
+
       <section class="guide-more card" aria-labelledby="guide-more-title">
-        <h2 id="guide-more-title">其他功能</h2>
-        <details><summary>每日祝福與信箱</summary><p>任務首頁可每日簽到並轉動幸運轉盤；右上角信箱可查看公告與領取可用補償。</p></details>
-        <details><summary>習慣與冒險任務</summary><p>在「更多 → 習慣」追蹤每日或每週習慣；任務首頁的冒險任務可查看每日、每週挑戰與可領獎勵。</p></details>
-        <details><summary>成就與稱號</summary><p>在「更多 → 成就」查看進度、領取已解鎖獎勵，並選擇喜歡的稱號。</p></details>
-        <details><summary>工坊與親密度</summary><p>探險帶回材料後，可在「更多 → 工坊」製作禮物並贈送寵物；完成任務也能提升陪伴寵物的親密度。</p></details>
-        <details><summary>資料備份與設定</summary><p>在「更多 → 設定」匯出 JSON 備份、恢復資料，以及調整主題和動畫偏好。資料主要保存在目前裝置的瀏覽器中。</p></details>
+        <h2 id="guide-more-title">日常功能速查</h2>
+        <details><summary>每日祝福與幸運轉盤</summary><p>入口：任務首頁的「每日祝福」。每天可簽到、查看獎勵，再依頁面狀態轉動幸運轉盤；已領取的項目會顯示今日狀態。每天開始安排任務時，可以順手查看。</p><button type="button" class="btn btn--ghost btn--sm" data-onboarding-action="quick:blessing">查看每日祝福</button></details>
+        <details><summary>習慣與冒險任務</summary><p>「更多 → 習慣」適合固定重複的事，可設定每日或每週頻率，實際做到後再記錄完成。首頁「冒險任務」則是系統的每日／每週挑戰，操作會累積進度，達成後記得領取獎勵。</p><div class="guide-quick-actions"><button type="button" class="btn btn--ghost btn--sm" data-onboarding-action="quick:habits">查看習慣</button><button type="button" class="btn btn--ghost btn--sm" data-onboarding-action="quick:quest">查看冒險任務</button></div></details>
+        <details><summary>成就、稱號與收藏里程</summary><p>「更多 → 成就」可以篩選「可領取」、查看條件並領獎，再挑選已獲得的稱號。圖鑑與探險頁也有各自的里程獎勵；進度達成後請到對應頁面領取。</p><button type="button" class="btn btn--ghost btn--sm" data-onboarding-action="quick:achievements">查看成就與稱號</button></details>
+        <details><summary>信箱與公告</summary><p>入口：任務首頁右上角信箱。開啟信件閱讀更新與活動資訊；有附件且仍可領取時，才會出現領獎操作。已領取或過期的贈禮無法重複領取。</p><button type="button" class="btn btn--ghost btn--sm" data-onboarding-action="quick:mailbox">開啟信箱</button></details>
+        <details><summary>資料備份與設定</summary><p>資料保存在目前裝置的瀏覽器。換裝置或清理瀏覽器前，請到「更多 → 設定」匯出 JSON 備份；恢復時先閱讀資料預覽與確認內容。這裡也能調整主題，動畫會配合系統的減少動態效果偏好。</p><button type="button" class="btn btn--ghost btn--sm" data-onboarding-action="quick:settings">查看備份與設定</button></details>
+        <details><summary>冒險手冊</summary><p>「更多 → 冒險手冊」整理任務、收藏、陪伴與探險的成長紀錄。想學操作時回到使用教學；想回顧自己的累積成果時查看手冊。</p><button type="button" class="btn btn--ghost btn--sm" data-onboarding-action="quick:handbook">查看成長紀錄</button></details>
       </section>
     </main>
 
@@ -603,6 +705,12 @@
             <button id="btn-import-reload" class="btn btn--primary btn--block" type="button">重新整理 App</button>
           </div>
         </div>
+      </section>
+
+      <section class="card">
+        <h2 class="section-title">意見與問題回報</h2>
+        <p class="settings-section-note">遇到異常或有新點子？整理回報並交給開發者。</p>
+        <button type="button" class="btn btn--secondary" data-feedback-open>填寫回報</button>
       </section>
 
       <section class="card settings-stats">

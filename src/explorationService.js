@@ -1,11 +1,10 @@
 /**
- * 探險地圖探索度系統 — QuestNote V2.7.0
+ * 探險地圖探索度系統
  *
- * 放置探險成長系統：每次成功領取探險獎勵後，對應地區探索度增加，
+ * 每次成功領取探險獎勵後，對應地區探索度增加，
  * 逐步解鎖地區故事、里程碑、地區徽章與稱號。
  *
- * 重要：本系統為「額外」成長層，不改動任何原本探險倒數 / 基礎收益 / 派遣邏輯。
- * 探索度只在「探險完成並成功領獎」時增加，不在派遣或倒數中增加。
+ * 探索度與領獎在同一筆交易內更新，不在派遣或倒數中增加。
  */
 import { dbGet, dbPut, STORES } from './db.js';
 import { applyRewardBundle } from './rewardService.js';
@@ -30,11 +29,13 @@ export const AREA_STORIES = {
   lava_rift_story_10: '裂谷邊緣傳來低沉的轟鳴聲，像是地底火脈仍在呼吸。',
   machine_ruins_story_10: '古老齒輪緩慢轉動，彷彿這座遺跡從未真正沉睡。',
   astral_rift_story_10: '星光碎片漂浮在半空中，牠們像是在等待某個願望被完成。',
+  polar_shore_story_10: '風雪短暫停歇，隊伍看見冰岸上通往極光的古老航路。',
+  harvest_fields_story_10: '田埂旁的小路連向村落，夥伴發現居民留下的守望記號。',
 };
 
 /**
  * 地區探索度定義：每個地區的每次增加量與里程碑內容。
- * 目前支援四個核心地區；其餘地區不參與探索度系統（領獎不增加、不顯示）。
+ * 六個地區都保留探索進度與里程碑。
  */
 export const AREA_EXPLORATION_DEFS = {
   mist_forest: {
@@ -195,6 +196,26 @@ export const AREA_EXPLORATION_DEFS = {
       },
     ],
   },
+  polar_shore: {
+    areaId: 'polar_shore', name: '極北冰岸', increment: 4,
+    milestones: [
+      { percent: 10, title: '極光航路', description: '隊伍找到風雪中的古老航路。', storyId: 'polar_shore_story_10', reward: { stardust: 60 } },
+      { percent: 25, title: '冰岸補給點', description: '找到可穩定採集的冰晶。', reward: { stardust: 90, materials: { aurora_ice: 3 } } },
+      { percent: 50, title: '北境巡行者', description: '能辨認寒潮前的徵兆。', reward: { stardust: 140, title: '北境巡行者', badgeId: 'badge_polar_shore_50' } },
+      { percent: 75, title: '極光之夜', description: '夥伴在極光下留下新的旅途記憶。', reward: { stardust: 200, materials: { aurora_ice: 5 } } },
+      { percent: 100, title: '極北冰岸完全探索', description: '完成冰岸的主要探索。', reward: { stardust: 350, materials: { aurora_ice: 5 }, title: '冰岸完成者', badgeId: 'badge_polar_shore_100' } },
+    ],
+  },
+  harvest_fields: {
+    areaId: 'harvest_fields', name: '豐穗遠郊', increment: 4,
+    milestones: [
+      { percent: 10, title: '村落守望', description: '認識遠郊的第一條田間小徑。', storyId: 'harvest_fields_story_10', reward: { stardust: 60 } },
+      { percent: 25, title: '豐穗倉庫', description: '找到田園間保存的護符。', reward: { stardust: 90, materials: { harvest_charm: 3 } } },
+      { percent: 50, title: '田野守護者', description: '隊伍已熟悉遠郊的一半道路。', reward: { stardust: 140, title: '田野守護者', badgeId: 'badge_harvest_fields_50' } },
+      { percent: 75, title: '豐收祭前夜', description: '村民與夥伴分享沿途故事。', reward: { stardust: 200, materials: { harvest_charm: 5 } } },
+      { percent: 100, title: '豐穗遠郊完全探索', description: '完成遠郊的主要探索。', reward: { stardust: 350, materials: { harvest_charm: 5 }, title: '遠郊完成者', badgeId: 'badge_harvest_fields_100' } },
+    ],
+  },
 };
 
 /** 探索度系統支援的地區 id 清單 */
@@ -210,6 +231,10 @@ const BADGE_LABELS = {
   badge_machine_ruins_100: '古代機械遺跡完成徽章',
   badge_astral_rift_50: '星界旅人徽章',
   badge_astral_rift_100: '星界裂縫完成徽章',
+  badge_polar_shore_50: '北境巡行徽章',
+  badge_polar_shore_100: '極北冰岸完成徽章',
+  badge_harvest_fields_50: '田野守護徽章',
+  badge_harvest_fields_100: '豐穗遠郊完成徽章',
 };
 
 function clampProgress(value) {
@@ -356,16 +381,18 @@ export async function isAreaFullyExplored(areaId) {
  * @returns {Promise<{ success: boolean, area?: object, increment?: number, newlyReachedMilestones?: object[], newlyUnlockedStories?: object[], justCompleted?: boolean, areaName?: string }>}
  */
 export async function updateAreaExplorationProgress(areaId, amount) {
-  const def = AREA_EXPLORATION_DEFS[areaId];
-  if (!def) {
-    return { success: false };
-  }
-  const inc = typeof amount === 'number' && Number.isFinite(amount) ? amount : def.increment;
-  if (inc <= 0) {
-    return { success: false };
-  }
-
   const ep = await getExplorationProgress();
+  const result = advanceExplorationRecord(ep, areaId, amount);
+  if (result.success) await dbPut(STORES.META, result.record);
+  return result;
+}
+
+/** Pure progress transition for an expedition's atomic reward transaction. */
+export function advanceExplorationRecord(ep, areaId, amount) {
+  const def = AREA_EXPLORATION_DEFS[areaId];
+  if (!def) return { success: false };
+  const inc = Number.isFinite(amount) ? amount : def.increment;
+  if (inc <= 0) return { success: false };
   const area = ep.areas[areaId];
   const prevProgress = area.progress;
   const prevStories = new Set(area.unlockedStories);
@@ -398,10 +425,9 @@ export async function updateAreaExplorationProgress(areaId, amount) {
   ).length;
   ep.stats.lastUpdatedAt = area.lastExploredAt;
 
-  await dbPut(STORES.META, ep);
-
   return {
     success: true,
+    record: ep,
     area,
     areaName: def.name,
     increment: inc,

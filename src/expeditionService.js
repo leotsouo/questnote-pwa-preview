@@ -1,19 +1,18 @@
 /**
  * 放置探險系統 — 地區解鎖、派遣、獎勵計算
  */
-import { dbGetAll, dbGet, dbPut, STORES } from './db.js';
+import { dbGetAll, dbGet, dbPut, dbMutateRecords, STORES } from './db.js';
 import {
-  getWallet,
-  spendAdventureEnergy,
-  addStardust,
-  addMaterial,
+  normalizeWallet,
 } from './rewardService.js';
 import {
-  getPetCollection,
   getCollection,
-  addBondExpToPet,
-  addFragments,
+  getBondLevelFromExp,
+  normalizeCollectionItem,
 } from './collectionService.js';
+import { EXPEDITION_OBJECTIVES, getDispatchTerms, planExpeditionResult } from './expeditionGameplay.js';
+import { advanceExplorationRecord, normalizeExplorationProgress, getAreaExplorationIncrement } from './explorationService.js';
+import { CAMP_KEY, normalizeCampProgress } from './campService.js';
 
 /** 稀有度星塵加成 */
 const RARITY_BONUS = { N: 0, R: 0.05, SR: 0.1, SSR: 0.15, UR: 0.2 };
@@ -60,6 +59,15 @@ export function normalizeExpedition(expedition) {
 export async function getAllExpeditions() {
   const rows = await dbGetAll(STORES.EXPEDITIONS);
   return rows.map(normalizeExpedition).filter(Boolean);
+}
+
+export async function getRecentExpeditions(limit = Number.POSITIVE_INFINITY) {
+  return (await getAllExpeditions()).filter((e) => e.claimed)
+    .sort((a, b) => Date.parse(b.startedAt) - Date.parse(a.startedAt)).slice(0, limit);
+}
+
+export async function isFirstJourneyAvailable(areaId) {
+  return areaId === 'mist_forest' && (await getAllExpeditions()).length === 0;
 }
 
 /** 取得進行中或未領取的探險（同一時間最多一筆） */
@@ -183,11 +191,6 @@ export function calculateExpeditionRewards(area, pet) {
   const materialAmount = randomInt(mat.min, mat.max);
   const materials = materialAmount > 0 ? { [mat.id]: materialAmount } : {};
 
-  let fragmentGained = 0;
-  if (rewards.fragmentChance && pet.rarity === 'UR' && Math.random() < rewards.fragmentChance) {
-    fragmentGained = 1;
-  }
-
   return {
     stardust,
     baseStardust,
@@ -197,7 +200,7 @@ export function calculateExpeditionRewards(area, pet) {
     totalBonus,
     materials,
     bondExp: rewards.bondExp || 0,
-    fragmentGained,
+    fragmentGained: 0,
     petId: pet.id,
   };
 }
@@ -205,53 +208,55 @@ export function calculateExpeditionRewards(area, pet) {
 /**
  * 開始探險
  */
-export async function startExpedition(petId, areaId, areas, allPets) {
-  const active = await getActiveExpedition();
-  if (active) {
-    throw new Error('已有探險進行中，請先完成或領取獎勵');
-  }
-
+export async function startExpedition(petIds, areaId, areas, allPets, objective = 'explore') {
   const area = areas.find((a) => a.id === areaId);
   if (!area) throw new Error('探險地區不存在');
-
-  const petData = allPets.find((p) => p.id === petId);
-  const collection = await getPetCollection(petId);
-  if (!collection || !petData) {
-    throw new Error('尚未獲得此寵物，無法派遣');
-  }
-
+  const ids = Array.isArray(petIds) ? petIds : [petIds];
+  if (ids.length < 1 || ids.length > 3 || new Set(ids).size !== ids.length) throw new Error('請選擇 1～3 隻不同寵物');
+  if (!Object.hasOwn(EXPEDITION_OBJECTIVES, objective)) throw new Error('探險目標不存在');
   const enrichedOwned = await getOwnedPetsForUnlock(allPets);
   const { unlocked, hint } = checkAreaUnlock(area, enrichedOwned);
   if (!unlocked) {
     throw new Error(`地區未解鎖：${hint}`);
   }
 
-  const wallet = await getWallet();
-  if ((wallet.adventureEnergy || 0) < area.energyCost) {
-    throw new Error(`冒險能量不足（需要 ${area.energyCost}）`);
-  }
-
-  await spendAdventureEnergy(area.energyCost);
-
   const now = new Date();
-  const endsAt = new Date(now.getTime() + area.durationMinutes * 60 * 1000);
-
-  const expedition = {
-    id: `expedition_${now.getTime()}`,
-    petId,
-    areaId,
-    durationMinutes: area.durationMinutes,
-    energyCost: area.energyCost,
-    startedAt: now.toISOString(),
-    endsAt: endsAt.toISOString(),
-    completed: false,
-    claimed: false,
-    rewardsPreview: null,
-    rewardsFinal: null,
-  };
-
-  await dbPut(STORES.EXPEDITIONS, expedition);
-  return expedition;
+  return dbMutateRecords([
+    { store: STORES.EXPEDITIONS, all: true },
+    { store: STORES.META, key: 'wallet' },
+    { store: STORES.META, key: CAMP_KEY },
+    { store: STORES.COLLECTION, all: true },
+  ], ([expeditions, walletRaw, campRaw, ownedRaw]) => {
+    if (expeditions.some((e) => !e.claimed)) throw new Error('已有探險進行中，請先領取獎勵');
+    const owned = new Map(ownedRaw.map((row) => [row.petId, normalizeCollectionItem(row)]));
+    const pets = ids.map((id) => {
+      const catalog = allPets.find((p) => p.id === id);
+      const saved = owned.get(id);
+      if (!catalog || !saved) throw new Error('尚未獲得此寵物，無法派遣');
+      return { ...catalog, stars: saved.stars, bondLevel: saved.bondLevel };
+    });
+    const terms = getDispatchTerms(area, expeditions.length === 0);
+    const wallet = normalizeWallet(walletRaw);
+    if (wallet.adventureEnergy < terms.energyCost) throw new Error(`冒險能量不足（需要 ${terms.energyCost}）`);
+    const planned = planExpeditionResult(area, pets, objective);
+    const camp = normalizeCampProgress(campRaw);
+    if (camp.level >= 2) planned.rewards.materials[area.rewards.material.id] += 1;
+    if (camp.level >= 3) planned.explorationGain += 1;
+    if (camp.level >= 4 && area.id === 'astral_rift') {
+      planned.event.text += '營地的星界觀測台記下了這次穿越的星圖。';
+    }
+    wallet.adventureEnergy -= terms.energyCost;
+    const expedition = {
+      id: `expedition_${now.getTime()}_${Math.random().toString(36).slice(2, 8)}`,
+      petId: ids[0], petIds: ids, areaId, objective,
+      durationMinutes: terms.durationMinutes, energyCost: terms.energyCost,
+      firstJourney: terms.firstJourney, startedAt: now.toISOString(),
+      endsAt: new Date(now.getTime() + terms.durationMinutes * 60000).toISOString(),
+      completed: false, claimed: false, rewardsPreview: null, rewardsFinal: null,
+      plannedResult: planned, report: null,
+    };
+    return { puts: [{ store: STORES.META, value: wallet }, { store: STORES.EXPEDITIONS, value: expedition }], result: expedition };
+  });
 }
 
 /** 取得已擁有寵物（合併資料）用於解鎖判定 */
@@ -286,51 +291,60 @@ export async function forceCompleteActiveExpedition() {
  * 領取探險獎勵
  */
 export async function claimExpeditionRewards(expeditionId, areas, allPets) {
-  const exp = await dbGet(STORES.EXPEDITIONS, expeditionId);
-  if (!exp) throw new Error('探險紀錄不存在');
-  if (exp.claimed) throw new Error('獎勵已領取');
-  if (!isExpeditionTimeComplete(exp)) {
-    throw new Error('探險尚未結束');
-  }
-
-  const area = areas.find((a) => a.id === exp.areaId);
-  if (!area) throw new Error('探險地區不存在');
-
-  const collection = await getPetCollection(exp.petId);
-  const petData = allPets.find((p) => p.id === exp.petId);
-  if (!collection || !petData) throw new Error('寵物資料不存在');
-
-  const pet = {
-    ...petData,
-    bondLevel: collection.bondLevel ?? 1,
-    bondExp: collection.bondExp ?? 0,
-  };
-
-  const rewards = calculateExpeditionRewards(area, pet);
-
-  await addStardust(rewards.stardust);
-
-  for (const [matId, amount] of Object.entries(rewards.materials)) {
-    if (amount > 0) await addMaterial(matId, amount);
-  }
-
-  const bondResult = await addBondExpToPet(exp.petId, rewards.bondExp);
-
-  if (rewards.fragmentGained > 0) {
-    await addFragments(exp.petId, rewards.fragmentGained);
-  }
-
-  exp.completed = true;
-  exp.claimed = true;
-  exp.rewardsFinal = rewards;
-  await dbPut(STORES.EXPEDITIONS, exp);
-
-  return { expedition: exp, rewards, bond: bondResult, pet };
+  return dbMutateRecords([
+    { store: STORES.EXPEDITIONS, key: expeditionId },
+    { store: STORES.META, key: 'wallet' },
+    { store: STORES.META, key: 'explorationProgress' },
+    { store: STORES.COLLECTION, all: true },
+  ], ([exp, walletRaw, explorationRaw, collectionRaw]) => {
+    if (!exp) throw new Error('探險紀錄不存在');
+    if (exp.claimed) throw new Error('獎勵已領取');
+    if (!isExpeditionTimeComplete(exp)) throw new Error('探險尚未結束');
+    const area = areas.find((a) => a.id === exp.areaId);
+    if (!area) throw new Error('探險地區不存在');
+    const ids = exp.petIds?.length ? exp.petIds : [exp.petId];
+    const collection = new Map(collectionRaw.map((row) => [row.petId, normalizeCollectionItem(row)]));
+    const petData = allPets.find((p) => p.id === exp.petId);
+    const lead = collection.get(exp.petId);
+    if (!lead || !petData || ids.some((id) => !collection.has(id))) throw new Error('寵物資料不存在');
+    const pet = { ...petData, bondLevel: lead.bondLevel, bondExp: lead.bondExp };
+    const planned = exp.plannedResult || null;
+    const rewards = planned?.rewards || calculateExpeditionRewards(area, pet);
+    const wallet = normalizeWallet(walletRaw);
+    wallet.stardust += rewards.stardust;
+    for (const [matId, amount] of Object.entries(rewards.materials || {})) {
+      wallet.materials[matId] = (wallet.materials[matId] || 0) + amount;
+    }
+    const puts = [{ store: STORES.META, value: wallet }];
+    let bond = null;
+    for (const id of ids) {
+      const entry = collection.get(id);
+      const oldLevel = entry.bondLevel;
+      entry.bondExp += planned?.bondByPet?.[id] ?? rewards.bondExp;
+      entry.bondLevel = getBondLevelFromExp(entry.bondExp);
+      puts.push({ store: STORES.COLLECTION, value: entry });
+      if (id === exp.petId) bond = { oldLevel, newLevel: entry.bondLevel, leveledUp: entry.bondLevel > oldLevel };
+    }
+    const exploration = advanceExplorationRecord(normalizeExplorationProgress(explorationRaw),
+      exp.areaId, getAreaExplorationIncrement(exp.areaId) + (planned?.explorationGain || 0));
+    if (exploration.success) puts.push({ store: STORES.META, value: exploration.record });
+    exp.completed = true;
+    exp.claimed = true;
+    exp.claimedAt = new Date().toISOString();
+    exp.rewardsFinal = rewards;
+    exp.report = { event: planned?.event || { title: '探險歸來', text: '隊伍帶回了新的收穫。' },
+      objective: exp.objective || 'explore', petIds: ids, rewards, exploration: exploration.success ? {
+        increment: exploration.increment, progress: exploration.area.progress,
+        newlyReachedMilestones: exploration.newlyReachedMilestones,
+      } : null };
+    puts.push({ store: STORES.EXPEDITIONS, value: exp });
+    return { puts, result: { expedition: exp, rewards, bond, pet, exploration } };
+  });
 }
 
 /** 寵物是否正在探險中 */
 export function isPetOnExpedition(petId, activeExpedition) {
-  return activeExpedition?.petId === petId && !activeExpedition.claimed;
+  return (activeExpedition?.petIds || [activeExpedition?.petId]).includes(petId) && !activeExpedition?.claimed;
 }
 
 export async function exportExpeditions() {

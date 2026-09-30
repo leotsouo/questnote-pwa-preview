@@ -3,8 +3,11 @@ import {
   advanceOnboardingForEvent,
   normalizeOnboardingState,
   saveOnboardingState,
+  startLesson, pauseLesson, advanceLesson, previousLessonStep,
 } from './onboardingService.js';
 import { resolveActivePool, resolveDrawCost } from './poolContentContract.js';
+import { getDispatchTerms } from './expeditionGameplay.js';
+import { LESSONS, LESSON_STATUS_LABELS, getLesson, getLessonStepContent, getLessonAvailability } from './onboardingLessons.js';
 
 const STEP_NUMBER = { task: 1, reward: 2, summon: 3, collection: 4, expedition: 5 };
 const WELCOME_MESSAGE_ID = '2026-07-welcome-10pull';
@@ -17,6 +20,27 @@ let showCompletion = false;
 let lastSignature = '';
 let highlighted = null;
 let priorFocus = null;
+let guideSignature = '';
+let lessonCompleted = null;
+let collapsed = false;
+let pendingWrite = Promise.resolve();
+let dockObserver = null;
+
+function enqueue(action) {
+  const next = pendingWrite.then(action);
+  pendingWrite = next.catch((error) => console.warn('[Onboarding] update failed:', error));
+  return next;
+}
+
+function escapeText(value) {
+  return String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
+}
+
+function lessonContent() {
+  const id = record?.activeLesson;
+  return id ? getLessonStepContent(id, record.lessons[id].step, appState) : null;
+}
 
 function ownedPets() {
   return (appState?.enrichedCollection || []).filter((pet) => pet.owned);
@@ -27,8 +51,9 @@ function singleCost() {
   return pool ? resolveDrawCost(pool, 1) : 100;
 }
 
-function expeditionCost() {
-  return appState?.expeditionAreas?.find((area) => area.id === 'mist_forest')?.energyCost ?? 3;
+function expeditionTerms() {
+  const area = appState?.expeditionAreas?.find((entry) => entry.id === 'mist_forest');
+  return getDispatchTerms(area || { id: 'mist_forest', energyCost: 3, durationMinutes: 15 }, appState?.firstJourneyAvailable === true);
 }
 
 function currentView() {
@@ -59,8 +84,8 @@ function stepContent() {
       return {
         title: '完成任務就能獲得資源',
         body: task
-          ? `「${task.title || '這件任務'}」完成後，點任務上的「完成」可獲得星塵和冒險能量。還沒做完就留著，無須為了教學提前勾選。`
-          : '先建立一件真正要做的任務；做完後點「完成」即可得到星塵和冒險能量，重要程度會影響獎勵。',
+          ? `「${task.title || '這件任務'}」完成後，點「完成」可獲得星塵和冒險能量；有設定陪伴時也會提升牠的親密度。還沒做完就留著，無須提前勾選。`
+          : '建立真正要做的任務；做完後點「完成」可得到星塵、能量與陪伴夥伴親密度，重要程度會影響獎勵。',
         primary: task ? ['找到任務', 'locate-reward'] : ['新增一件任務', 'locate-task'],
         secondary: ['這件事稍後完成', 'later-reward'],
       };
@@ -100,13 +125,15 @@ function stepContent() {
         primary: ['前往圖鑑', 'locate-collection'],
         secondary: ['稍後再選夥伴', 'later-collection'],
       };
-    case 'expedition':
+    case 'expedition': {
+      const terms = expeditionTerms();
       return {
         title: '帶夥伴去探險',
-        body: `迷霧森林需要一隻已獲得的寵物和 ${expeditionCost()} 點冒險能量；你目前有 ${energy} 點。派遣後會倒數，結束時回來領取星塵、材料與親密度。${ownedPets().length && energy >= expeditionCost() ? '現在就可以試著派遣。' : '條件不足也可以先完成教學。'}`,
+        body: `迷霧森林${terms.firstJourney ? '首次短程' : '行程'}消耗 ${terms.energyCost} 點冒險能量、歷時 ${terms.durationMinutes} 分鐘；你目前有 ${energy} 點。選 1～3 隻夥伴，再選探索、採集或羈絆目標；一隻也能出發。回來後閱讀旅程報告並領取獎勵，沒有逾期損失。${ownedPets().length && energy >= terms.energyCost ? '現在就可以試著派遣。' : '條件不足也可以先完成教學。'}`,
         primary: ['查看探險', 'locate-expedition'],
         secondary: ['完成教學', 'finish'],
       };
+    }
     default:
       return null;
   }
@@ -136,6 +163,11 @@ function syncPresentationVisibility() {
 }
 
 function targetForStep() {
+  const lesson = lessonContent();
+  if (lesson) {
+    if (currentView() !== lesson.target.view) return null;
+    return document.querySelector(lesson.selector) || document.getElementById(`view-${lesson.target.view}`)?.querySelector('h1');
+  }
   if (record?.status !== 'active') return null;
   const view = currentView();
   if (record.step === 'task' && view === 'tasks') return document.getElementById('btn-add-task');
@@ -182,19 +214,45 @@ function renderGuideStatus() {
   label.textContent = resumable ? '你的教學進度已保留。' : '可以隨時重看，不會自動建立任務或發放獎勵。';
   button.textContent = resumable ? '繼續實作引導' : '重新體驗引導';
   button.dataset.onboardingAction = resumable ? 'resume' : 'replay';
+  const chapters = document.getElementById('guide-chapters');
+  if (!chapters) return;
+  const signature = JSON.stringify([record.lessons, LESSONS.map((lesson) => getLessonAvailability(lesson.id, appState))]);
+  if (guideSignature === signature) return;
+  const focusedAction = chapters.contains(document.activeElement) ? document.activeElement.dataset.onboardingAction : null;
+  chapters.innerHTML = LESSONS.map((lesson, index) => {
+    const progress = record.lessons[lesson.id];
+    const resumable = ['active', 'paused'].includes(progress.status);
+    const label = resumable ? '繼續本章' : progress.status === 'new' ? '開始本章' : '重看與練習';
+    return `<article class="guide-chapter card" aria-labelledby="guide-chapter-${lesson.id}">
+      <div class="guide-chapter__top"><span>成長章節 ${index + 1}</span><span class="guide-chapter__status" data-status="${progress.status}">${LESSON_STATUS_LABELS[progress.status]}</span></div>
+      <h3 id="guide-chapter-${lesson.id}">${lesson.title}</h3>
+      <p>${lesson.summary}</p>
+      <p class="guide-chapter__condition">${escapeText(getLessonAvailability(lesson.id, appState))}</p>
+      ${resumable ? `<p class="guide-chapter__resume">進度 ${lesson.steps.indexOf(progress.step) + 1} / ${lesson.steps.length}：${getLessonStepContent(lesson.id, progress.step, appState).title}</p>` : ''}
+      <button class="btn btn--secondary" type="button" data-onboarding-action="lesson:${lesson.id}" aria-label="${label}：${lesson.title}">${label}</button>
+    </article>`;
+  }).join('');
+  guideSignature = signature;
+  if (focusedAction) chapters.querySelector(`[data-onboarding-action="${focusedAction}"]`)?.focus({ preventScroll: true });
 }
 
 function render() {
   if (!root || !record) return;
+  renderGuideStatus();
   if (hasActivePresentation()) {
     root.hidden = true;
     clearHighlight();
     return;
   }
   root.hidden = false;
-  renderGuideStatus();
-  const content = record.status === 'active' ? stepContent() : null;
-  const signature = JSON.stringify({ record, content, showCompletion });
+  const lesson = getLesson(record.activeLesson);
+  const progress = lesson ? record.lessons[lesson.id] : null;
+  const chapterContent = lessonContent();
+  const content = chapterContent ? { ...chapterContent,
+    primary: [chapterContent.action, 'lesson-locate'],
+    secondary: [progress.step === lesson.steps.at(-1) ? '我了解了，完成本章' : lesson.practice[progress.step] ? '先了解，下一步' : '下一步', 'lesson-next'],
+  } : record.status === 'active' ? stepContent() : null;
+  const signature = JSON.stringify({ record, content, showCompletion, lessonCompleted, collapsed });
   if (signature !== lastSignature) {
     const focusedAction = root.contains(document.activeElement)
       ? document.activeElement?.dataset?.onboardingAction : null;
@@ -224,36 +282,46 @@ function render() {
             <p class="onboarding-eyebrow">新手教學完成</p>
             <h2 id="onboarding-done-title">你已經知道怎麼開始冒險了</h2>
             <p>每天可以先安排任務，完成後累積星塵與能量；召喚、陪伴和探險會讓旅程繼續向前。</p>
-            <p class="onboarding-dialog__hint">每日祝福、習慣、成就、工坊和資料備份，都能在「更多 → 使用教學」查看。</p>
+            <p class="onboarding-dialog__hint">下一步可以到「更多 → 使用教學」練習升星、親密度、探險領獎和工坊；每日功能也有入口速查。</p>
             <div class="onboarding-dialog__actions">
               <button class="btn btn--primary" type="button" data-onboarding-action="close-summary">開始使用</button>
               <button class="btn btn--ghost" type="button" data-onboarding-action="summary-guide">查看使用教學</button>
             </div>
           </section>
         </div>`;
+    } else if (lessonCompleted) {
+      const completed = getLesson(lessonCompleted);
+      const practiced = record.lessons[lessonCompleted].status === 'practiced';
+      root.innerHTML = `<aside class="onboarding-dock onboarding-lesson-dock" aria-label="章節完成">
+        <div role="status"><h2>${completed.title}：${practiced ? '已完成實作' : '已了解'}</h2>
+        <p>${practiced ? '這次練習已記錄，可以繼續下一章。' : '閱讀進度已保存；尚未實作的操作，可等資源或時間足夠時再練習。'}</p></div>
+        <div class="onboarding-dock__actions"><button class="btn btn--primary btn--sm" type="button" data-onboarding-action="lesson-guide">返回教學中心</button>
+        <button class="btn btn--ghost btn--sm" type="button" data-onboarding-action="lesson-close">繼續使用 App</button></div></aside>`;
     } else if (content) {
       root.innerHTML = `
-        <aside class="onboarding-dock" data-step="${record.step}" aria-label="新手教學">
+        <aside class="onboarding-dock${lesson ? ' onboarding-lesson-dock' : ''}" data-step="${lesson ? progress.step : record.step}" aria-label="${lesson ? lesson.title : '新手教學'}">
           <div class="onboarding-dock__top">
-            <span>新手教學 ${STEP_NUMBER[record.step]} / 5</span>
-            <button type="button" data-onboarding-action="pause">稍後</button>
+            <span>${lesson ? `${lesson.title} ${lesson.steps.indexOf(progress.step) + 1} / ${lesson.steps.length}` : `新手教學 ${STEP_NUMBER[record.step]} / 5`}</span>
+            <button type="button" data-onboarding-action="collapse" aria-expanded="${!collapsed}" aria-controls="onboarding-step-body">${collapsed ? '展開' : '收起'}</button>
+            <button type="button" data-onboarding-action="${lesson ? 'lesson-pause' : 'pause'}">稍後</button>
           </div>
-          <div aria-live="polite" aria-atomic="true">
-            <h2>${content.title}</h2>
-            <p>${content.body.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')}</p>
-          </div>
+          <h2>${escapeText(content.title)}</h2>
+          <div id="onboarding-step-body" ${collapsed ? 'hidden' : ''}>
+          <p aria-live="polite" aria-atomic="true">${escapeText(content.body)}</p>
+          ${lesson?.practice[progress.step] ? '<p class="onboarding-practice-note">實際操作成功後會自動前進；也可先了解、稍後練習。</p>' : ''}
           <div class="onboarding-dock__actions">
             <button class="btn btn--primary btn--sm" type="button" data-onboarding-action="${content.primary[1]}">${content.primary[0]}</button>
             <button class="btn btn--ghost btn--sm" type="button" data-onboarding-action="${content.secondary[1]}">${content.secondary[0]}</button>
           </div>
-          <button class="onboarding-dock__skip" type="button" data-onboarding-action="skip">略過整個教學</button>
+          ${lesson ? `<button class="onboarding-dock__skip" type="button" data-onboarding-action="lesson-back" ${progress.step === lesson.steps[0] ? 'disabled' : ''}>上一步</button>` : '<button class="onboarding-dock__skip" type="button" data-onboarding-action="skip">略過整個教學</button>'}
+          </div>
         </aside>`;
     } else {
       root.replaceChildren();
     }
 
     document.body.classList.toggle('onboarding-dialog-open', isDialog);
-    document.body.classList.toggle('onboarding-active', Boolean(content));
+    document.body.classList.toggle('onboarding-active', Boolean(content || lessonCompleted));
     const app = document.getElementById('app');
     if (app) app.inert = isDialog;
     if (isDialog) {
@@ -265,13 +333,19 @@ function render() {
       root.querySelector(`[data-onboarding-action="${focusedAction}"]`)?.focus({ preventScroll: true });
     }
     lastSignature = signature;
+    dockObserver?.disconnect();
+    const dock = root.querySelector('.onboarding-dock');
+    if (dock) dockObserver?.observe(dock);
   }
   updateHighlight();
 }
 
 async function save(next) {
+  const wasCompleted = record?.status === 'completed';
+  const previousLesson = record?.activeLesson;
   record = await saveOnboardingState(next);
-  if (record.status === 'completed') showCompletion = true;
+  if (record.status === 'completed' && !wasCompleted) showCompletion = true;
+  if (previousLesson && !record.activeLesson && ['understood', 'practiced'].includes(record.lessons[previousLesson].status)) lessonCompleted = previousLesson;
   render();
 }
 
@@ -285,7 +359,9 @@ function revealTarget(selector) {
     if (!target) return;
     const reduceMotion = appState?.userPreferences?.reduceMotion
       || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    target.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' });
+    const tallTarget = target.getBoundingClientRect().height > window.innerHeight * 0.4;
+    target.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: tallTarget ? 'start' : 'center' });
+    if (!target.matches('button, input, select, textarea, a[href], [tabindex]')) target.tabIndex = -1;
     target.focus?.({ preventScroll: true });
     updateHighlight();
   });
@@ -293,16 +369,59 @@ function revealTarget(selector) {
 
 async function handleAction(action) {
   if (!record) return;
+  if (action === 'collapse') { collapsed = !collapsed; return render(); }
+  if (action.startsWith('lesson:')) {
+    showCompletion = false;
+    lessonCompleted = null;
+    collapsed = false;
+    await save(startLesson(record, action.slice(7)));
+    root.querySelector('[data-onboarding-action="lesson-locate"]')?.focus({ preventScroll: true });
+    return;
+  }
+  if (action === 'lesson-next') { collapsed = false; return save(advanceLesson(record)); }
+  if (action === 'lesson-back') return save(previousLessonStep(record));
+  if (action === 'lesson-pause') {
+    await save(pauseLesson(record));
+    navigation.switchView('guide');
+    return;
+  }
+  if (action === 'lesson-close' || action === 'lesson-guide') {
+    lessonCompleted = null;
+    render();
+    if (action === 'lesson-guide') navigation.switchView('guide');
+    return;
+  }
+  if (action === 'lesson-locate') {
+    const content = lessonContent();
+    if (!content) return;
+    await navigation.openTeachingTarget(content.target);
+    revealTarget(content.selector);
+    return;
+  }
+  if (action.startsWith('quick:')) {
+    const key = action.slice(6);
+    await save(pauseLesson(record));
+    if (key === 'mailbox') return navigation.openGlobalMailbox();
+    const targets = { blessing: { view: 'tasks', hub: 'blessing' }, quest: { view: 'tasks', hub: 'quest' },
+      habits: { view: 'habits' }, achievements: { view: 'achievements' }, settings: { view: 'settings' }, handbook: { view: 'handbook' } };
+    if (targets[key]) await navigation.openTeachingTarget(targets[key]);
+    return;
+  }
   if (action === 'start') return setStep('task');
   if (action === 'skip') return save({ ...record, status: 'dismissed' });
   if (action === 'pause') return save({ ...record, status: 'paused' });
   if (action === 'resume') {
-    await save({ ...record, status: 'active', step: record.step === 'welcome' ? 'task' : record.step });
+    lessonCompleted = null;
+    collapsed = false;
+    await save({ ...pauseLesson(record), status: 'active', step: record.step === 'welcome' ? 'task' : record.step });
     navigation.switchView('tasks');
     return;
   }
   if (action === 'replay') {
-    await save({ ...record, status: 'active', step: 'task', taskId: null });
+    showCompletion = false;
+    lessonCompleted = null;
+    collapsed = false;
+    await save({ ...pauseLesson(record), status: 'active', step: 'task', taskId: null });
     navigation.switchView('tasks');
     return;
   }
@@ -361,21 +480,25 @@ export function initOnboarding(app, handlers, initialRecord) {
   record = normalizeOnboardingState(initialRecord);
   root = document.getElementById('onboarding-root');
   if (!root) return;
+  dockObserver = new ResizeObserver(() => {
+    const height = root.querySelector('.onboarding-dock')?.getBoundingClientRect().height || 0;
+    document.documentElement.style.setProperty('--onboarding-coach-space', `${height + 32}px`);
+  });
   const presentationObserver = new MutationObserver(syncPresentationVisibility);
   presentationObserver.observe(document.body, { childList: true });
   const modalOverlay = document.getElementById('modal-overlay');
   if (modalOverlay) presentationObserver.observe(modalOverlay, { attributes: true, attributeFilter: ['class'] });
   root.addEventListener('click', (event) => {
     const action = event.target.closest('[data-onboarding-action]')?.dataset.onboardingAction;
-    if (action) void handleAction(action).catch((error) => console.warn('[Onboarding] action failed:', error));
+    if (action) void enqueue(() => handleAction(action));
   });
   root.addEventListener('keydown', (event) => {
     const dialog = root.querySelector('[role="dialog"]');
     if (!dialog) return;
     if (event.key === 'Escape') {
       event.preventDefault();
-      if (record.status === 'new') void handleAction('skip');
-      else void handleAction('close-summary');
+      if (record.status === 'new') void enqueue(() => handleAction('skip'));
+      else void enqueue(() => handleAction('close-summary'));
     }
     if (event.key !== 'Tab') return;
     const buttons = [...dialog.querySelectorAll('button:not(:disabled)')];
@@ -391,7 +514,7 @@ export function initOnboarding(app, handlers, initialRecord) {
   });
   document.getElementById('view-guide')?.addEventListener('click', (event) => {
     const action = event.target.closest('[data-onboarding-action]')?.dataset.onboardingAction;
-    if (action) void handleAction(action).catch((error) => console.warn('[Onboarding] guide action failed:', error));
+    if (action) void enqueue(() => handleAction(action));
   });
 
   // A completed action can survive a reload even if the guide state write was interrupted.
@@ -407,24 +530,29 @@ export function refreshOnboarding() {
 }
 
 export async function recordOnboardingEvent(event, detail = {}) {
-  if (!record) return;
-  if (event === 'view-changed') {
-    render();
-    return;
-  }
-  const next = advanceOnboardingForEvent(record, event, detail);
-  if (next.status !== record.status || next.step !== record.step || next.taskId !== record.taskId) {
-    await save(next);
-  } else {
-    render();
-  }
+  return enqueue(async () => {
+    if (!record) return;
+    if (event === 'view-changed') {
+      render();
+      return;
+    }
+    const next = advanceOnboardingForEvent(record, event, detail);
+    if (JSON.stringify(next) !== JSON.stringify(record)) {
+      await save(next);
+    } else {
+      render();
+    }
+  });
 }
 
 export async function showOnboardingAfterReset() {
+  lessonCompleted = null;
+  collapsed = false;
   await save({ status: 'new', step: 'welcome', taskId: null });
 }
 
 export async function dismissOnboardingAfterRestore() {
   showCompletion = false;
+  lessonCompleted = null;
   await save({ status: 'dismissed', step: 'welcome', taskId: null });
 }

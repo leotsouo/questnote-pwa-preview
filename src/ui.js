@@ -11,6 +11,8 @@ import {
   toggleSubtaskComplete,
 } from './taskService.js';
 import { getCategoryById } from './categoryService.js';
+import { initFeedback } from './feedbackController.js';
+import { shareQuestNote, copyQuestNoteUrl } from './shareService.js';
 import { bindDialogFocus, isTopDialog, rememberDialogFocus, focusDialog, restoreDialogFocus } from './dialogFocus.js';
 import {
   getTodayDateString,
@@ -157,6 +159,8 @@ import {
   formatRemainingTime,
   isPetOnExpedition,
 } from './expeditionService.js';
+import { EXPEDITION_OBJECTIVES, getDispatchTerms, getPetSpecialty } from './expeditionGameplay.js';
+import { CAMP_UPGRADES, upgradeCamp } from './campService.js';
 import {
   createHabit,
   updateHabit,
@@ -210,10 +214,7 @@ import {
 import { MATERIAL_LABELS } from './expeditionService.js';
 import { updateQuestProgress, claimQuestReward } from './questService.js';
 import {
-  updateAreaExplorationProgress,
-  getAreaExplorationIncrement,
   claimExplorationMilestone,
-  AREA_EXPLORATION_DEFS,
 } from './explorationService.js';
 import { getAdventureHandbookSummary } from './adventureHandbookService.js';
 import {
@@ -343,7 +344,9 @@ let lastUserActivity = Date.now();
 let currentTasksView = 'tasks';
 // V2.7.2 派遣 Modal 狀態
 let dispatchAreaId = null;
-let dispatchSelectedPetId = null;
+let dispatchSelectedPetIds = [];
+let dispatchObjective = 'explore';
+let journeyArchiveExpanded = false;
 let dispatchKeydownHandler = null;
 let achievementFilter = 'all';
 let collectionFilter = 'all';
@@ -577,6 +580,7 @@ export function initUI(appState, refreshCallback, achievementCheckCallback) {
     bindActivityTracking();
     bindAchievementClaimAll();
     bindGlobalMailboxEntry();
+    initFeedback({ navigate: switchView });
 
     document.getElementById('collection-filters')?.addEventListener('click', (e) => {
       const btn = e.target.closest('.filter-btn');
@@ -864,6 +868,10 @@ function bindDelegatedEvents() {
       e.preventDefault();
       e.stopPropagation();
       await handleCompanionPet();
+    } else if (action === 'companion-feed') {
+      e.preventDefault();
+      e.stopPropagation();
+      if (state?.companion) openPetFeedModal(state.companion);
     } else if (action === 'empty-add-task') {
       openTaskForm();
     } else if (action === 'empty-go-gacha') {
@@ -993,13 +1001,21 @@ function bindDelegatedEvents() {
     const nextStar = (pet?.stars || 1) + 1;
     const cost = STAR_UPGRADE_COST[nextStar];
 
-    const result = await upgradeStar(petId);
-    if (result.success) {
-      await onRefresh({ renderMode: ['collection', 'tasks'] });
-      showToast(`${petDisplayName(pet)} 升級至 ${result.entry.stars} 星！`, 'success');
-    } else {
-      showToast(result.message || `升星需要 ${cost} 碎片`, 'warning');
+    if (!cost || (pet?.fragments || 0) < cost) {
+      showToast(cost ? `升星需要 ${cost} 個這隻夥伴的碎片，目前有 ${pet?.fragments || 0} 個。` : '已達最高星級', 'warning');
+      return;
     }
+    openConfirmModal('確認升星', `將消耗「${petDisplayName(pet)}」的 ${cost} 個碎片，從 ${pet.stars} 星升到 ${nextStar} 星。`, async () => {
+      try {
+        const result = await upgradeStar(petId);
+        if (!result.success) { showToast(result.message, 'warning'); return; }
+        void recordOnboardingEvent('star-upgraded', { petId });
+        await onRefresh({ renderMode: ['collection', 'tasks'] });
+        showToast(`${petDisplayName(pet)} 升級至 ${result.entry.stars} 星！`, 'success');
+      } catch (error) {
+        showToast(error.message || '升星失敗，請稍後再試', 'error');
+      }
+    }, { confirmLabel: `花費 ${cost} 碎片升星` });
   });
 
   document.getElementById('btn-export')?.addEventListener('click', async () => {
@@ -1060,6 +1076,24 @@ function bindDelegatedEvents() {
         document.getElementById('homeDailyBlessingContainer')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
     }
+  });
+
+  document.getElementById('view-share')?.addEventListener('click', (e) => {
+    const backBtn = e.target.closest('[data-goto]');
+    if (backBtn) switchView(backBtn.dataset.goto);
+  });
+  document.getElementById('btn-share-app')?.addEventListener('click', async () => {
+    const result = await shareQuestNote();
+    if (result === 'unsupported') {
+      const copied = await copyQuestNoteUrl();
+      showToast(copied ? '正式版連結已複製' : '無法自動複製，請長按下方連結', copied ? 'success' : 'warning');
+    } else if (result === 'failed') {
+      showToast('無法開啟分享，請使用複製連結', 'warning');
+    }
+  });
+  document.getElementById('btn-copy-app-link')?.addEventListener('click', async () => {
+    const copied = await copyQuestNoteUrl();
+    showToast(copied ? '正式版連結已複製' : '無法自動複製，請長按下方連結', copied ? 'success' : 'warning');
   });
 
   document.getElementById('view-workshop')?.addEventListener('click', (e) => {
@@ -1237,7 +1271,7 @@ export function switchView(viewName) {
   document.querySelectorAll('.nav-item').forEach((n) => n.classList.remove('active'));
 
   const view = document.getElementById(`view-${viewName}`);
-  const navView = viewName === 'achievements' || viewName === 'settings' || viewName === 'habits' || viewName === 'workshop' || viewName === 'handbook' || viewName === 'guide' ? 'more' : viewName;
+  const navView = viewName === 'achievements' || viewName === 'settings' || viewName === 'habits' || viewName === 'workshop' || viewName === 'handbook' || viewName === 'guide' || viewName === 'feedback' || viewName === 'share' ? 'more' : viewName;
   const nav = document.querySelector(`.nav-item[data-view="${navView}"]`);
   if (view) view.classList.add('active');
   if (nav) nav.classList.add('active');
@@ -1310,7 +1344,7 @@ export function switchView(viewName) {
     preloadCompanionImage(state).catch(() => {});
   }
 
-  currentTasksView = viewName === 'achievements' || viewName === 'settings' || viewName === 'habits' || viewName === 'workshop' || viewName === 'handbook' || viewName === 'guide' || viewName === 'more'
+  currentTasksView = viewName === 'achievements' || viewName === 'settings' || viewName === 'habits' || viewName === 'workshop' || viewName === 'handbook' || viewName === 'guide' || viewName === 'feedback' || viewName === 'share' || viewName === 'more'
     ? currentTasksView
     : viewName;
   if (viewName === 'tasks' || viewName === 'gacha' || viewName === 'collection' || viewName === 'expedition' || viewName === 'more') {
@@ -1318,6 +1352,28 @@ export function switchView(viewName) {
   }
   renderNavBadges();
   void recordOnboardingEvent('view-changed', { viewName });
+}
+
+/** Teaching links only navigate and select filters; product controls own every write. */
+export async function openTeachingTarget({ view, filter, tab, hub, petId } = {}) {
+  if (view === 'collection' && filter === 'owned') {
+    collectionFilter = 'owned';
+    collectionSeriesFilter = 'all';
+  }
+  if (view === 'workshop' && ['materials', 'craft', 'gift'].includes(tab)) {
+    workshopTab = tab;
+    if (petId) selectedGiftPetId = petId;
+    document.querySelectorAll('[data-workshop-tab]').forEach((button) => {
+      const active = button.dataset.workshopTab === tab;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-selected', String(active));
+    });
+  }
+  if (view === 'tasks' && ['blessing', 'quest', 'titles'].includes(hub)) homeHubActive = hub;
+  switchView(view);
+  if (view === 'collection') renderCollectionView();
+  if (view === 'tasks' && hub) renderHomeHub();
+  await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 }
 
 function bindModals() {
@@ -1674,6 +1730,8 @@ export function renderView(viewName) {
     case 'guide':
       refreshOnboarding();
       break;
+    case 'share':
+      break;
     default:
       uiDebugLog('[Render] renderAll fallback (unknown view:', viewName, ')');
       renderAll();
@@ -1931,7 +1989,7 @@ function showDailyBlessingRewardToast(text) {
   const toast = document.createElement('div');
   toast.className = 'reward-toast reward-toast--daily';
   toast.innerHTML = `<span class="reward-toast__icon">🌙</span><span>${escapeHtml(text)}</span>`;
-  document.body.appendChild(toast);
+  (document.getElementById('toast-container') || document.body).appendChild(toast);
   requestAnimationFrame(() => toast.classList.add('show'));
   setTimeout(() => {
     toast.classList.remove('show');
@@ -3204,7 +3262,10 @@ function renderCompanionPetButton(companion) {
 
   return `
     <div class="companion-card__pet-row">
-      <button type="button" class="btn btn--secondary btn--sm companion-pet-btn" data-action="companion-pet" ${canPet ? '' : 'disabled'}>${escapeHtml(btnLabel)}</button>
+      <div class="companion-card__actions">
+        <button type="button" class="btn btn--secondary btn--sm companion-pet-btn" data-action="companion-pet" ${canPet ? '' : 'disabled'}>${escapeHtml(btnLabel)}</button>
+        <button type="button" class="btn btn--secondary btn--sm companion-feed-btn" data-action="companion-feed" aria-label="餵食 ${escapeHtml(petDisplayName(companion))}">餵食</button>
+      </div>
       ${cooldownHint}
     </div>`;
 }
@@ -3251,6 +3312,7 @@ async function handleCompanionPet() {
     }
 
     playHomeCompanionPetEffect();
+    void recordOnboardingEvent('companion-petted', { petId: state.companion.id });
     showToast('你輕輕摸了摸牠，親密度 +5', 'success', 2800);
     if (result.leveledUp) {
       setTimeout(() => {
@@ -3406,7 +3468,7 @@ function playCompanionComfortEffect() {
   }
 }
 
-function buildCompanionFeedSection(companion) {
+function buildPetFeedSection(companion) {
   const inventory = state.inventory || { items: {} };
   const itemCounts = getItemInventory(inventory);
   const bondItems = (state.craftablesCatalog || []).filter(
@@ -3424,6 +3486,7 @@ function buildCompanionFeedSection(companion) {
       <section class="companion-preview-feed card">
         <h3 class="companion-preview-feed__title">餵食</h3>
         <p class="companion-preview-feed__empty">目前沒有親密度道具。<br>可到「更多 → 工坊」用探險材料製作。</p>
+        <button type="button" class="btn btn--secondary btn--block companion-preview-feed__workshop" id="companion-feed-workshop-btn">前往工坊製作</button>
       </section>
       <p class="companion-preview-bond">親密度 Lv.${companion.bondLevel ?? 1} · ${progress.current}/${progress.max || 'MAX'}</p>`;
   }
@@ -3451,59 +3514,21 @@ function buildCompanionFeedSection(companion) {
     <p class="companion-preview-bond">親密度 Lv.${companion.bondLevel ?? 1} · ${progress.current}/${progress.max || 'MAX'}</p>`;
 }
 
-function buildCompanionPetButtonHtml(companion) {
-  const canPet = canPetCompanion(companion);
-  const remaining = getPetCooldownRemaining(companion);
-  const btnLabel = canPet ? '撫摸' : (remaining > 0 ? `還要 ${formatCooldown(remaining)}` : '冷卻中');
-  return `<button type="button" class="btn btn--secondary btn--block" id="companion-pet-btn" ${canPet ? '' : 'disabled'}>${escapeHtml(btnLabel)}</button>`;
-}
-
-function bindCompanionPreviewInteractions(companion) {
+function bindPetFeedInteractions(companion) {
   const stage = document.getElementById('companion-preview-stage');
   const img = stage?.querySelector('.companion-image-preview__img--interactive');
-  const petBtn = document.getElementById('companion-pet-btn');
   const feedBtn = document.getElementById('companion-feed-btn');
 
-  const onPet = async (e) => {
-    e?.stopPropagation();
-    if (!canPetCompanion(companion)) {
-      const remaining = getPetCooldownRemaining(companion);
-      showToast(`牠剛剛已經被摸過了，還要 ${formatCooldown(remaining)}才能再次撫摸。`, 'warning', 3500);
-      return;
-    }
-    try {
-      const result = await petCompanion();
-      if (!result.success) {
-        showToast(result.message, 'warning', 3500);
-        return;
-      }
-      playCompanionComfortEffect();
-      showToast('你輕輕摸了摸牠，親密度 +5', 'success', 2800);
-      if (result.leveledUp) {
-        setTimeout(() => showToast(`親密度提升到 Lv.${result.newLevel}`, 'success', 2800), 400);
-      }
-      await trackQuest('pet_companion');
-      await onRefresh({ renderMode: ['tasks'] });
-      if (result.leveledUp) {
-        await notifyBondUnlocks(companion.id);
-      }
-      const updated = state.companion;
-      if (updated) {
-        openCompanionImageModal(updated);
-      }
-      const comfortLine = getPetComfortLine(updated || companion);
-      setCompanionBubbleText(comfortLine, true);
-    } catch (err) {
-      showToast(err.message || '撫摸失敗', 'error');
-    }
-  };
-
-  // 點圖片放大原圖；撫摸改由下方「撫摸」按鈕觸發
+  // 點圖片仍可查看原圖，不會誤觸消耗道具。
   img?.addEventListener('click', (e) => {
     e.stopPropagation();
     openPetImageViewer(companion.id);
   });
-  petBtn?.addEventListener('click', onPet);
+
+  document.getElementById('companion-feed-workshop-btn')?.addEventListener('click', () => {
+    closeModal();
+    void openTeachingTarget({ view: 'workshop', tab: 'craft' });
+  });
 
   feedBtn?.addEventListener('click', async (e) => {
     e.stopPropagation();
@@ -3514,18 +3539,24 @@ function bindCompanionPreviewInteractions(companion) {
       showToast('請先選擇要餵食的食物', 'warning');
       return;
     }
+    feedBtn.disabled = true;
+    let consumed = false;
     try {
       const result = await useBondItem(itemId, companion.id, state.allPets);
       if (!result.success) {
         showToast(result.message, 'warning');
+        feedBtn.disabled = false;
         return;
       }
-      playCompanionComfortEffect();
+      consumed = true;
+      void recordOnboardingEvent('gift-given', { petId: companion.id, itemId });
       await trackQuest('gift_pet');
-      await onRefresh({ renderMode: ['tasks', 'workshop'] });
-      const updated = state.companion;
+      closeModal();
+      await onRefresh({ renderMode: ['tasks', 'collection', 'workshop'] });
+      const updated = state.enrichedCollection.find((pet) => pet.id === companion.id);
       if (updated) {
-        openCompanionImageModal(updated);
+        openPetFeedModal(updated);
+        playCompanionComfortEffect();
       }
       if (result.isFavorite) {
         showToast(`牠很喜歡這份禮物！親密度 +${result.bondExp}`, 'success', 3200);
@@ -3538,30 +3569,30 @@ function bindCompanionPreviewInteractions(companion) {
       }
       await handleAchievementCheckAfterAction();
     } catch (err) {
-      showToast(err.message || '餵食失敗', 'error');
+      closeModal();
+      console.warn('[QuestNote] 餵食後處理失敗:', err);
+      showToast(consumed
+        ? '餵食已完成，畫面暫時無法更新，請重新開啟 App'
+        : '餵食狀態無法確認，請重新開啟 App 檢查庫存', 'warning', 4000);
     }
   });
 }
 
-function openCompanionImageModal(companion) {
-  if (!companion?.image) return;
+function openPetFeedModal(companion) {
+  if (!companion?.id || companion.owned === false) return;
 
   const src = getPetImageSrc(companion);
-  warmPetImageCache(src).catch(() => {});
+  if (src) warmPetImageCache(src).catch(() => {});
 
   const rarityClass = `rarity-${companion.rarity}`;
   const onError = `this.onerror=null;this.classList.add('companion-image-preview__img--error')`;
   const onload = "this.classList.add('is-loaded');this.closest('.pet-image-frame')?.classList.remove('is-loading')";
-  const feedSection = buildCompanionFeedSection(companion);
-
-  openModal(`
-    <div class="companion-image-preview ${rarityClass}">
-      <div class="companion-image-preview__stage" id="companion-preview-stage">
-        <div class="companion-preview-hearts" id="companion-preview-hearts" aria-hidden="true"></div>
-        <div class="companion-image-preview__frame pet-image-frame pet-image-frame--lg is-loading">
+  const feedSection = buildPetFeedSection(companion);
+  const imageHtml = src
+    ? `<div class="companion-image-preview__frame pet-image-frame pet-image-frame--lg is-loading">
           <img
             class="companion-image-preview__img companion-image-preview__img--interactive is-loading"
-            src="${src}"
+            src="${escapeHtml(src)}"
             alt="${escapeHtml(petDisplayName(companion))}"
             loading="eager"
             decoding="async"
@@ -3569,7 +3600,14 @@ function openCompanionImageModal(companion) {
             onerror="${onError}"
           />
           <span class="pet-image-frame__fallback" aria-hidden="true">圖片載入中</span>
-        </div>
+        </div>`
+    : '<div class="companion-image-preview__frame pet-image-frame pet-image-frame--lg is-error" role="img" aria-label="圖片暫時無法載入"><span class="pet-image-frame__fallback">圖片暫時無法載入</span></div>';
+
+  openModal(`
+    <div class="companion-image-preview companion-image-preview--feed ${rarityClass}">
+      <div class="companion-image-preview__stage" id="companion-preview-stage">
+        <div class="companion-preview-hearts" id="companion-preview-hearts" aria-hidden="true"></div>
+        ${imageHtml}
       </div>
       <h2 class="companion-image-preview__name">${escapeHtml(petDisplayName(companion))}</h2>
       ${petOriginalNameHtml(companion)}
@@ -3577,15 +3615,12 @@ function openCompanionImageModal(companion) {
         <span class="badge badge--rarity ${rarityClass}">${companion.rarity}</span>
         ${renderStars(companion.stars ?? 1)}
       </div>
-      <div class="companion-preview-actions">
-        ${buildCompanionPetButtonHtml(companion)}
-      </div>
       ${feedSection}
-      <p class="companion-image-preview__hint">點圖片放大原圖 · 按撫摸與夥伴互動 · 餵食使用工坊食物</p>
+      <p class="companion-image-preview__hint">點圖片可看原圖 · 餵食會消耗一份工坊道具</p>
     </div>
   `);
 
-  bindCompanionPreviewInteractions(companion);
+  bindPetFeedInteractions(companion);
 }
 
 /** 陪伴寵物未變時只更新圖片 src（避免整卡重建） */
@@ -4563,7 +4598,7 @@ function showBondLevelUpToast(level, customLine = null) {
     ? escapeHtml(customLine)
     : `你的夥伴提升到親密度 <strong>Lv.${level}</strong>！`;
   toast.innerHTML = `<span class="reward-toast__icon">💜</span><span>${msg}</span>`;
-  document.body.appendChild(toast);
+  (document.getElementById('toast-container') || document.body).appendChild(toast);
   requestAnimationFrame(() => toast.classList.add('show'));
   setTimeout(() => {
     toast.classList.remove('show');
@@ -4635,7 +4670,7 @@ function showBondUnlockToast(level) {
   toast.setAttribute('role', 'status');
   const icon = liberated ? '🌟' : '💠';
   toast.innerHTML = `<span class="bond-unlock-toast__icon" aria-hidden="true">${icon}</span><span class="bond-unlock-toast__text">${escapeHtml(message)}</span>`;
-  document.body.appendChild(toast);
+  (document.getElementById('toast-container') || document.body).appendChild(toast);
   requestAnimationFrame(() => toast.classList.add('show'));
   setTimeout(() => {
     toast.classList.remove('show');
@@ -4669,7 +4704,7 @@ function showRewardToast(amount, energy = 0) {
     text += `<span class="reward-toast__energy">＋<strong class="toast-highlight">${energy}</strong> 冒險能量</span>`;
   }
   toast.innerHTML = text;
-  document.body.appendChild(toast);
+  (document.getElementById('toast-container') || document.body).appendChild(toast);
   requestAnimationFrame(() => toast.classList.add('show'));
   setTimeout(() => {
     toast.classList.remove('show');
@@ -6206,7 +6241,9 @@ function openPetDetailModal(petId) {
       </div>
       ${personalityTags ? `<div class="pet-detail__tags">${personalityTags}</div>` : ''}
       ${owned ? renderStars(pet.stars) : ''}
+      ${owned ? `<p class="pet-detail__specialty">探險專長：${escapeHtml(getPetSpecialty(pet).label)} Lv.${getPetSpecialty(pet).level}。一星即可發揮效果，升星會強化專長；不同稀有度都能在合適隊伍中派上用場。</p>` : ''}
       ${owned ? `<p class="pet-detail__bond-lv">親密度 Lv.${bondLevel || 1}</p>` : ''}
+      ${owned ? `<button type="button" class="btn btn--primary btn--block pet-detail__feed-button" data-action="detail-feed-pet" data-pet-id="${escapeHtml(pet.id)}">餵食</button>` : ''}
       <p class="pet-detail__desc">${escapeHtml(pet.description)}</p>
       ${owned && pet.lore ? `<p class="pet-detail__lore">${escapeHtml(pet.lore)}</p>` : ''}
       ${!owned ? '<p class="pet-detail__locked">召喚解鎖後，可閱讀完整背景與親密度故事。</p>' : ''}
@@ -6225,6 +6262,10 @@ function openPetDetailModal(petId) {
   document.querySelector('[data-action="detail-view-image"]')?.addEventListener('click', (e) => {
     const id = e.currentTarget.dataset.petId;
     if (id) openPetImageViewer(id, e.currentTarget);
+  });
+
+  document.querySelector('[data-action="detail-feed-pet"]')?.addEventListener('click', () => {
+    openPetFeedModal(pet);
   });
 
   document.querySelector('[data-action="set-companion-detail"]')?.addEventListener('click', async (e) => {
@@ -6315,6 +6356,9 @@ function renderExpeditionView() {
       stopExpeditionStatusRotation();
     } else {
       const pet = state.enrichedCollection.find((p) => p.id === activeExpedition.petId);
+      const teamNames = (activeExpedition.petIds || [activeExpedition.petId])
+        .map((id) => state.enrichedCollection.find((p) => p.id === id))
+        .filter(Boolean).map(petDisplayName).join('、');
       const area = expeditionAreas.find((a) => a.id === activeExpedition.areaId);
       const remaining = getRemainingMs(activeExpedition);
       const complete = isExpeditionTimeComplete(activeExpedition);
@@ -6323,23 +6367,24 @@ function renderExpeditionView() {
         <article class="expedition-active-card card expedition-active-card--area-${area?.id || 'mist_forest'} ${complete ? 'expedition-active-card--ready' : 'expedition-active-card--glow'}">
           <div class="expedition-active-card__fx" aria-hidden="true"></div>
           <span class="expedition-status-badge ${complete ? 'expedition-status-badge--ready' : 'expedition-status-badge--active'}">${complete ? '可領取' : '進行中'}</span>
-          <h2 class="section-title">進行中探險</h2>
+          <h2 class="section-title">${complete ? '探險歸來' : '進行中探險'}</h2>
           <div class="expedition-active-card__body">
             <div class="expedition-active-card__pet">
               <div class="expedition-active-card__pet-img ${complete ? 'expedition-pet-img--complete' : 'expedition-pet-img--float'}">
                 ${pet ? petImageHtml(pet, { size: 'md' }) : ''}
               </div>
               <div>
-                <p class="expedition-active-card__name">${pet ? escapeHtml(petDisplayName(pet)) : '未知寵物'}</p>
+                <p class="expedition-active-card__name">${teamNames ? escapeHtml(teamNames) : '未知寵物'}</p>
                 ${pet?.nickname ? `<p class="pet-original-name pet-original-name--sm">原名：${escapeHtml(petOriginalName(pet))}</p>` : ''}
-                <p class="expedition-active-card__area">${area ? escapeHtml(area.name) : ''}</p>
+                <p class="expedition-active-card__area">${area ? escapeHtml(area.name) : ''} · ${escapeHtml(EXPEDITION_OBJECTIVES[activeExpedition.objective || 'explore'].label)}</p>
                 <p class="expedition-active-card__status-label">${complete ? '探索完成' : '探索日誌'}</p>
               </div>
             </div>
             ${
               complete
                 ? `<p class="expedition-complete-msg">${EXPEDITION_COMPLETE_MSG}</p>
-                   <button class="btn btn--primary btn--block expedition-claim-btn expedition-claim-btn--glow" data-action="claim-expedition" data-id="${escapeHtml(activeExpedition.id)}">領取獎勵</button>`
+                   <p class="expedition-report-event">${escapeHtml(activeExpedition.plannedResult?.event?.title || '探險報告已送達')}</p>
+                   <button class="btn btn--primary btn--block expedition-claim-btn expedition-claim-btn--glow" data-action="claim-expedition" data-id="${escapeHtml(activeExpedition.id)}">閱讀報告並領獎</button>`
                 : `<p class="expedition-status-log" id="expedition-status-log"></p>
                    <div class="expedition-countdown-row">
                      <span class="expedition-pulse-dot" aria-hidden="true"></span>
@@ -6360,6 +6405,8 @@ function renderExpeditionView() {
 
   // 探索地圖探索度面板
   renderExplorationPanel();
+  renderCampPanel();
+  renderJourneyArchive();
 
   // 探險地區（V2.7.2：先選地區，點派遣開 Modal）
   const areasEl = document.getElementById('expedition-areas');
@@ -6371,7 +6418,7 @@ function renderExpeditionView() {
 
     areasEl.innerHTML = `
       <h2 class="section-title">探險地區</h2>
-      <p class="expedition-map__hint">選擇想探索的地區，點「派遣探險」挑選夥伴出發。</p>
+      <p class="expedition-map__hint">${hasActive ? '領取目前旅程的獎勵後可再出發；現在仍可查看地區情報。' : '選擇地區查看路線與收穫，再組隊出發。'}</p>
       <div class="expedition-map expedition-area-grid">
         ${expeditionAreas
           .map((area) => renderExpeditionAreaCard(area, {
@@ -6379,6 +6426,7 @@ function renderExpeditionView() {
             energy,
             ownedPets,
             exploration: explorationMap[area.id] || null,
+            firstJourney: state.firstJourneyAvailable && area.id === 'mist_forest',
           }))
           .join('')}
       </div>`;
@@ -6389,82 +6437,121 @@ function renderExpeditionView() {
   if (petsEl) petsEl.innerHTML = '';
 }
 
-/** V2.7.2 探險地區卡片（含探索度、派遣按鈕，點按鈕開派遣 Modal） */
-function renderExpeditionAreaCard(area, { hasActive, energy, ownedPets, exploration }) {
-  const { unlocked, hint } = checkAreaUnlock(area, ownedPets);
+function expeditionAreaImageUrl(areaId) {
+  return `./assets/expeditions/${encodeURIComponent(areaId)}.webp`;
+}
+
+/** 地區小卡保留派遣所需的資訊，完整路線與收穫放在派遣視窗。 */
+function renderExpeditionAreaCard(area, { hasActive, energy, ownedPets, exploration, firstJourney }) {
+  const { unlocked } = checkAreaUnlock(area, ownedPets);
   const locked = !unlocked;
   const mat = area.rewards.material;
-  const lowEnergy = energy < area.energyCost;
+  const terms = getDispatchTerms(area, firstJourney);
+  const lowEnergy = energy < terms.energyCost;
 
   let statusLabel = '可派遣';
   let statusClass = 'expedition-area-card__status--ready';
-  let btnLabel = '派遣探險';
-  let btnDisabled = false;
+  let btnLabel = '選隊出發';
   if (locked) {
     statusLabel = '未解鎖';
     statusClass = 'expedition-area-card__status--locked';
-    btnLabel = '未解鎖';
-    btnDisabled = true;
+    btnLabel = '解鎖條件';
   } else if (hasActive) {
-    statusLabel = '探險進行中';
+    statusLabel = '';
     statusClass = 'expedition-area-card__status--busy';
-    btnLabel = '探險進行中';
-    btnDisabled = true;
+    btnLabel = '查看地區';
   } else if (lowEnergy) {
     statusLabel = '能量不足';
     statusClass = 'expedition-area-card__status--locked';
-    btnLabel = '能量不足';
-    btnDisabled = true;
+    btnLabel = '查看地區';
   }
 
-  const exploreBadge = exploration
-    ? `<span class="expedition-explore-badge">探索度 ${exploration.progress}%</span>`
-    : '';
-
-  const progressBlock = exploration
-    ? `<div class="expedition-area-card__progress">
-         <div class="expedition-area-progress-bar" role="progressbar" aria-valuenow="${exploration.progress}" aria-valuemin="0" aria-valuemax="100">
-           <div class="expedition-area-progress-fill" style="width: ${exploration.progress}%;"></div>
-           <span class="expedition-area-progress-text">${exploration.progress}%</span>
-         </div>
-         <p class="expedition-area-card__next">${
-           exploration.fullyExplored
-             ? '已完全探索'
-             : exploration.nextMilestone
-               ? `下一個里程碑：${exploration.nextMilestone.percent}% ${escapeHtml(exploration.nextMilestone.title)}`
-               : '—'
-         }</p>
-       </div>`
-    : '';
+  const progress = exploration?.progress ?? 0;
 
   return `
     <article class="expedition-area-card card expedition-area-card--${area.id} ${locked ? 'expedition-area-card--locked' : ''}" data-area-id="${area.id}">
-      <div class="expedition-area-card__header">
-        <h3 class="expedition-area-card__title">${escapeHtml(area.name)}</h3>
-        ${exploreBadge}
-        <span class="expedition-area-card__status ${statusClass}">${statusLabel}</span>
+      <div class="expedition-area-card__art">
+        <img src="${expeditionAreaImageUrl(area.id)}" alt="" loading="lazy" decoding="async">
+        ${statusLabel ? `<span class="expedition-area-card__status ${statusClass}">${statusLabel}</span>` : ''}
       </div>
-      <p class="expedition-area-card__desc">${escapeHtml(area.description)}</p>
-      <div class="expedition-area-card__meta">
-        <span class="expedition-area-card__meta-item">⏱ ${formatDuration(area.durationMinutes)}</span>
-        <span class="expedition-area-card__meta-item">⚡ 冒險能量 ${area.energyCost}</span>
-      </div>
-      <div class="expedition-area-card__rewards">
-        <span class="expedition-reward-chip" data-reward-type="stardust">✦ 星塵 ${area.rewards.stardust.min}～${area.rewards.stardust.max}</span>
-        <span class="expedition-reward-chip" data-reward-type="material">📦 ${escapeHtml(getMaterialName(mat.id))} ${mat.min}～${mat.max}</span>
-        <span class="expedition-reward-chip" data-reward-type="bond">💜 親密度 +${area.rewards.bondExp}</span>
-      </div>
-      ${progressBlock}
-      ${locked ? `<p class="expedition-area-card__unlock">${escapeHtml(hint)}</p>` : ''}
-      <div class="expedition-area-card__actions">
-        <button
-          class="expedition-dispatch-button"
-          data-action="open-dispatch"
-          data-area-id="${area.id}"
-          ${btnDisabled ? 'disabled' : ''}
-        >${btnLabel}</button>
+      <div class="expedition-area-card__content">
+        <div class="expedition-area-card__header">
+          <h3 class="expedition-area-card__title">${escapeHtml(area.name)}</h3>
+          <span class="expedition-explore-badge">${progress}%</span>
+        </div>
+        <div class="expedition-area-card__meta">
+          <span>⏱ ${formatDuration(terms.durationMinutes)}</span>
+          <span>⚡ ${terms.energyCost}${firstJourney ? ' · 首次' : ''}</span>
+        </div>
+        <div class="expedition-area-card__progress" role="progressbar" aria-label="${escapeHtml(area.name)}探索度" aria-valuenow="${progress}" aria-valuemin="0" aria-valuemax="100">
+          <span class="expedition-area-progress-fill" style="width: ${progress}%;"></span>
+        </div>
+        <p class="expedition-area-card__material">📦 ${escapeHtml(getMaterialName(mat.id))}</p>
+        <button type="button" class="expedition-dispatch-button" data-action="open-dispatch" data-area-id="${area.id}" aria-label="${escapeHtml(area.name)}：${btnLabel}">${btnLabel}</button>
       </div>
     </article>`;
+}
+
+function renderCampPanel() {
+  const el = document.getElementById('expedition-camp');
+  if (!el) return;
+  const wasOpen = el.querySelector('.camp-card__details')?.open ?? false;
+  const level = state.campProgress?.level || 0;
+  const next = CAMP_UPGRADES[level];
+  const materials = state.wallet?.materials || {};
+  const costs = next ? Object.entries(next.materials).map(([id, amount]) => {
+    const owned = materials[id] || 0;
+    return `<span class="camp-cost ${owned < amount ? 'is-missing' : ''}">${escapeHtml(getMaterialName(id))} ${owned}/${amount}</span>`;
+  }).join('') : '';
+  const affordable = next && Object.entries(next.materials).every(([id, amount]) => (materials[id] || 0) >= amount);
+  el.innerHTML = `<article class="card camp-card">
+    <details class="camp-card__details" ${wasOpen ? 'open' : ''}>
+      <summary class="camp-card__summary"><span><strong>共用營地 · Lv.${level}</strong><small>${next ? `下一步：${next.name}` : '全部建設完成'}</small></span><span class="camp-card__summary-action">${affordable ? '可升級' : '查看'}</span></summary>
+      <div class="camp-card__content">
+        <p>六區素材一起建設營地，升級會永久保留。</p>
+        <div class="camp-unlocks">${CAMP_UPGRADES.map((entry) => `<span class="camp-unlock ${level >= entry.level ? 'is-open' : ''}">${level >= entry.level ? '✓' : '○'} ${entry.name}</span>`).join('')}</div>
+        ${next ? `<p>${next.description}</p><div class="camp-costs">${costs}</div><button type="button" class="btn btn--primary" data-action="upgrade-camp" ${affordable ? '' : 'disabled'}>投入素材升級</button>` : '<p>營地已完成全部建設。</p>'}
+      </div>
+    </details>
+  </article>`;
+}
+
+function renderJourneyArchive() {
+  const el = document.getElementById('expedition-archive');
+  if (!el) return;
+  const journeys = state.recentExpeditions || [];
+  if (!journeys.length) {
+    el.innerHTML = '';
+    return;
+  }
+  const wasOpen = el.querySelector('.journey-archive__details')?.open ?? false;
+  el.innerHTML = `<article class="card journey-archive"><details class="journey-archive__details" ${wasOpen ? 'open' : ''}>
+    <summary class="journey-archive__summary"><strong>旅程檔案</strong><span>${journeys.length} 份報告 · 查看</span></summary>
+    <div class="journey-archive__content"><p>已領取的旅程會留在這裡，隨時可以重讀。</p>
+    <div class="journey-list">${journeys.slice(0, journeyArchiveExpanded ? journeys.length : 5).map((journey) => {
+      const area = state.expeditionAreas.find((entry) => entry.id === journey.areaId);
+      return `<button type="button" data-action="read-journey" data-id="${escapeHtml(journey.id)}"><strong>${escapeHtml(area?.name || journey.areaId)}</strong><span>${escapeHtml(journey.report?.event?.title || '過往旅程')} · ${escapeHtml(formatDateTime(journey.startedAt))}</span></button>`;
+    }).join('')}</div>${journeys.length > 5 ? `<button type="button" class="btn btn--ghost" data-action="toggle-journey-archive">${journeyArchiveExpanded ? '收起舊報告' : `查看全部 ${journeys.length} 份報告`}</button>` : ''}
+    </div></details></article>`;
+}
+
+function showJourneyReport(journey) {
+  const area = state.expeditionAreas.find((entry) => entry.id === journey.areaId);
+  const report = journey.report;
+  const rewards = journey.rewardsFinal || report?.rewards;
+  const team = (journey.petIds || [journey.petId]).map((id) =>
+    state.enrichedCollection.find((pet) => pet.id === id)).filter(Boolean).map(petDisplayName).join('、');
+  const materials = Object.entries(rewards?.materials || {}).map(([id, amount]) =>
+    `${escapeHtml(getMaterialName(id))} +${amount}`).join('、');
+  openModal(`<div class="journey-report"><h2 class="modal-title">${escapeHtml(area?.name || '旅程報告')}</h2>
+    <p>${escapeHtml(formatDateTime(journey.startedAt))} · ${escapeHtml(EXPEDITION_OBJECTIVES[journey.objective || 'explore'].label)}</p>
+    <p>隊伍：${escapeHtml(team || '早期單人探險')}</p>
+    <h3>${escapeHtml(report?.event?.title || '探險歸來')}</h3>
+    <p>${escapeHtml(report?.event?.text || '夥伴完成旅程，帶回了收穫。')}</p>
+    <p>收穫：星塵 +${rewards?.stardust || 0}、${materials || '無素材'}、親密度 +${rewards?.bondExp || 0}</p>
+    ${report?.exploration ? `<p>探索度 +${report.exploration.increment}% → ${report.exploration.progress}%</p>` : ''}
+    <button type="button" class="btn btn--primary btn--block" id="journey-report-close">關閉</button></div>`);
+  document.getElementById('journey-report-close')?.addEventListener('click', closeModal);
 }
 
 function startExpeditionTimer() {
@@ -6488,6 +6575,7 @@ function startExpeditionTimer() {
       stopExpeditionStatusRotation();
       renderExpeditionView();
       renderNavBadges();
+      refreshOnboarding();
       return;
     }
 
@@ -6562,16 +6650,6 @@ async function handleExpeditionClick(e) {
 
   if (action === 'open-dispatch') {
     const areaId = target.dataset.areaId;
-    if (state.activeExpedition) {
-      showToast('目前已有探險進行中', 'warning');
-      return;
-    }
-    const area = state.expeditionAreas.find((a) => a.id === areaId);
-    const { unlocked, hint } = checkAreaUnlock(area, getOwnedPets());
-    if (!unlocked) {
-      showToast(hint || '此地區尚未解鎖', 'warning');
-      return;
-    }
     openExpeditionDispatchModal(areaId);
     return;
   }
@@ -6579,19 +6657,18 @@ async function handleExpeditionClick(e) {
   if (action === 'claim-expedition') {
     const expId = target.dataset.id;
     const expeditionPetId = state.activeExpedition?.petId ?? null;
-    const expeditionAreaId = state.activeExpedition?.areaId ?? null;
     try {
       const result = await claimExpeditionRewards(
         expId,
         state.expeditionAreas,
         state.allPets
       );
+      void recordOnboardingEvent('expedition-claimed', { expeditionId: expId, petId: expeditionPetId });
       await trackQuest('complete_expedition');
-      // 探險成功領獎後才推進探索度（不影響原本收益 / 倒數邏輯）
-      const exploration = await applyExplorationOnClaim(expeditionAreaId);
+      const exploration = result.exploration;
       await onRefresh({ renderMode: ['expedition', 'tasks', 'collection'] });
-      if (expeditionPetId) {
-        await notifyBondUnlocks(expeditionPetId);
+      for (const petId of result.expedition.petIds || [expeditionPetId]) {
+        if (petId) await notifyBondUnlocks(petId);
       }
       showExpeditionRewardModal(result);
       const matEntries = Object.entries(result.rewards.materials || {}).filter(([, amt]) => amt > 0);
@@ -6617,6 +6694,31 @@ async function handleExpeditionClick(e) {
   if (action === 'toggle-exploration-panel') {
     explorationPanelCollapsed = !explorationPanelCollapsed;
     renderExplorationPanel();
+    return;
+  }
+
+  if (action === 'upgrade-camp') {
+    target.disabled = true;
+    try {
+      const result = await upgradeCamp();
+      await onRefresh({ renderMode: ['expedition'] });
+      showToast(`營地升級：${result.upgrade.name}`, 'reward');
+    } catch (err) {
+      target.disabled = false;
+      showToast(err.message || '營地升級失敗', 'warning');
+    }
+    return;
+  }
+
+  if (action === 'read-journey') {
+    const journey = (state.recentExpeditions || []).find((entry) => entry.id === target.dataset.id);
+    if (journey) showJourneyReport(journey);
+    return;
+  }
+
+  if (action === 'toggle-journey-archive') {
+    journeyArchiveExpanded = !journeyArchiveExpanded;
+    renderJourneyArchive();
     return;
   }
 
@@ -6657,7 +6759,7 @@ async function handleExpeditionClick(e) {
 }
 
 function showExpeditionRewardModal(result) {
-  const { rewards, pet, bond } = result;
+  const { rewards, pet, bond, expedition } = result;
   const displayPet = state.enrichedCollection?.find((p) => p.id === pet.id) || pet;
   const matEntries = Object.entries(rewards.materials || {});
   const rarityPct = Math.round((rewards.rarityBonus || 0) * 100);
@@ -6666,6 +6768,7 @@ function showExpeditionRewardModal(result) {
   openModal(`
     <div class="expedition-reward-modal expedition-reward-modal--animate">
       <h2 class="modal-title expedition-reward-modal__title">探險歸來！</h2>
+      <p class="expedition-report-event"><strong>${escapeHtml(expedition.report?.event?.title || '平安歸來')}</strong><br>${escapeHtml(expedition.report?.event?.text || '')}</p>
       <div class="expedition-reward-modal__pet">
         ${petImageHtml(displayPet, { size: 'md' })}
         <p class="expedition-reward-modal__pet-name">${escapeHtml(petDisplayName(displayPet))}</p>
@@ -6679,7 +6782,7 @@ function showExpeditionRewardModal(result) {
         <li class="expedition-reward-item" data-reward-type="bond">💜 親密度 <strong class="expedition-reward-value">+${rewards.bondExp}</strong></li>
         ${rewards.fragmentGained > 0 ? `<li class="expedition-reward-item" data-reward-type="fragment">💫 寵物碎片 <strong class="expedition-reward-value">+${rewards.fragmentGained}</strong></li>` : ''}
       </ul>
-      <p class="expedition-reward-modal__workshop-hint">可在工坊製作親密度道具。</p>
+      <p class="expedition-reward-modal__workshop-hint">旅程報告已收入營地，可隨時重讀。</p>
       ${
         rewards.bonusStardust > 0
           ? `<p class="expedition-bonus-detail">加成：稀有度 +${rarityPct}% · 親密度 Lv.${bond?.oldLevel ?? pet.bondLevel ?? 1} +${bondPct}%</p>`
@@ -6839,23 +6942,6 @@ function renderExplorationMilestoneCard(areaId, milestone) {
     </div>`;
 }
 
-/**
- * 探險成功領獎後，推進對應地區探索度並回傳提示資訊。
- * 不改動原本探險收益；僅疊加探索度成長層。
- */
-async function applyExplorationOnClaim(areaId) {
-  if (!areaId || !AREA_EXPLORATION_DEFS[areaId]) return null;
-  try {
-    const increment = getAreaExplorationIncrement(areaId);
-    const result = await updateAreaExplorationProgress(areaId, increment);
-    if (!result?.success) return null;
-    return result;
-  } catch (err) {
-    console.warn('[QuestNote] 探索度更新失敗:', err);
-    return null;
-  }
-}
-
 /* ─── V2.7.2 派遣選單 Modal ─── */
 
 const DISPATCH_RARITY_RANK = { UR: 5, SSR: 4, SR: 3, R: 2, N: 1 };
@@ -6871,8 +6957,15 @@ function getDispatchablePetsSorted() {
     const ca = a.id === companionId ? 1 : 0;
     const cb = b.id === companionId ? 1 : 0;
     if (ca !== cb) return cb - ca;
+    const targetRole = { explore: 'scout', gather: 'gatherer', bond: 'companion' }[dispatchObjective];
+    const sa = getPetSpecialty(a);
+    const sb = getPetSpecialty(b);
+    const pa = sa.role === targetRole ? sa.level : 0;
+    const pb = sb.role === targetRole ? sb.level : 0;
+    if (pa !== pb) return pb - pa;
     const ra = DISPATCH_RARITY_RANK[a.rarity] ?? 0;
     const rb = DISPATCH_RARITY_RANK[b.rarity] ?? 0;
+    if (sa.level !== sb.level) return sb.level - sa.level;
     if (ra !== rb) return rb - ra;
     const la = a.bondLevel ?? 1;
     const lb = b.bondLevel ?? 1;
@@ -6895,11 +6988,12 @@ function openExpeditionDispatchModal(areaId) {
   const pets = getDispatchablePetsSorted();
   const selectable = pets.filter((p) => !isPetOnExpedition(p.id, state.activeExpedition));
   const companionId = state?.companion?.id;
-  dispatchSelectedPetId = null;
+  dispatchSelectedPetIds = [];
+  dispatchObjective = 'explore';
   if (selectable.length === 1) {
-    dispatchSelectedPetId = selectable[0].id;
+    dispatchSelectedPetIds = [selectable[0].id];
   } else if (companionId && selectable.some((p) => p.id === companionId)) {
-    dispatchSelectedPetId = companionId;
+    dispatchSelectedPetIds = [companionId];
   }
 
   let overlay = document.getElementById('expedition-dispatch-modal');
@@ -6936,7 +7030,7 @@ function closeExpeditionDispatchModal() {
     dispatchKeydownHandler = null;
   }
   dispatchAreaId = null;
-  dispatchSelectedPetId = null;
+  dispatchSelectedPetIds = [];
 }
 
 /** 派遣 Modal 點擊委派（背景 / 關閉 / 選寵物 / 確認） */
@@ -6959,15 +7053,23 @@ function handleDispatchModalClick(e) {
   if (action === 'dispatch-select-pet') {
     if (t.disabled) return;
     const scrollTop = overlay.querySelector('.expedition-dispatch-modal__body')?.scrollTop || 0;
-    dispatchSelectedPetId = t.dataset.petId;
+    const petId = t.dataset.petId;
+    dispatchSelectedPetIds = dispatchSelectedPetIds.includes(petId)
+      ? dispatchSelectedPetIds.filter((id) => id !== petId)
+      : dispatchSelectedPetIds.length < 3 ? [...dispatchSelectedPetIds, petId] : dispatchSelectedPetIds;
     renderExpeditionDispatchModal();
     const scrollBody = overlay.querySelector('.expedition-dispatch-modal__body');
     if (scrollBody) scrollBody.scrollTop = scrollTop;
-    overlay.querySelector('.expedition-pet-option.is-selected')?.focus({ preventScroll: true });
+    overlay.querySelector(`[data-pet-id="${petId}"]`)?.focus({ preventScroll: true });
+    return;
+  }
+  if (action === 'dispatch-objective') {
+    dispatchObjective = t.dataset.objective;
+    renderExpeditionDispatchModal();
     return;
   }
   if (action === 'dispatch-confirm') {
-    confirmExpeditionDispatch(dispatchAreaId, dispatchSelectedPetId);
+    confirmExpeditionDispatch(dispatchAreaId, dispatchSelectedPetIds);
     return;
   }
 }
@@ -6976,6 +7078,7 @@ function handleDispatchModalClick(e) {
 function renderExpeditionDispatchModal() {
   const overlay = document.getElementById('expedition-dispatch-modal');
   if (!overlay) return;
+  const specialtyHelpOpen = overlay.querySelector('.expedition-specialty-help')?.open ?? false;
   const area = state.expeditionAreas.find((a) => a.id === dispatchAreaId);
   if (!area) {
     closeExpeditionDispatchModal();
@@ -6984,23 +7087,28 @@ function renderExpeditionDispatchModal() {
 
   const mat = area.rewards.material;
   const energy = state.wallet.adventureEnergy ?? 0;
-  const lowEnergy = energy < area.energyCost;
+  const terms = getDispatchTerms(area, state.firstJourneyAvailable && area.id === 'mist_forest');
+  const lowEnergy = energy < terms.energyCost;
+  const { unlocked, hint } = checkAreaUnlock(area, getOwnedPets());
   const exploration = (state.explorationSummary?.areas || []).find(
     (a) => a.areaId === dispatchAreaId
   );
   const pets = getDispatchablePetsSorted();
-  const selectedPet = pets.find((p) => p.id === dispatchSelectedPetId) || null;
+  const selectedPets = pets.filter((p) => dispatchSelectedPetIds.includes(p.id));
 
   const petListHtml =
     pets.length === 0
       ? '<p class="expedition-dispatch-empty">目前還沒有可派遣的寵物，先去召喚夥伴吧。</p>'
       : pets.map((p) => buildDispatchPetOptionHtml(p)).join('');
 
-  const canConfirm = !!selectedPet && !lowEnergy && !state.activeExpedition;
+  const canConfirm = selectedPets.length > 0 && unlocked && !lowEnergy && !state.activeExpedition;
+  const confirmLabel = !unlocked ? '尚未解鎖'
+    : state.activeExpedition ? '探險進行中'
+      : lowEnergy ? '能量不足' : '確認派遣';
 
-  const previewHtml = selectedPet
-    ? `你將派遣：<strong>${escapeHtml(petDisplayName(selectedPet))}</strong>　前往：<strong>${escapeHtml(area.name)}</strong><br>消耗：冒險能量 ${area.energyCost}　預計時間：${formatDuration(area.durationMinutes)}`
-    : '請先選擇出發寵物';
+  const previewHtml = selectedPets.length
+    ? `隊伍：<strong>${selectedPets.map((pet) => escapeHtml(petDisplayName(pet))).join('、')}</strong>　目標：${EXPEDITION_OBJECTIVES[dispatchObjective].label}<br>消耗：冒險能量 ${terms.energyCost}　預計時間：${formatDuration(terms.durationMinutes)}<br>保證帶回星塵、親密度與至少 1 份${escapeHtml(getMaterialName(mat.id))}；額外發現由隊伍專長決定。${state.campProgress?.level >= 1 ? `<br>地圖桌情報：${selectedPets.map((pet) => `${escapeHtml(petDisplayName(pet))}（${getPetSpecialty(pet).label} Lv.${getPetSpecialty(pet).level}）`).join('、')}。` : ''}`
+    : '請先選擇 1～3 隻出發寵物';
 
   overlay.innerHTML = `
     <div class="expedition-dispatch-modal__backdrop"></div>
@@ -7011,41 +7119,48 @@ function renderExpeditionDispatchModal() {
       </div>
       <div class="expedition-dispatch-modal__body">
         <div class="expedition-dispatch-modal__area-summary">
+          <img class="expedition-dispatch-area__image" src="${expeditionAreaImageUrl(area.id)}" alt="">
           <h3 class="expedition-dispatch-area__name">${escapeHtml(area.name)}</h3>
           <p class="expedition-dispatch-area__desc">${escapeHtml(area.description)}</p>
           <div class="expedition-dispatch-area__meta">
-            <span class="expedition-dispatch-area__meta-item">⏱ ${formatDuration(area.durationMinutes)}</span>
-            <span class="expedition-dispatch-area__meta-item ${lowEnergy ? 'is-low' : ''}">⚡ 消耗 ${area.energyCost}（目前 ${energy}）</span>
+            <span class="expedition-dispatch-area__meta-item">⏱ ${formatDuration(terms.durationMinutes)}${terms.firstJourney ? ' · 首次短程' : ''}</span>
+            <span class="expedition-dispatch-area__meta-item ${lowEnergy ? 'is-low' : ''}">⚡ 消耗 ${terms.energyCost}（目前 ${energy}）</span>
           </div>
           <div class="expedition-dispatch-area__rewards">
             <span class="expedition-reward-chip" data-reward-type="stardust">✦ 星塵 ${area.rewards.stardust.min}～${area.rewards.stardust.max}</span>
             <span class="expedition-reward-chip" data-reward-type="material">📦 ${escapeHtml(getMaterialName(mat.id))} ${mat.min}～${mat.max}</span>
             <span class="expedition-reward-chip" data-reward-type="bond">💜 親密度 +${area.rewards.bondExp}</span>
           </div>
-          ${
-            exploration
-              ? `<p class="expedition-dispatch-area__explore">探索度 ${exploration.progress}%${
-                  exploration.fullyExplored
-                    ? '（已完全探索）'
-                    : exploration.nextMilestone
-                      ? ` · 下一個里程碑 ${exploration.nextMilestone.percent}%`
-                      : ''
-                }</p>`
-              : ''
-          }
+          ${exploration ? `<p class="expedition-dispatch-area__explore">探索度 ${exploration.progress}%${exploration.fullyExplored ? ' · 已完全探索' : exploration.nextMilestone ? ` · 下一個里程碑：${exploration.nextMilestone.percent}% ${escapeHtml(exploration.nextMilestone.title)}` : ''}</p>` : ''}
+          ${!unlocked ? `<p class="expedition-dispatch-area__unlock">解鎖條件：${escapeHtml(hint)}</p>` : ''}
+          ${state.activeExpedition ? '<p class="expedition-dispatch-area__unlock">領取目前旅程的獎勵後，就能再次派遣。</p>' : ''}
         </div>
         <div class="expedition-dispatch-modal__pet-section">
-          <h3 class="expedition-dispatch-modal__pet-title">選擇出發寵物</h3>
+          <h3 class="expedition-dispatch-modal__pet-title">選擇 1～3 隻出發寵物</h3>
           <p class="expedition-dispatch-modal__pet-note">陪伴中的寵物也可以派遣，不會取消目前的陪伴設定。</p>
+          <details class="expedition-specialty-help" ${specialtyHelpOpen ? 'open' : ''}>
+            <summary>專長是什麼？看隊伍如何影響收穫</summary>
+            <p>一星就能發揮專長，升星會讓效果更強。不同專長同行，也更容易遇見額外事件。</p>
+            <ul>
+              <li><strong>探路</strong>：選探索目標時，增加地區探索進度。</li>
+              <li><strong>採集</strong>：選採集目標時，多帶回地區素材。</li>
+              <li><strong>同行</strong>：選羈絆目標時，增加隊伍親密度。</li>
+              <li><strong>解讀</strong>：提高額外發現機會，帶回更多線索。</li>
+              <li><strong>守護</strong>：帶回額外星塵。</li>
+            </ul>
+          </details>
           <div class="expedition-dispatch-modal__pet-list">
             ${petListHtml}
           </div>
+        </div>
+        <div class="expedition-objectives" role="group" aria-label="探險目標">
+          ${Object.entries(EXPEDITION_OBJECTIVES).map(([id, entry]) => `<button type="button" class="expedition-objective ${dispatchObjective === id ? 'is-selected' : ''}" data-action="dispatch-objective" data-objective="${id}" aria-pressed="${dispatchObjective === id}"><strong>${entry.label}</strong><span>${entry.description}</span></button>`).join('')}
         </div>
       </div>
       <div class="expedition-dispatch-modal__preview">${previewHtml}</div>
       <div class="expedition-dispatch-modal__footer">
         <button type="button" class="expedition-dispatch-cancel-button" data-action="dispatch-close">取消</button>
-        <button type="button" class="expedition-dispatch-confirm-button" data-action="dispatch-confirm" ${canConfirm ? '' : 'disabled'}>確認派遣</button>
+        <button type="button" class="expedition-dispatch-confirm-button" data-action="dispatch-confirm" ${canConfirm ? '' : 'disabled'}>${confirmLabel}</button>
       </div>
     </div>`;
 }
@@ -7053,7 +7168,8 @@ function renderExpeditionDispatchModal() {
 /** 派遣 Modal 內單一寵物選項 */
 function buildDispatchPetOptionHtml(pet) {
   const onExp = isPetOnExpedition(pet.id, state.activeExpedition);
-  const selected = dispatchSelectedPetId === pet.id;
+  const selected = dispatchSelectedPetIds.includes(pet.id);
+  const specialty = getPetSpecialty(pet);
   const rarityClass = `rarity-${pet.rarity}`;
   const liberated = pet.bondLiberated;
   const isCompanion = !!pet.isCompanion || pet.id === state?.companion?.id;
@@ -7072,6 +7188,7 @@ function buildDispatchPetOptionHtml(pet) {
         <span class="expedition-pet-option__tags">
           <span class="badge badge--rarity ${rarityClass}">${pet.rarity}</span>
           <span class="expedition-pet-option__bond">親密 Lv.${pet.bondLevel || 1}</span>
+          <span class="expedition-pet-option__specialty">${specialty.label} Lv.${specialty.level} · ${pet.stars || 1}★</span>
           ${isCompanion ? '<span class="expedition-pet-option__companion">陪伴中</span>' : ''}
           ${liberated ? '<span class="expedition-pet-option__liberated">羈絆解放</span>' : ''}
           ${onExp ? '<span class="expedition-pet-option__busy">探險中</span>' : ''}
@@ -7082,13 +7199,13 @@ function buildDispatchPetOptionHtml(pet) {
 }
 
 /** 確認派遣：完整檢查後呼叫原本 startExpedition 邏輯 */
-async function confirmExpeditionDispatch(areaId, petId) {
+async function confirmExpeditionDispatch(areaId, petIds) {
   if (!areaId) {
     showToast('找不到地區資料', 'error');
     return;
   }
-  if (!petId) {
-    showToast('請先選擇出發寵物。', 'warning');
+  if (!petIds?.length) {
+    showToast('請先選擇 1～3 隻出發寵物。', 'warning');
     return;
   }
   const area = state.expeditionAreas.find((a) => a.id === areaId);
@@ -7096,20 +7213,21 @@ async function confirmExpeditionDispatch(areaId, petId) {
     showToast('找不到地區資料', 'error');
     return;
   }
-  const pet = getOwnedPets().find((p) => p.id === petId);
-  if (!pet) {
-    showToast('找不到這隻寵物資料。', 'error');
+  const pets = petIds.map((id) => getOwnedPets().find((p) => p.id === id));
+  if (pets.some((pet) => !pet)) {
+    showToast('找不到隊伍寵物資料。', 'error');
     return;
   }
   if (state.activeExpedition) {
     showToast('目前已有探險進行中。', 'warning');
     return;
   }
-  if ((state.wallet.adventureEnergy ?? 0) < area.energyCost) {
+  const terms = getDispatchTerms(area, state.firstJourneyAvailable && area.id === 'mist_forest');
+  if ((state.wallet.adventureEnergy ?? 0) < terms.energyCost) {
     showToast('冒險能量不足。', 'warning');
     return;
   }
-  if (isPetOnExpedition(petId, state.activeExpedition)) {
+  if (petIds.some((id) => isPetOnExpedition(id, state.activeExpedition))) {
     showToast('這隻寵物正在探險中。', 'warning');
     return;
   }
@@ -7121,13 +7239,13 @@ async function confirmExpeditionDispatch(areaId, petId) {
 
   try {
     // 呼叫原本探險開始邏輯（扣能量、建立 expedition 狀態、倒數）
-    await startExpedition(petId, areaId, state.expeditionAreas, state.allPets);
+    await startExpedition(petIds, areaId, state.expeditionAreas, state.allPets, dispatchObjective);
     await trackQuest('start_expedition');
     closeExpeditionDispatchModal();
     await onRefresh({ renderMode: ['expedition', 'tasks'] });
     startExpeditionTimer();
-    showToast(`已派遣 ${petDisplayName(pet)} 前往${area.name}`, 'success');
-    void recordOnboardingEvent('expedition-started', { areaId, petId });
+    showToast(`已派遣 ${pets.length} 隻夥伴前往${area.name}`, 'success');
+    void recordOnboardingEvent('expedition-started', { areaId, petId: petIds[0] });
   } catch (err) {
     if (confirmBtn) confirmBtn.disabled = false;
     showToast(err.message || '無法開始探險', 'warning');
@@ -7665,6 +7783,7 @@ async function handleWorkshopClick(e) {
         showToast(result.message, 'warning');
         return;
       }
+      void recordOnboardingEvent('item-crafted', { itemId });
       await trackQuest('craft');
       await onRefresh({ renderMode: ['workshop', 'tasks'] });
       renderWorkshopView();
@@ -7691,6 +7810,7 @@ async function handleWorkshopClick(e) {
         showToast(result.message, 'warning');
         return;
       }
+      void recordOnboardingEvent('gift-given', { petId, itemId });
       await trackQuest('gift_pet');
       await onRefresh({ renderMode: ['workshop', 'tasks', 'collection'] });
       renderWorkshopView();

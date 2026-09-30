@@ -3,7 +3,7 @@ const BASE_KEYS = ['tasks', 'wallet', 'collection', 'gachaStats', 'expeditions',
   'achievements', 'taskStats', 'userPreferences', 'habits'];
 const ADDITIONS = ['inventory', 'workshopStats', 'dailyCheckIn', 'questProgress',
   'explorationProgress', 'collectionMilestones', 'globalMailboxState',
-  'poolDebutSeen', 'poolUnlockState', 'idempotentGrants'];
+  'poolDebutSeen', 'poolUnlockState', 'idempotentGrants', 'campProgress'];
 export const SNAPSHOT_KEYS = [...BASE_KEYS, ...ADDITIONS];
 // Counts come from actual versioned exports, not inferred release dates.
 const LEGACY_PROFILES = {
@@ -11,7 +11,7 @@ const LEGACY_PROFILES = {
   '2.1.1': 2, '2.1.2': 2, '2.1.4': 2,
   '2.2': 3, '2.2.7': 3, '2.3.5': 3, '2.3.7': 3,
   '2.6.1': 4, '2.7.3': 5, '2.9.0': 6, '3.0.1': 7,
-  '3.4.3': 10, '3.4.4': 10,
+  '3.4.3': 10, '3.4.4': 10, '3.4.17': 10,
 };
 const LIST_KEYS = new Set(['tasks', 'collection', 'expeditions', 'habits']);
 const FORBIDDEN_KEYS = new Set(['__proto__', 'prototype', 'constructor']);
@@ -30,7 +30,7 @@ const QUEST_TARGETS = {
   weekly: { weekly_complete_tasks_20: 20, weekly_complete_habits_10: 10,
     weekly_checkin_5: 5, weekly_expedition_5: 5, weekly_gift_5: 5 },
 };
-const AREA_IDS = ['mist_forest', 'lava_rift', 'machine_ruins', 'astral_rift'];
+const AREA_IDS = ['mist_forest', 'lava_rift', 'machine_ruins', 'astral_rift', 'polar_shore', 'harvest_fields'];
 const COLLECTION_MILESTONE_IDS = ['collection_005', 'collection_010', 'collection_020',
   'collection_030', 'collection_040', 'collection_050', 'collection_all', 'rarity_first_sr',
   'rarity_first_ssr', 'rarity_first_ur', 'rarity_all_n', 'rarity_all_r', 'rarity_sr_5',
@@ -160,7 +160,17 @@ export function validateSnapshotData(data, requiredKeys = SNAPSHOT_KEYS, profile
   const expedition = shape({ id, petId, areaId: id, durationMinutes: nonNegativeNumber,
     energyCost: integer, startedAt: timestamp, endsAt: timestamp, completed: bool, claimed: bool,
     rewardsPreview: nullable(expeditionRewards), rewardsFinal: nullable(expeditionRewards),
-    rewards: nullable(expeditionRewards) });
+    rewards: nullable(expeditionRewards) }, {
+    petIds: list(petId, true), objective: oneOf(['explore', 'gather', 'bond']), firstJourney: bool,
+    plannedResult: nullable(shape({ rewards: expeditionRewards, bondByPet: map(integer, petId),
+      explorationGain: integer, event: shape({ id, title: text, text }),
+      specialtySummary: list(shape({ petId, role: text, level: integer })) })),
+    report: nullable(shape({ event: shape({ title: text, text }, { id }),
+      objective: oneOf(['explore', 'gather', 'bond']), petIds: list(petId, true), rewards: expeditionRewards,
+      exploration: nullable(shape({ increment: integer, progress: integer,
+        newlyReachedMilestones: list(shape({ percent: integer, title: text, description: text, reward: (v, p) => { if (!isRecord(v)) fail(p, '必須是物件'); } }, { storyId: id })) })) })),
+    claimedAt: timestamp,
+  });
   const checkRows = (rows, key, path, legacyCollection = false) => {
     if (!Array.isArray(rows)) return;
     const seen = new Set();
@@ -246,13 +256,19 @@ export function validateSnapshotData(data, requiredKeys = SNAPSHOT_KEYS, profile
   state('questProgress', { daily: questScope('daily'), weekly: questScope('weekly'),
     stats: shape({ totalDailyQuestsClaimed: integer, totalWeeklyQuestsClaimed: integer, lastUpdatedAt: nullable(timestamp) }) });
   const storyIds = list(scalar((value) => validId(value) || (typeof value === 'number' && Number.isFinite(value)), '故事 ID 無效'), true);
-  state('explorationProgress', { areas: map((value, path, key) => shape({ areaId: oneOf([key]),
+  const explorationAreas = (value, path) => {
+    map((area, areaPath, key) => shape({ areaId: oneOf([key]),
     progress: scalar((n) => Number.isInteger(n) && n >= 0 && n <= 100, '探索進度無效'), completedRuns: integer,
     claimedMilestones: list(oneOf([10, 25, 50, 75, 100]), true), unlockedStories: storyIds,
-    completedAt: nullable(timestamp), lastExploredAt: nullable(timestamp) })(value, path), id, AREA_IDS),
+    completedAt: nullable(timestamp), lastExploredAt: nullable(timestamp) })(area, areaPath), oneOf(AREA_IDS))(value, path);
+    const requiredAreas = profile === 'current' || profile === '3.4.18' ? AREA_IDS : AREA_IDS.slice(0, 4);
+    for (const id of requiredAreas) if (!Object.hasOwn(value || {}, id)) fail(`${path}.${id}`, '缺少持久化項目');
+  };
+  state('explorationProgress', { areas: explorationAreas,
   unlockedBadges: storyIds, unlockedTitles: storyIds,
   stats: shape({ totalExplorationRuns: integer, totalMilestonesClaimed: integer,
     fullyExploredAreas: integer, lastUpdatedAt: nullable(timestamp) }) });
+  state('campProgress', { level: oneOf([0, 1, 2, 3, 4]), upgradedAt: nullable(timestamp) });
   // The milestone normalizer filters unknown IDs, while mailbox trims IDs. Reject
   // these inputs before they can be mistaken for a faithful snapshot restoration.
   state('collectionMilestones', { claimedIds: list(oneOf(COLLECTION_MILESTONE_IDS), true), lastUpdatedAt: nullable(timestamp) }, { version: oneOf([1]) });
@@ -327,7 +343,9 @@ export function validateBackupEnvelope(raw, currentVersion) {
     return { valid: false, error: '備份版本未知或較新；請使用相容版本恢復，未執行覆蓋。', warnings };
   }
   const data = raw.data === undefined ? raw : raw.data;
-  const additions = LEGACY_PROFILES[version] ?? ADDITIONS.length;
+  const preCampRelease = actual[0] < 3 || (actual[0] === 3
+    && (actual[1] < 4 || (actual[1] === 4 && (actual[2] ?? 0) <= 17)));
+  const additions = LEGACY_PROFILES[version] ?? (preCampRelease ? 10 : ADDITIONS.length);
   const required = [...BASE_KEYS, ...ADDITIONS.slice(0, additions)];
   const errors = validateSnapshotData(data, required, version);
   if (isRecord(data)) {

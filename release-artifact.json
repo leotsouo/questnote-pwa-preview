@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "artifactId": "6b049f0f3811dc289a48f41a7419af717cf7c387737c9c81a47ef3e176fad979",
-  "sourceCommit": "9f966cd098faec3107e94846c3115b48d43fb6e3",
+  "artifactId": "f8e7b79ffb561c9e539d8cf23a3d111cdcca337305a17bade4446ffbd28e1208",
+  "sourceCommit": "4b995b2a7ef2a414b720f3c08045e817b734bfcc",
   "profile": {
     "schemaVersion": 1,
     "profile": "preview",
-    "artifactId": "6b049f0f3811dc289a48f41a7419af717cf7c387737c9c81a47ef3e176fad979",
-    "sourceCommit": "9f966cd098faec3107e94846c3115b48d43fb6e3",
+    "artifactId": "f8e7b79ffb561c9e539d8cf23a3d111cdcca337305a17bade4446ffbd28e1208",
+    "sourceCommit": "4b995b2a7ef2a414b720f3c08045e817b734bfcc",
     "scopePath": "/questnote-pwa-preview/",
     "runtimeContentSchema": 1,
     "dbName": "QuestNotePreviewDB",
@@ -26,6 +26,12 @@
   },
   "sourceFiles": {
     ".nojekyll": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "assets/expeditions/astral_rift.webp": "343c7342d7156be0fef42c809e0028811a936e2ba478b2785eaf498845dc4d2d",
+    "assets/expeditions/harvest_fields.webp": "6196b84c367ff547d91741d36a57ed06aa34e15464ddafb071d4940d0014a29c",
+    "assets/expeditions/lava_rift.webp": "9c14dd71f7752f8ca652992659ba929a094512ec5dc34b4d3806b90dabac904e",
+    "assets/expeditions/machine_ruins.webp": "14947a69cacfa25522b20159f5f135734fc5eac25f58a55ae9cb09fc3dccd3b1",
+    "assets/expeditions/mist_forest.webp": "d97f0f24d8189b4e882b8da213399b5dba992481d97917c196c5d9bbaded8dc1",
+    "assets/expeditions/polar_shore.webp": "e963c18f17a9d60746f2601822f7e0ab18be730629b8de9a3fdf546381891506",
     "assets/icons/icon-192.png": "f47dd61d5e26732d2d20aba9051e7ce922449a6095a3715f7e803a2037857fb1",
     "assets/icons/icon-512.png": "8623855b674e1bb7c10525ff0118b0f4b1da5de551753d724238b62db8c403be",
     "assets/pets/.gitkeep": "22e959030a1b6293ad3c8f017c04a834e85ae029513aa94b8dbbd618b7bbb60b",
@@ -249,36 +255,41 @@
     "data/categories.json": "166e8f4de44f41d6ec27b3a6b1780f9cd155aa599371b443c92537949276ebe1",
     "data/craftables.json": "7dcac55dcb152e38999596da48281900fdd04db5abd4f3ed6ffd23f9e654d569",
     "data/dailyWheelRewards.json": "98f1fb5b3dc5e49fb0815cf60842bc53fd34e604baf540b4d0e2946929030f12",
-    "data/expeditions.json": "08cd2ae6781ee4775549a77b8e243133e2c2a24b3865019f1a397ccf9ecb2136",
-    "data/global-mailbox.json": "e9ea60c8da58a03cd12b4ab3224b5dcb47890549fc0e369bc92c1f8238f461fe",
+    "data/expeditions.json": "20c9ea6a7ddbcf8a0300268c4653a1d7619c8561cabd35d3cf21a3e31be0c7a3",
+    "data/global-mailbox.json": "49c06b7f0dc976bda2034ee5a9a50abb14d894baa0903a6821016798b6b9a1bd",
     "data/materials.json": "2c13faf4c26ed398297ef4a81ccdb6be0bc0bedadb4c8305a466a68437fcb75b",
     "data/pet-series.json": "bb13440208aa76ea0178ee2167f7612b363daa409d8ef4f09d478ae30bd16715",
     "data/pets-lore.json": "255b939626e8680a8c463af4ce95e9f7bbf8ee5ff1ffc7f4c4dbe4099cb6f163",
     "data/pets.json": "fb3c2fcac7b65e0d6b1d41fa16c98fb854394dfa7a3e611e6132a40513c8bcb0",
     "data/pools.json": "4fd1cdc8674e5592b6b2256603bad59b5bf555650c482237eedb6a86b3867fcc",
     "data/titles.json": "318675b79872dfabccc4b8beb99f77eb248a40e5e50bbbd4e4dc24886b3a1398",
-    "index.html": "6b8a4cafd504df185bef4e76cce7eabe960e8cd96c3111b88c5011ef43ede995",
+    "index.html": "190e98df6e366c685bfb121ef217c1746a96687a9fa0ec3abfed5a242fb19b95",
     "manifest.webmanifest": "eb55a896e912c00763760ee803a296136569b27ef88077ac886857f8a3f31c66",
-    "service-worker.js": "a23d8a83f593f207392255fb7dcc6e5a05c10731d769a2e9a3a711f796b11f58",
+    "service-worker.js": "a26937f0c9d9dc3be17da8ac40742fdf1d9ceca31c03577545a557212df9dc81",
     "src/achievementService.js": "25eba10a95247380c424a59dd539b7c0e55b866992a2eb6404ac74d3fb4b0316",
     "src/adventureHandbookService.js": "d9dc8d34fc08a83c0c2f36682698fd4d96ebd0852c8cb0fde161a5a718d065b9",
-    "src/app.js": "58d012a9d4599c908e9eb6b31c198d61dea9941029d78a2c1f479011cd356613",
-    "src/backupSchema.js": "3cd1e1d4c43970da918a1223d1cb3eecb815ed8b2097c0bc9157e080ff03a99f",
-    "src/backupService.js": "b9a9410d2f252451ea5bee13cff248102b670b39f24785c956bbf3edcea985c4",
+    "src/app.js": "f1ae1db55c2572aad3849e94d1d684b3b3e8109b602ddc7c4d46e97c1faf8c04",
+    "src/backupSchema.js": "dd1901bb7e37ec93a17c88e263ee6abc381e4984eb82448c17bb18f173bac958",
+    "src/backupService.js": "e48da4ded47c5e6c984b8f09fcbe5b5f2deb7b8ecb2477c4d0169c11e2c7cfa1",
     "src/bootstrap.js": "975974b344ff1f3e8100eed78a1fafa054b6b549c185dc03cd918dd31be6f08d",
+    "src/campService.js": "fee6e4aeafbde7e3d356214099b50523d31089fb00e573c853810c32062a65b1",
     "src/categoryService.js": "8636cdb8453e0a383b813f99d117ead49911353bd6848de05d7f513c28713e32",
     "src/collectionMilestoneService.js": "2f9fe055d3facfb2ce5f6eee96ee0026eb41dab602f27a0eef104402dbe2db5f",
     "src/collectionService.js": "4babc98a28293244bc833788c641fa20dc0aca396eab6aba0f5ba797f35d3da6",
     "src/companionDialogueService.js": "8fe79ef7d7d94e3a654b8f9ee43178cc4fac01bfbf1cc67b53b173be3f17c955",
     "src/companionService.js": "3974b56613aea67e80f7659caa9dbca0d9397f298948f1f98c9e60b8e446d6aa",
     "src/dailyCheckInService.js": "d994210565a779da2265f8a32334dc233a06b4dee037672ef433eb5fa123b62b",
-    "src/db.js": "4250bbbfb69b07ad590eac6773bec6f092a6512c4445057efc7ffd15c4b69db6",
+    "src/db.js": "5c84de76db373846b23686ae1ff3babca9da9df9bd2b24e7aa8ab1679b3e32c1",
     "src/deferredRenderGate.js": "cbbaf2e401be35eab6d673a935c13fef615286a554937dc497b02c4aa6aca6e5",
     "src/devService.js": "af56b92e6fcf886786f4a41d777dc355c35c0d0bd4b39fd72fc11217c4238dd4",
     "src/dialogFocus.js": "24eb36d909579732f8b9776c4f2e2a3fec8e112d8e96194257b6b16bee49eecf",
-    "src/expeditionService.js": "b54bd5306e1d3b91eafe42de553cd1730df3c3a36cf57868d28c1e29b07d6096",
+    "src/expeditionGameplay.js": "ece2a8d10bd2416805ac0c5a82ff19d946c26134f02ac9860f2736e590c62f1f",
+    "src/expeditionService.js": "a0393db1951029c6496216e3af4c6b771ab35c590ddff74adc44c5c68136581d",
     "src/expeditionStatusService.js": "6e45a6ec8e7b3bfa6018b431991b5540cc214e582e1113fe7636da2f95e141e9",
-    "src/explorationService.js": "bde22bcbfefbf28926b2a412630d4061fcce52ef8dcceae05e076ac3b1cf84d5",
+    "src/explorationService.js": "5ee9429d826df97d8bbe0b89fff95a9accc5aec23cd4d99f0105cb3bfaf0ab8f",
+    "src/feedbackConfig.js": "77e9eda8efe76ad2ea3d1d216d10be01bb219c954c6c619e925d8e2aeafe49f7",
+    "src/feedbackController.js": "2d1d4956ba24a114bae0fffbe504ab83a55c58194dbf0a83dd3c0d5d774b757e",
+    "src/feedbackService.js": "f96898f3d97d6dc86157f65aae8e8f2b763f222b04bf778aab386276d8bb9310",
     "src/gachaService.js": "d631816bfcb980ecbe502cbecf867e0adf65871d00d6ef4e70adce22df9c9bf9",
     "src/gachaTransactionCore.js": "ac2b5db58e2cdec942bb28e0e7b8dae446282fd45518bdf6666fafdc6d579dde",
     "src/glacierArrivalScene.js": "bb3d646a9faaece23f41d29f6248b682fb67e3851e702ac3667f006c02d8b2bb",
@@ -288,8 +299,9 @@
     "src/loreService.js": "2beab9e2c2ab3418b16e638e247d1976c916b537e6a7a21d754751c54336541c",
     "src/mailboxSchema.js": "070e2c731ac75a6bdbecfc24afad986d0357e440d1449c374d898d7e0b0ccd15",
     "src/mailboxService.js": "9e2b08feedc9dc73beb9d18bcff62fd722af276c57ab4f79f9bc8d20eccfa0d0",
-    "src/onboardingController.js": "20b7f2bf2af49244d64882fb2077a2ce52a2ae4aecd1b910025b64d718c8e998",
-    "src/onboardingService.js": "108703da62c536ec687506bcedb5dc3a341701434868372a57807ed79e82b66f",
+    "src/onboardingController.js": "e56386ff4457b3a37fd8f3790f502dad75db568079b8ed63c8441c8f4f8b4527",
+    "src/onboardingLessons.js": "972c8f06a2d5ccd92662f211568234b7948c20c4b41213e9919f95e3dc3bbe8c",
+    "src/onboardingService.js": "4289008c57efc95843d141a33cb2333c0d9af8c1188a3ba4157e2ab2dfd49a6a",
     "src/perfDiagnostics.js": "e6e5e3a4fe72ec00df1bd5469147b07d3d6cf8377e9ec691b2908af2cfd494d7",
     "src/petDataSchema.js": "157323ee04b497c281cb5a5371b298e0e9af40761f3d35a6c303b868698db73b",
     "src/petPoolFilter.js": "8aab1c055fbdcd40209864ab4ec8b489cb284c73bcded88fa8a45e7b4eacb6db",
@@ -304,7 +316,8 @@
     "src/releaseCatalog.js": "38ac32aedef26d927638ef7413ec78520c0f9d114623a4a61283d488d99cbb4a",
     "src/releaseProfile.js": "512b20c341a3b11c6eeb764789fe8efc3f00fae20a732baaafef8cfec32f4061",
     "src/rewardService.js": "a245a6e08e6ead6aa65dc4dbb99e8c767fa81bd210e253955359be1a5442e0ff",
-    "src/styles.css": "55e2ec728b59afa1641736669d726d77da80c67584f4e89307c00c4f57ad09a0",
+    "src/shareService.js": "04705dbca03c699f62781606b45d8bf483acb7463358750d6c9c4c0da47bcad1",
+    "src/styles.css": "79c500c311984f25957c4f4f615af7a53a9ef807f5a39840c3b729390a31c51a",
     "src/summon-polish.css": "0d3cbae026034e11034be8ecabc6ff9613a461fbaee616376a26f90f4b924bda",
     "src/summonRevealService.js": "71d4828b6e0c4a89285f63a2781c67e7b96b7966c3e0c98312c4c037c1c1bed4",
     "src/taskFilterService.js": "687858edc36119afcb388fc3fd75ebd058d0a93117da42740c8a1f18d4b00471",
@@ -313,18 +326,42 @@
     "src/taskStatsService.js": "1e61c0f67426459a73b2c6ec405dbfdef87b86840a519518d9f5432fb4d2cbb5",
     "src/themedSummonController.js": "f2bcd1b922da8dee874ee5c2a678378f23841f44287b44b8d2b8f14014b3af6f",
     "src/ui-polish.css": "d56b6c2dc56782a7833ee96c4573e7a4ffbc7b8580ab9e9e9d0bc08e1fe473f8",
-    "src/ui.js": "010e62051bb5f29705d338ed3847bf86ee96e0cebbe34b4d2cdca2dfcf0feab5",
+    "src/ui.js": "dfa87bcd9884ae121339db1d66b946cc874c822b26c11e4f618fba87ded613ed",
     "src/uiHelpers.js": "875f08583510e7c246eebeff4b39d6a7273d2643f6a2a2931281672c6c4d7de6",
-    "src/version.js": "f09db33f7576feaa26652133a5a6a289c741a3b532161b012d9f5dcbe7e48f9f",
+    "src/version.js": "8cd80b12e1031435e7fd0ead5ceb1c9adf11991f02c63f78575272a820c516fe",
     "src/workshopService.js": "9833bf353f6c13072f1c3995e2770408533be4e8ed19ea0d1e481740fb7e2e69"
   },
-  "assemblerSha256": "5bec24c762ea7e379765f5af1a676df4563812a3ea0645ea167a6acab2c502e2",
+  "assemblerSha256": "8038743986968f47e78c8a9c6b313846a36ede9a75bf226d163a04771c6261cb",
   "candidateManifestSha256": "7a21bd41a69224604638f4daa319ce30300a3647809e2602d05cbc187d774ff8",
   "inputVerification": "candidate-file-hashes",
   "files": {
     ".nojekyll": {
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "bytes": 0
+    },
+    "assets/expeditions/astral_rift.webp": {
+      "sha256": "343c7342d7156be0fef42c809e0028811a936e2ba478b2785eaf498845dc4d2d",
+      "bytes": 109378
+    },
+    "assets/expeditions/harvest_fields.webp": {
+      "sha256": "6196b84c367ff547d91741d36a57ed06aa34e15464ddafb071d4940d0014a29c",
+      "bytes": 126428
+    },
+    "assets/expeditions/lava_rift.webp": {
+      "sha256": "9c14dd71f7752f8ca652992659ba929a094512ec5dc34b4d3806b90dabac904e",
+      "bytes": 109960
+    },
+    "assets/expeditions/machine_ruins.webp": {
+      "sha256": "14947a69cacfa25522b20159f5f135734fc5eac25f58a55ae9cb09fc3dccd3b1",
+      "bytes": 130140
+    },
+    "assets/expeditions/mist_forest.webp": {
+      "sha256": "d97f0f24d8189b4e882b8da213399b5dba992481d97917c196c5d9bbaded8dc1",
+      "bytes": 116464
+    },
+    "assets/expeditions/polar_shore.webp": {
+      "sha256": "e963c18f17a9d60746f2601822f7e0ab18be730629b8de9a3fdf546381891506",
+      "bytes": 91330
     },
     "assets/icons/icon-192.png": {
       "sha256": "f47dd61d5e26732d2d20aba9051e7ce922449a6095a3715f7e803a2037857fb1",
@@ -1363,12 +1400,12 @@
       "bytes": 1262
     },
     "data/expeditions.json": {
-      "sha256": "08cd2ae6781ee4775549a77b8e243133e2c2a24b3865019f1a397ccf9ecb2136",
-      "bytes": 4272
+      "sha256": "20c9ea6a7ddbcf8a0300268c4653a1d7619c8561cabd35d3cf21a3e31be0c7a3",
+      "bytes": 4240
     },
     "data/global-mailbox.json": {
-      "sha256": "e9ea60c8da58a03cd12b4ab3224b5dcb47890549fc0e369bc92c1f8238f461fe",
-      "bytes": 4675
+      "sha256": "49c06b7f0dc976bda2034ee5a9a50abb14d894baa0903a6821016798b6b9a1bd",
+      "bytes": 8404
     },
     "data/materials.json": {
       "sha256": "2c13faf4c26ed398297ef4a81ccdb6be0bc0bedadb4c8305a466a68437fcb75b",
@@ -1399,8 +1436,8 @@
       "bytes": 6119
     },
     "index.html": {
-      "sha256": "6844c4dee8a49cb4b2b6adbbd36768aa17fdfe7a664891cdca25156bccf1cb25",
-      "bytes": 38799
+      "sha256": "6be4a0506c0fe5ca6bc223cbe0598dde03bdf01c616063f908b3742788130863",
+      "bytes": 48841
     },
     "manifest.webmanifest": {
       "sha256": "d5b2f9a18fc8f0266706510c1a029c33c0754fdf9e38f081d96a2064f090cf90",
@@ -1419,8 +1456,8 @@
       "bytes": 6393
     },
     "service-worker.js": {
-      "sha256": "23acfbb98e63e4b479218c4f7479696b1935bb830d447aac2c893dfffb705d41",
-      "bytes": 19575
+      "sha256": "9a6bc402bd05490f9615c9ed0ac818dfb914f9524476e2db5343bf7f145fd7d5",
+      "bytes": 21349
     },
     "src/achievementService.js": {
       "sha256": "25eba10a95247380c424a59dd539b7c0e55b866992a2eb6404ac74d3fb4b0316",
@@ -1431,20 +1468,24 @@
       "bytes": 22986
     },
     "src/app.js": {
-      "sha256": "58d012a9d4599c908e9eb6b31c198d61dea9941029d78a2c1f479011cd356613",
-      "bytes": 16843
+      "sha256": "f1ae1db55c2572aad3849e94d1d684b3b3e8109b602ddc7c4d46e97c1faf8c04",
+      "bytes": 17311
     },
     "src/backupSchema.js": {
-      "sha256": "3cd1e1d4c43970da918a1223d1cb3eecb815ed8b2097c0bc9157e080ff03a99f",
-      "bytes": 22800
+      "sha256": "dd1901bb7e37ec93a17c88e263ee6abc381e4984eb82448c17bb18f173bac958",
+      "bytes": 24286
     },
     "src/backupService.js": {
-      "sha256": "b9a9410d2f252451ea5bee13cff248102b670b39f24785c956bbf3edcea985c4",
-      "bytes": 19636
+      "sha256": "e48da4ded47c5e6c984b8f09fcbe5b5f2deb7b8ecb2477c4d0169c11e2c7cfa1",
+      "bytes": 19954
     },
     "src/bootstrap.js": {
       "sha256": "975974b344ff1f3e8100eed78a1fafa054b6b549c185dc03cd918dd31be6f08d",
       "bytes": 3909
+    },
+    "src/campService.js": {
+      "sha256": "fee6e4aeafbde7e3d356214099b50523d31089fb00e573c853810c32062a65b1",
+      "bytes": 1988
     },
     "src/categoryService.js": {
       "sha256": "8636cdb8453e0a383b813f99d117ead49911353bd6848de05d7f513c28713e32",
@@ -1471,8 +1512,8 @@
       "bytes": 12031
     },
     "src/db.js": {
-      "sha256": "4250bbbfb69b07ad590eac6773bec6f092a6512c4445057efc7ffd15c4b69db6",
-      "bytes": 11478
+      "sha256": "5c84de76db373846b23686ae1ff3babca9da9df9bd2b24e7aa8ab1679b3e32c1",
+      "bytes": 11548
     },
     "src/deferredRenderGate.js": {
       "sha256": "cbbaf2e401be35eab6d673a935c13fef615286a554937dc497b02c4aa6aca6e5",
@@ -1486,17 +1527,33 @@
       "sha256": "24eb36d909579732f8b9776c4f2e2a3fec8e112d8e96194257b6b16bee49eecf",
       "bytes": 4933
     },
+    "src/expeditionGameplay.js": {
+      "sha256": "ece2a8d10bd2416805ac0c5a82ff19d946c26134f02ac9860f2736e590c62f1f",
+      "bytes": 5516
+    },
     "src/expeditionService.js": {
-      "sha256": "b54bd5306e1d3b91eafe42de553cd1730df3c3a36cf57868d28c1e29b07d6096",
-      "bytes": 10668
+      "sha256": "a0393db1951029c6496216e3af4c6b771ab35c590ddff74adc44c5c68136581d",
+      "bytes": 14182
     },
     "src/expeditionStatusService.js": {
       "sha256": "6e45a6ec8e7b3bfa6018b431991b5540cc214e582e1113fe7636da2f95e141e9",
       "bytes": 2169
     },
     "src/explorationService.js": {
-      "sha256": "bde22bcbfefbf28926b2a412630d4061fcce52ef8dcceae05e076ac3b1cf84d5",
-      "bytes": 20653
+      "sha256": "5ee9429d826df97d8bbe0b89fff95a9accc5aec23cd4d99f0105cb3bfaf0ab8f",
+      "bytes": 23093
+    },
+    "src/feedbackConfig.js": {
+      "sha256": "77e9eda8efe76ad2ea3d1d216d10be01bb219c954c6c619e925d8e2aeafe49f7",
+      "bytes": 201
+    },
+    "src/feedbackController.js": {
+      "sha256": "2d1d4956ba24a114bae0fffbe504ab83a55c58194dbf0a83dd3c0d5d774b757e",
+      "bytes": 6199
+    },
+    "src/feedbackService.js": {
+      "sha256": "f96898f3d97d6dc86157f65aae8e8f2b763f222b04bf778aab386276d8bb9310",
+      "bytes": 6508
     },
     "src/gachaService.js": {
       "sha256": "d631816bfcb980ecbe502cbecf867e0adf65871d00d6ef4e70adce22df9c9bf9",
@@ -1535,12 +1592,16 @@
       "bytes": 27364
     },
     "src/onboardingController.js": {
-      "sha256": "20b7f2bf2af49244d64882fb2077a2ce52a2ae4aecd1b910025b64d718c8e998",
-      "bytes": 18680
+      "sha256": "e56386ff4457b3a37fd8f3790f502dad75db568079b8ed63c8441c8f4f8b4527",
+      "bytes": 27146
+    },
+    "src/onboardingLessons.js": {
+      "sha256": "972c8f06a2d5ccd92662f211568234b7948c20c4b41213e9919f95e3dc3bbe8c",
+      "bytes": 13726
     },
     "src/onboardingService.js": {
-      "sha256": "108703da62c536ec687506bcedb5dc3a341701434868372a57807ed79e82b66f",
-      "bytes": 3035
+      "sha256": "4289008c57efc95843d141a33cb2333c0d9af8c1188a3ba4157e2ab2dfd49a6a",
+      "bytes": 5845
     },
     "src/perfDiagnostics.js": {
       "sha256": "e6e5e3a4fe72ec00df1bd5469147b07d3d6cf8377e9ec691b2908af2cfd494d7",
@@ -1591,16 +1652,20 @@
       "bytes": 4727
     },
     "src/releaseProfile.js": {
-      "sha256": "b853f73daaa8285e034405d957c73d49caf03483ecc75a24e2a387f809a187e1",
+      "sha256": "06512a1f46e69b90bc4854cae61736f64956e7b26321267d19a6e3f052a31936",
       "bytes": 631
     },
     "src/rewardService.js": {
       "sha256": "a245a6e08e6ead6aa65dc4dbb99e8c767fa81bd210e253955359be1a5442e0ff",
       "bytes": 9635
     },
+    "src/shareService.js": {
+      "sha256": "04705dbca03c699f62781606b45d8bf483acb7463358750d6c9c4c0da47bcad1",
+      "bytes": 1577
+    },
     "src/styles.css": {
-      "sha256": "55e2ec728b59afa1641736669d726d77da80c67584f4e89307c00c4f57ad09a0",
-      "bytes": 443980
+      "sha256": "79c500c311984f25957c4f4f615af7a53a9ef807f5a39840c3b729390a31c51a",
+      "bytes": 456494
     },
     "src/summon-polish.css": {
       "sha256": "0d3cbae026034e11034be8ecabc6ff9613a461fbaee616376a26f90f4b924bda",
@@ -1635,16 +1700,16 @@
       "bytes": 13817
     },
     "src/ui.js": {
-      "sha256": "010e62051bb5f29705d338ed3847bf86ee96e0cebbe34b4d2cdca2dfcf0feab5",
-      "bytes": 353415
+      "sha256": "dfa87bcd9884ae121339db1d66b946cc874c822b26c11e4f618fba87ded613ed",
+      "bytes": 365100
     },
     "src/uiHelpers.js": {
       "sha256": "875f08583510e7c246eebeff4b39d6a7273d2643f6a2a2931281672c6c4d7de6",
       "bytes": 2309
     },
     "src/version.js": {
-      "sha256": "b120c4594ad522ff8bf5baf49c310f75ae559e6cb7545ae95489366c29439431",
-      "bytes": 1141
+      "sha256": "03dc7f669ade4836b409749d44d860e4036054e5e426bfb125ec202c60d3817c",
+      "bytes": 1145
     },
     "src/workshopService.js": {
       "sha256": "9833bf353f6c13072f1c3995e2770408533be4e8ed19ea0d1e481740fb7e2e69",

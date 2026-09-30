@@ -298,6 +298,7 @@ export async function replaceAllStores(payload) {
       if (payload.dailyCheckIn) metaStore.put(payload.dailyCheckIn);
       if (payload.questProgress) metaStore.put(payload.questProgress);
       if (payload.explorationProgress) metaStore.put(payload.explorationProgress);
+      if (payload.campProgress) metaStore.put(payload.campProgress);
       if (payload.collectionMilestones) metaStore.put(payload.collectionMilestones);
       if (payload.globalMailboxState) metaStore.put(payload.globalMailboxState);
       if (payload.poolDebutSeen) metaStore.put(payload.poolDebutSeen);
