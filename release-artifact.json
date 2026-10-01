@@ -1,18 +1,18 @@
 {
   "schemaVersion": 1,
-  "artifactId": "89af5039a536cc207a1b7482a8dd8305c120dee607c603f41868e704fb174a8a",
+  "artifactId": "8f8c933b2e939632b2807e33ef21e18b9d3021052b67805b6f03472cf390e92f",
   "sourceCommit": "41e234e79f9b1dfaf2ff9c6deca86b6a84aa3810",
   "profile": {
     "schemaVersion": 1,
     "profile": "preview",
-    "artifactId": "89af5039a536cc207a1b7482a8dd8305c120dee607c603f41868e704fb174a8a",
+    "artifactId": "8f8c933b2e939632b2807e33ef21e18b9d3021052b67805b6f03472cf390e92f",
     "sourceCommit": "41e234e79f9b1dfaf2ff9c6deca86b6a84aa3810",
     "scopePath": "/questnote-pwa-preview/",
     "runtimeContentSchema": 1,
     "dbName": "QuestNotePreviewDB",
     "cacheNamespace": "questnote-preview-",
-    "contentBundleSha256": "f00f02ed3dc6414a7bdc41b1032d1f021e6a19edd1b1f5792f27725ec07abc45",
-    "contentBundleUrl": "data/releases/f00f02ed3dc6414a7bdc41b1032d1f021e6a19edd1b1f5792f27725ec07abc45/catalog.json"
+    "contentBundleSha256": "8475965d22917f5594a56ba6b5bba21e9c4aa22c4b160b4c000e32608e2bc5df",
+    "contentBundleUrl": "data/releases/8475965d22917f5594a56ba6b5bba21e9c4aa22c4b160b4c000e32608e2bc5df/catalog.json"
   },
   "legacyCompatibility": {
     "sourceCommit": "aada9a73e6cf0381fc03359dafd78b70b274cce2",
@@ -436,8 +436,8 @@
     "src/workshopService.js": "5c1940a3116e93e8e9376a102621f02ff3a58c9d575491e875420dd4890b9480"
   },
   "assemblerSha256": "61a6f2cca11031f007cdfb7f091f7f5eed4f0bd3708ce14e9e2b8c5d4151a250",
-  "candidateManifestSha256": "6b6aa4d9babafa3d78af37ee32edddf0eb71d83ea90d55886154ce44164e3fe7",
-  "inputVerification": "candidate-file-hashes",
+  "candidateManifestSha256": null,
+  "inputVerification": "explicit-local-input",
   "files": {
     ".nojekyll": {
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -1723,8 +1723,8 @@
       "sha256": "4fd1cdc8674e5592b6b2256603bad59b5bf555650c482237eedb6a86b3867fcc",
       "bytes": 1651
     },
-    "data/releases/f00f02ed3dc6414a7bdc41b1032d1f021e6a19edd1b1f5792f27725ec07abc45/catalog.json": {
-      "sha256": "f00f02ed3dc6414a7bdc41b1032d1f021e6a19edd1b1f5792f27725ec07abc45",
+    "data/releases/8475965d22917f5594a56ba6b5bba21e9c4aa22c4b160b4c000e32608e2bc5df/catalog.json": {
+      "sha256": "8475965d22917f5594a56ba6b5bba21e9c4aa22c4b160b4c000e32608e2bc5df",
       "bytes": 331807
     },
     "data/titles.json": {
@@ -1732,27 +1732,15 @@
       "bytes": 6119
     },
     "index.html": {
-      "sha256": "9d6046815799cc349c6a42d2131e871d47e6192b434aada355e2992d7fbbe8b5",
+      "sha256": "f373dc9df6e6d2ba3c0aa1810a7fd08f82e822b003cd3411c7ad002247b37e9b",
       "bytes": 59012
     },
     "manifest.webmanifest": {
       "sha256": "92eebd112db700add8829cda91380b117bcf4f4d91723ea899055ebde22caad0",
       "bytes": 869
     },
-    "release-input/approvals.json": {
-      "sha256": "7bb8adf513b74359f3c1a785e64c89a1e7af4b12f2b55f1416ae302acd843cd6",
-      "bytes": 1190936
-    },
-    "release-input/candidate.json": {
-      "sha256": "6b6aa4d9babafa3d78af37ee32edddf0eb71d83ea90d55886154ce44164e3fe7",
-      "bytes": 4875
-    },
-    "release-input/validation.json": {
-      "sha256": "60426e2983b2a37794b8baeb8ab8bda4abc217c8756d366539b2541ad2515c3a",
-      "bytes": 6513
-    },
     "service-worker.js": {
-      "sha256": "a4dcd0915a52350ec59a046f6dfd59e55374df1595ce5808332d49410ce6394f",
+      "sha256": "2d2bb39db0a8714845b27c1c10538e5e92bbc0c416b7c4aa90e4b78a9d9afe60",
       "bytes": 29233
     },
     "src/achievementService.js": {
@@ -1976,7 +1964,7 @@
       "bytes": 4727
     },
     "src/releaseProfile.js": {
-      "sha256": "772f258e33a8f83db2a51aa23a9634ad65d210598527515ae0e3a45f18faebdf",
+      "sha256": "f9b5bc57881997958ace2d66032cb7d23a9981b676fa5f491429f45d1ddd3d31",
       "bytes": 631
     },
     "src/reminder-settings.css": {
@@ -2080,7 +2068,7 @@
       "bytes": 695
     },
     "src/version.js": {
-      "sha256": "c57946b164d3e673a245d8b43bf574c211e58921c4e31dd89bee3bfa993b926f",
+      "sha256": "6f61bc92b1f1f6491717533c776cb7b3e086549e460ed864b378e6b824daa088",
       "bytes": 1147
     },
     "src/workshopGiftView.js": {

@@ -1617,6 +1617,164 @@
       }
     ]
   },
+  "poolsData": {
+    "pools": [
+      {
+        "id": "standard",
+        "name": "標準召喚",
+        "active": true,
+        "cost": 100,
+        "rates": {
+          "N": 0.55,
+          "R": 0.3,
+          "SR": 0.1,
+          "SSR": 0.03,
+          "UR": 0.02
+        },
+        "pity": {
+          "ssr": 30,
+          "ur": 100
+        },
+        "petFilter": {
+          "poolTags": [
+            "standard"
+          ]
+        }
+      },
+      {
+        "id": "eternal_slumber_bloom",
+        "name": "永眠花海召喚",
+        "active": true,
+        "cost": 100,
+        "rates": {
+          "N": 0.55,
+          "R": 0.3,
+          "SR": 0.1,
+          "SSR": 0.03,
+          "UR": 0.02
+        },
+        "pity": {
+          "ssr": 30,
+          "ur": 100
+        },
+        "petFilter": {
+          "poolTags": [
+            "eternal_slumber_bloom"
+          ]
+        },
+        "presentation": {
+          "themeKey": "eternal_slumber_bloom",
+          "badge": "限定系列",
+          "eyebrow": "月皇花已於長夜中甦醒",
+          "tagline": "將散落的夢塵投入鏡池，喚醒沉睡於花庭深處的生命。",
+          "heroPetId": "pet_ur05",
+          "featuredPetIds": [
+            "pet_ssr05",
+            "pet_ssr06"
+          ],
+          "animationKey": "dream_bloom"
+        },
+        "unlockExpansion": {
+          "key": "morning_garden",
+          "threshold": 20,
+          "progressScope": "lifetime_pool_draws",
+          "extraPoolTags": [
+            "eternal_slumber_bloom_awakened"
+          ],
+          "rewardPetId": "pet_r16",
+          "animationKey": "morning_garden_unlock",
+          "title": "晨醒花庭",
+          "unlockMessage": "沉眠有歸，甦醒有時。"
+        }
+      },
+      {
+        "id": "frost_oath_fjord",
+        "name": "霜誓峽灣召喚",
+        "active": true,
+        "cost": 100,
+        "rates": {
+          "N": 0.55,
+          "R": 0.3,
+          "SR": 0.1,
+          "SSR": 0.03,
+          "UR": 0.02
+        },
+        "pity": {
+          "ssr": 30,
+          "ur": 100
+        },
+        "petFilter": {
+          "poolTags": [
+            "frost_oath_fjord"
+          ]
+        },
+        "presentation": {
+          "themeKey": "glacier_arrival",
+          "animationKey": "glacier_arrival",
+          "heroPetId": "pet_ur07",
+          "featuredPetIds": [
+            "pet_ssr08",
+            "pet_ssr09",
+            "pet_n20"
+          ],
+          "badge": "北境新地域",
+          "eyebrow": "循著誓火，抵達冰河盡頭的船港。",
+          "tagline": "風雪越烈，誓約越亮。",
+          "debutLines": [
+            "冰壁之間",
+            "誓火引路",
+            "霜誓峽灣"
+          ],
+          "debutLabel": "抵達霜誓峽灣",
+          "detailsNote": "十二隻遠航夥伴從第一抽起皆可抽取；無抽數解鎖或額外贈寵。主打角色不另加權。",
+          "candidateNote": "僅含霜誓峽灣 12 隻夥伴，不含其他系列寵物。"
+        }
+      },
+      {
+        "id": "honeylight_sugar_garden_v2",
+        "name": "蜜光糖庭",
+        "active": true,
+        "cost": 100,
+        "rates": {
+          "N": 0.55,
+          "R": 0.3,
+          "SR": 0.1,
+          "SSR": 0.03,
+          "UR": 0.02
+        },
+        "pity": {
+          "ssr": 30,
+          "ur": 100
+        },
+        "petFilter": {
+          "poolTags": [
+            "honeylight_sugar_garden_v2"
+          ]
+        },
+        "presentation": {
+          "themeKey": "honeylight_sugar",
+          "animationKey": "honeylight_sugar",
+          "heroPetId": "pet_ur10",
+          "featuredPetIds": [
+            "pet_ur09",
+            "pet_ssr12",
+            "pet_ssr13"
+          ],
+          "badge": "糖庭新地域",
+          "eyebrow": "糖晶溫室與暖香烘焙街，為每一個小進展留下甜味。",
+          "tagline": "每一步努力，都值得一點甜。",
+          "detailsNote": "12 隻皆從第一抽開放，無解鎖、無贈寵。雙 UR：焦糖布蕾海獺、千層奶霜天鵝；主打角色不另加權。",
+          "candidateNote": "僅含蜜光糖庭 12 隻夥伴，不含其他系列寵物。",
+          "debutLabel": "蜜光糖庭登場",
+          "debutLines": [
+            "糖庭亮起",
+            "甜蜜相遇"
+          ]
+        }
+      }
+    ],
+    "schemaVersion": 1
+  },
   "loreData": {
     "version": 1,
     "description": "寵物個性化內容，以 id 對應 pets.json。新增寵物只需更新此檔，無需改核心 JS。",
@@ -7079,163 +7237,5 @@
         "order": 100
       }
     ]
-  },
-  "poolsData": {
-    "pools": [
-      {
-        "id": "standard",
-        "name": "標準召喚",
-        "active": true,
-        "cost": 100,
-        "rates": {
-          "N": 0.55,
-          "R": 0.3,
-          "SR": 0.1,
-          "SSR": 0.03,
-          "UR": 0.02
-        },
-        "pity": {
-          "ssr": 30,
-          "ur": 100
-        },
-        "petFilter": {
-          "poolTags": [
-            "standard"
-          ]
-        }
-      },
-      {
-        "id": "eternal_slumber_bloom",
-        "name": "永眠花海召喚",
-        "active": true,
-        "cost": 100,
-        "rates": {
-          "N": 0.55,
-          "R": 0.3,
-          "SR": 0.1,
-          "SSR": 0.03,
-          "UR": 0.02
-        },
-        "pity": {
-          "ssr": 30,
-          "ur": 100
-        },
-        "petFilter": {
-          "poolTags": [
-            "eternal_slumber_bloom"
-          ]
-        },
-        "presentation": {
-          "themeKey": "eternal_slumber_bloom",
-          "badge": "限定系列",
-          "eyebrow": "月皇花已於長夜中甦醒",
-          "tagline": "將散落的夢塵投入鏡池，喚醒沉睡於花庭深處的生命。",
-          "heroPetId": "pet_ur05",
-          "featuredPetIds": [
-            "pet_ssr05",
-            "pet_ssr06"
-          ],
-          "animationKey": "dream_bloom"
-        },
-        "unlockExpansion": {
-          "key": "morning_garden",
-          "threshold": 20,
-          "progressScope": "lifetime_pool_draws",
-          "extraPoolTags": [
-            "eternal_slumber_bloom_awakened"
-          ],
-          "rewardPetId": "pet_r16",
-          "animationKey": "morning_garden_unlock",
-          "title": "晨醒花庭",
-          "unlockMessage": "沉眠有歸，甦醒有時。"
-        }
-      },
-      {
-        "id": "frost_oath_fjord",
-        "name": "霜誓峽灣召喚",
-        "active": true,
-        "cost": 100,
-        "rates": {
-          "N": 0.55,
-          "R": 0.3,
-          "SR": 0.1,
-          "SSR": 0.03,
-          "UR": 0.02
-        },
-        "pity": {
-          "ssr": 30,
-          "ur": 100
-        },
-        "petFilter": {
-          "poolTags": [
-            "frost_oath_fjord"
-          ]
-        },
-        "presentation": {
-          "themeKey": "glacier_arrival",
-          "animationKey": "glacier_arrival",
-          "heroPetId": "pet_ur07",
-          "featuredPetIds": [
-            "pet_ssr08",
-            "pet_ssr09",
-            "pet_n20"
-          ],
-          "badge": "北境新地域",
-          "eyebrow": "循著誓火，抵達冰河盡頭的船港。",
-          "tagline": "風雪越烈，誓約越亮。",
-          "debutLines": [
-            "冰壁之間",
-            "誓火引路",
-            "霜誓峽灣"
-          ],
-          "debutLabel": "抵達霜誓峽灣",
-          "detailsNote": "十二隻遠航夥伴從第一抽起皆可抽取；無抽數解鎖或額外贈寵。主打角色不另加權。",
-          "candidateNote": "僅含霜誓峽灣 12 隻夥伴，不含其他系列寵物。"
-        }
-      },
-      {
-        "id": "honeylight_sugar_garden_v2",
-        "name": "蜜光糖庭",
-        "active": true,
-        "cost": 100,
-        "rates": {
-          "N": 0.55,
-          "R": 0.3,
-          "SR": 0.1,
-          "SSR": 0.03,
-          "UR": 0.02
-        },
-        "pity": {
-          "ssr": 30,
-          "ur": 100
-        },
-        "petFilter": {
-          "poolTags": [
-            "honeylight_sugar_garden_v2"
-          ]
-        },
-        "presentation": {
-          "themeKey": "honeylight_sugar",
-          "animationKey": "honeylight_sugar",
-          "heroPetId": "pet_ur10",
-          "featuredPetIds": [
-            "pet_ur09",
-            "pet_ssr12",
-            "pet_ssr13"
-          ],
-          "badge": "糖庭新地域",
-          "eyebrow": "糖晶溫室與暖香烘焙街，為每一個小進展留下甜味。",
-          "tagline": "每一步努力，都值得一點甜。",
-          "detailsNote": "12 隻皆從第一抽開放，無解鎖、無贈寵。雙 UR：焦糖布蕾海獺、千層奶霜天鵝；主打角色不另加權。",
-          "candidateNote": "僅含蜜光糖庭 12 隻夥伴，不含其他系列寵物。",
-          "debutLabel": "蜜光糖庭登場",
-          "debutLines": [
-            "糖庭亮起",
-            "甜蜜相遇"
-          ]
-        }
-      }
-    ],
-    "schemaVersion": 1
   }
 }
