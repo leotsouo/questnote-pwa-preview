@@ -2,6 +2,7 @@
  * 習慣追蹤服務 — CRUD、完成紀錄、獎勵、統計與 streak
  */
 import { dbGetAll, dbPut, dbGet, dbDelete, STORES } from './db.js';
+import { putWithAwakeningProgress } from './petAwakeningService.js';
 import { getTodayDateString } from './taskFilterService.js';
 import { addStardust, addAdventureEnergy } from './rewardService.js';
 import { addBondExpToCompanion } from './collectionService.js';
@@ -65,7 +66,7 @@ export async function getHabitById(id) {
 async function saveHabit(habit) {
   const normalized = normalizeHabit(habit);
   normalized.updatedAt = new Date().toISOString();
-  await dbPut(STORES.HABITS, normalized);
+  await putWithAwakeningProgress(STORES.HABITS, normalized);
   return normalized;
 }
 

@@ -77,6 +77,8 @@ import { initQuestIconLanguage } from './iconPresentation.js';
 import { THEME_DIRECTIONS } from './themeRegistry.js';
 import { twilightIcon, getCompanionScene, initTwilightChrome, syncTwilightHome, syncTwilightGacha, setTwilightCompanionLine, reactTwilightCompanion } from './twilightPresentation.js';
 import { createBondJourneyController } from './bondJourneyController.js';
+import { createAwakeningController } from './petAwakeningController.js';
+import { renderAwakeningDetail, renderAwakeningHome } from './petAwakeningView.js';
 import { renderBondHome, renderBondDetail, renderBondKeepsake } from './bondJourneyView.js';
 import {
   pickStatusLine,
@@ -594,6 +596,8 @@ export function initUI(appState, refreshCallback, achievementCheckCallback) {
     createBondJourneyController({ getState: () => state, refresh: (...args) => onRefresh(...args),
       openModal, closeModal, showToast, switchView,
       portrait: (pet) => petImageHtml(pet, { size: 'md', loading: 'eager', eager: true }) }).mount();
+    createAwakeningController({ getState: () => state, refresh: (...args) => onRefresh(...args),
+      openModal, closeModal, showToast, switchView, portrait: (pet) => petImageHtml(pet, { size: 'md', loading: 'eager', eager: true }) }).mount();
     initQuestIconLanguage();
     bindNavigation();
     initFilterGestures();
@@ -1532,7 +1536,7 @@ export function openPetImageViewer(petId, opener) {
     return;
   }
   const original = pet.nickname ? petOriginalName(pet) : '';
-  openPetImageViewerBySrc(src, petDisplayName(pet), pet.rarity, original, opener, getPetImageSrc(pet, 'stage'));
+  openPetImageViewerBySrc(src, petDisplayName(pet), pet.rarity, original, opener, getPetImageSrc(pet, 'stage'), pet.fallbackImage || '');
 }
 
 /**
@@ -1543,7 +1547,7 @@ export function openPetImageViewer(petId, opener) {
  * @param {string} [originalName] 副名稱（原名，僅有暱稱時顯示）
  * @param {HTMLElement} [opener] 未指定時沿用目前焦點。
  */
-export function openPetImageViewerBySrc(imageSrc, petName, rarity, originalName = '', opener, previewSrc = '') {
+export function openPetImageViewerBySrc(imageSrc, petName, rarity, originalName = '', opener, previewSrc = '', fallbackSrc = '') {
   const resolved = getPetImageSrc({ image: imageSrc }) || imageSrc;
   if (!resolved) return;
 
@@ -1593,6 +1597,7 @@ export function openPetImageViewerBySrc(imageSrc, petName, rarity, originalName 
   const note = overlay.querySelector('.pet-image-viewer__preview-note');
   const preview = previewSrc && previewSrc !== resolved ? previewSrc : resolved;
   let originalStarted = false;
+  let fallbackUsed = false;
   const loadOriginal = () => {
     if (originalStarted || preview === resolved) return;
     originalStarted = true;
@@ -1606,11 +1611,22 @@ export function openPetImageViewerBySrc(imageSrc, petName, rarity, originalName 
     frame.classList.remove('is-loading', 'is-error');
     frame.classList.add('is-loaded');
     if (image.src === new URL(resolved, location.href).href) note.textContent = '';
-    else loadOriginal();
+    else if (!fallbackUsed) loadOriginal();
   };
   image.onerror = () => {
+    if (fallbackUsed) {
+      frame.classList.remove('is-loading', 'is-loaded');
+      frame.classList.add('is-error');
+      return;
+    }
     if (image.src !== new URL(resolved, location.href).href) {
       image.src = resolved;
+      return;
+    }
+    if (fallbackSrc && image.src !== new URL(fallbackSrc, location.href).href) {
+      fallbackUsed = true;
+      image.src = fallbackSrc;
+      note.textContent = '形態圖片暫時無法載入，顯示現行卡圖；形態選擇已保留';
       return;
     }
     frame.classList.remove('is-loading', 'is-loaded');
@@ -1695,7 +1711,7 @@ export function petImageHtml(pet, options = {}) {
   } = options;
   const cls = `pet-img pet-img--${size}`;
   const src = getPetImageSrc(pet, imageVariant);
-  const originalSrc = getPetImageSrc(pet);
+  const originalSrc = pet.fallbackImage || getPetImageSrc(pet);
   const loadAttr = eager || loading === 'eager' ? 'eager' : loading;
   const onload = "this.classList.add('is-loaded');this.closest('.pet-image-frame')?.classList.remove('is-loading')";
   const onerror = "if(this.dataset.originalSrc&&this.src!==new URL(this.dataset.originalSrc,location.href).href){this.src=this.dataset.originalSrc;return;}this.onerror=null;this.classList.add('is-error');var f=this.closest('.pet-image-frame');if(f){f.classList.remove('is-loading');f.classList.add('is-error');}";
@@ -1777,7 +1793,7 @@ export function renderSharedUI() {
 function renderBondHomeSection() {
   const root = document.getElementById('bond-journey-home');
   if (!root) return;
-  const html = renderBondHome(state);
+  const html = renderBondHome(state) + renderAwakeningHome(state);
   const opener = document.getElementById('modal-overlay')?.classList.contains('open')
     ? root.querySelector('[data-bond-open]') : null;
   // Preserve a connected dialog opener while updating the lightweight home card.
@@ -3695,7 +3711,7 @@ function openPetFeedModal(companion) {
   if (src) warmPetImageCache(src).catch(() => {});
 
   const rarityClass = `rarity-${companion.rarity}`;
-  const onError = `this.onerror=null;this.classList.add('companion-image-preview__img--error')`;
+  const onError = `if(this.dataset.fallbackSrc&&this.src!==new URL(this.dataset.fallbackSrc,location.href).href){this.src=this.dataset.fallbackSrc;return;}this.onerror=null;this.classList.add('companion-image-preview__img--error')`;
   const onload = "this.classList.add('is-loaded');this.closest('.pet-image-frame')?.classList.remove('is-loading')";
   const feedSection = buildPetFeedSection(companion);
   const imageHtml = src
@@ -3703,6 +3719,7 @@ function openPetFeedModal(companion) {
           <img
             class="companion-image-preview__img companion-image-preview__img--interactive is-loading"
             src="${escapeHtml(src)}"
+            data-fallback-src="${escapeHtml(companion.fallbackImage || '')}"
             alt="${escapeHtml(petDisplayName(companion))}"
             loading="eager"
             decoding="async"
@@ -6265,7 +6282,7 @@ function openPetDetailModal(petId) {
     const liberatedLabel = st.bondLiberated
       ? '<span class="bond-liberated-label">羈絆解放</span>'
       : '';
-    const storyHtml = renderBondDetail(pet, state);
+    const storyHtml = renderBondDetail(pet, state) + renderAwakeningDetail(pet, state);
     bondStatusSection = `
       <section class="bond-section">
         <div class="bond-section__title-row">
@@ -6544,7 +6561,6 @@ function renderExpeditionView() {
 }
 
 function expeditionAreaImageUrl(areaId) {
-  if (areaId === 'cloudrest_trail') return './assets/expeditions/cloudrest_trail.svg';
   return `./assets/expeditions/${encodeURIComponent(areaId)}.webp`;
 }
 

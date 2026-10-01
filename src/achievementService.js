@@ -28,6 +28,8 @@ import { getDailyCheckIn } from './dailyCheckInService.js';
 import { getQuestProgress } from './questService.js';
 import { getExplorationProgress, EXPLORATION_AREA_IDS } from './explorationService.js';
 
+import { AWAKENING_KEY, awakenedTitles } from './petAwakeningCore.js';
+import { loadAwakeningCatalog } from './petAwakeningCatalog.js';
 const ACHIEVEMENTS_KEY = 'achievements';
 
 const DEFAULT_STATE = {
@@ -105,7 +107,10 @@ export function normalizeAchievementsState(data) {
 /** 取得玩家成就狀態 */
 export async function getAchievementsState() {
   const data = await dbGet(STORES.META, ACHIEVEMENTS_KEY);
-  return normalizeAchievementsState(data);
+  const state = normalizeAchievementsState(data);
+  const unlocked = awakenedTitles(await dbGet(STORES.META, AWAKENING_KEY));
+  state.unlockedTitleIds = [...new Set([...state.unlockedTitleIds, ...unlocked])];
+  return state;
 }
 
 /** 儲存玩家成就狀態 */
@@ -143,9 +148,10 @@ export async function loadTitlesCatalog() {
     const res = await fetch('./data/titles.json');
     if (!res.ok) throw new Error('無法載入稱號資料');
     const data = await res.json();
-    titlesCatalog = data.titles || [];
+    const awakening = await loadAwakeningCatalog();
+    titlesCatalog = [...(data.titles || []), ...awakening.pets.map((p) => ({ id: `title_awakening_${p.petId}`, name: p.title, description: `與${p.name}完成守諾覺醒。`, sourceAchievementId: null }))];
     titleByAchievementId = new Map(
-      titlesCatalog.map((t) => [t.sourceAchievementId, t])
+      titlesCatalog.filter((t) => t.sourceAchievementId).map((t) => [t.sourceAchievementId, t])
     );
     return titlesCatalog;
   } catch (err) {

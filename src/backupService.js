@@ -25,6 +25,7 @@ import { normalizeGlobalMailboxState } from './mailboxService.js';
 import { validateBackupEnvelope, validateSnapshotData, validateStoredSnapshot } from './backupSchema.js';
 import { APP_VERSION } from './version.js';
 import { normalizeBondJourney } from './bondJourneyCore.js';
+import { normalizePetAwakening } from './petAwakeningCore.js';
 
 export { APP_VERSION };
 const APP_NAME = 'QuestNote';
@@ -59,6 +60,7 @@ const DATA_KEYS = [
   'poolUnlockState',
   'idempotentGrants',
   'bondJourney',
+  'petAwakening',
 ];
 
 /**
@@ -86,6 +88,7 @@ function buildDataPayload({
   poolUnlockState,
   idempotentGrants,
   bondJourney,
+  petAwakening,
 }) {
   const walletData = {
     stardust: wallet.stardust ?? 0,
@@ -140,6 +143,7 @@ function buildDataPayload({
     poolUnlockState,
     idempotentGrants,
     bondJourney,
+    petAwakening,
   };
 }
 
@@ -383,6 +387,7 @@ function normalizePayloadData(rawBackup) {
     poolUnlockState: normalizePoolUnlockState(data.poolUnlockState),
     idempotentGrants: normalizeIdempotentGrants(data.idempotentGrants),
     bondJourney: normalizeBondJourney(data.bondJourney),
+    petAwakening: normalizePetAwakening(data.petAwakening),
   };
 }
 
@@ -455,6 +460,7 @@ export function migrateImportedData(normalizedBackup) {
   const poolUnlockState = normalizePoolUnlockState(normalizedBackup.poolUnlockState);
   const idempotentGrants = normalizeIdempotentGrants(normalizedBackup.idempotentGrants);
   const bondJourney = normalizeBondJourney(normalizedBackup.bondJourney);
+  const petAwakening = normalizePetAwakening(normalizedBackup.petAwakening);
 
   return {
     ...normalizedBackup,
@@ -480,6 +486,7 @@ export function migrateImportedData(normalizedBackup) {
     poolUnlockState,
     idempotentGrants,
     bondJourney,
+    petAwakening,
   };
 }
 
@@ -578,6 +585,7 @@ export async function safeReplaceAllData(migratedData) {
     poolUnlockState: migratedData.poolUnlockState,
     idempotentGrants: migratedData.idempotentGrants,
     bondJourney: migratedData.bondJourney,
+    petAwakening: migratedData.petAwakening,
   });
 }
 

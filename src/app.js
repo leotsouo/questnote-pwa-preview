@@ -119,6 +119,10 @@ import { runAppHealthCheck } from './healthCheckService.js';
 import { getServiceWorkerRegisterUrl } from './version.js';
 import { loadCatalogBundle } from './releaseCatalog.js';
 import { loadBondStories, syncBondJourney } from './bondJourneyService.js';
+import { loadAwakeningCatalog } from './petAwakeningCatalog.js';
+import { syncPetAwakening } from './petAwakeningService.js';
+import { awakeningPortrait } from './petAwakeningView.js';
+import { preloadAwakeningForms } from './petAwakeningScene.js';
 import { preloadCompanionImage, preloadOwnedPetImages } from './imagePreloadService.js';
 
 
@@ -220,6 +224,10 @@ async function loadGameData() {
 function warmCriticalPetImages() {
   preloadCompanionImage(appState).catch(() => {});
   preloadOwnedPetImages(appState.enrichedCollection, appState.allPets, 12).catch(() => {});
+  for (const pet of appState.enrichedCollection.filter((p) => p.owned && p.bondLevel >= 5)) {
+    const entry = appState.awakeningCatalog?.pets.find((p) => p.petId === pet.id);
+    if (entry) preloadAwakeningForms(entry, appState.allPets.find((p) => p.id === pet.id)).catch(() => {});
+  }
 }
 
 
@@ -341,6 +349,16 @@ async function refreshState(options = {}) {
     appState.bondJourneyError = '同行紀錄暫時無法載入，請重試；原始紀錄已保留。';
   }
 
+  try {
+    appState.awakeningCatalog = await loadAwakeningCatalog();
+    appState.petAwakening = await syncPetAwakening();
+    appState.awakeningError = null;
+    appState.enrichedCollection = appState.enrichedCollection.map((p) => awakeningPortrait(p, appState.petAwakening, appState.awakeningCatalog));
+    appState.companion = awakeningPortrait(appState.companion, appState.petAwakening, appState.awakeningCatalog);
+  } catch (error) {
+    console.error('[QuestNote] 覺醒紀錄載入失敗:', error);
+    appState.awakeningError = error.message;
+  }
   appState.activeExpedition = await getActiveExpedition();
   appState.recentExpeditions = await getRecentExpeditions();
   appState.campProgress = await getCampProgress();

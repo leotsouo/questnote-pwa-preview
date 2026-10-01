@@ -2,6 +2,7 @@
  * 放置探險系統 — 地區解鎖、派遣、獎勵計算
  */
 import { dbGetAll, dbGet, dbPut, dbMutateRecords, STORES } from './db.js';
+import { AWAKENING_KEY, awakeningEvents, advancePetAwakening } from './petAwakeningCore.js';
 import {
   normalizeWallet,
 } from './rewardService.js';
@@ -293,10 +294,11 @@ export async function forceCompleteActiveExpedition() {
 export async function claimExpeditionRewards(expeditionId, areas, allPets) {
   return dbMutateRecords([
     { store: STORES.EXPEDITIONS, key: expeditionId },
+    { store: STORES.META, key: AWAKENING_KEY },
     { store: STORES.META, key: 'wallet' },
     { store: STORES.META, key: 'explorationProgress' },
     { store: STORES.COLLECTION, all: true },
-  ], ([exp, walletRaw, explorationRaw, collectionRaw]) => {
+  ], ([exp, awakeningRaw, walletRaw, explorationRaw, collectionRaw]) => {
     if (!exp) throw new Error('探險紀錄不存在');
     if (exp.claimed) throw new Error('獎勵已領取');
     if (!isExpeditionTimeComplete(exp)) throw new Error('探險尚未結束');
@@ -338,6 +340,7 @@ export async function claimExpeditionRewards(expeditionId, areas, allPets) {
         newlyReachedMilestones: exploration.newlyReachedMilestones,
       } : null };
     puts.push({ store: STORES.EXPEDITIONS, value: exp });
+    if (awakeningRaw) puts.push({ store: STORES.META, value: advancePetAwakening(awakeningRaw, awakeningEvents([], [], [exp])) });
     return { puts, result: { expedition: exp, rewards, bond, pet, exploration } };
   });
 }

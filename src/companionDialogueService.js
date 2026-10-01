@@ -397,6 +397,9 @@ export function getCompanionDialogue(ctx, forceScenario = null) {
   const { tasks, todayCompleted, companion } = ctx;
   const scenario = forceScenario || resolveScenario(ctx);
 
+  if (!BOND_DIALOGUE_BLOCKED_SCENARIOS.has(scenario) && companion?.awakeningDialogue?.length) {
+    if (Math.random() < 0.5) return companion.awakeningDialogue[Math.floor(Math.random() * companion.awakeningDialogue.length)];
+  }
   // 羈絆台詞：在非行動導向情境下，依解鎖狀態有機率插入
   if (!BOND_DIALOGUE_BLOCKED_SCENARIOS.has(scenario)) {
     const bondLine = getBondDialogueLine(companion);

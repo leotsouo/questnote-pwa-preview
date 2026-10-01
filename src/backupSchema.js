@@ -2,11 +2,12 @@
 import { SUPPORTED_THEMES } from './themeRegistry.js';
 import { FONT_SIZES } from './preferencesService.js';
 import { validateBondJourney } from './bondJourneyCore.js';
+import { validatePetAwakening } from './petAwakeningCore.js';
 const BASE_KEYS = ['tasks', 'wallet', 'collection', 'gachaStats', 'expeditions',
   'achievements', 'taskStats', 'userPreferences', 'habits'];
 const ADDITIONS = ['inventory', 'workshopStats', 'dailyCheckIn', 'questProgress',
   'explorationProgress', 'collectionMilestones', 'globalMailboxState',
-  'poolDebutSeen', 'poolUnlockState', 'idempotentGrants', 'campProgress', 'bondJourney'];
+  'poolDebutSeen', 'poolUnlockState', 'idempotentGrants', 'campProgress', 'bondJourney', 'petAwakening'];
 export const SNAPSHOT_KEYS = [...BASE_KEYS, ...ADDITIONS];
 // Counts come from actual versioned exports, not inferred release dates.
 const LEGACY_PROFILES = {
@@ -298,6 +299,7 @@ export function validateSnapshotData(data, requiredKeys = SNAPSHOT_KEYS, profile
     }
   };
   if (Object.hasOwn(data, 'bondJourney')) errors.push(...validateBondJourney(data.bondJourney));
+  if (Object.hasOwn(data, 'petAwakening')) errors.push(...validatePetAwakening(data.petAwakening));
   visit(data, '');
   return errors;
 }
@@ -355,7 +357,9 @@ export function validateBackupEnvelope(raw, currentVersion) {
     && (actual[1] < 4 || (actual[1] === 4 && (actual[2] ?? 0) <= 17)));
   const preBondRelease = actual[0] < 3 || (actual[0] === 3
     && (actual[1] < 5 || (actual[1] === 5 && (actual[2] ?? 0) < 1)));
-  const additions = LEGACY_PROFILES[version] ?? (preCampRelease ? 10 : preBondRelease ? 11 : ADDITIONS.length);
+  const preAwakeningRelease = actual[0] < 3 || (actual[0] === 3
+    && (actual[1] < 5 || (actual[1] === 5 && (actual[2] ?? 0) < 4)));
+  const additions = LEGACY_PROFILES[version] ?? (preCampRelease ? 10 : preBondRelease ? 11 : preAwakeningRelease ? ADDITIONS.length - 1 : ADDITIONS.length);
   const required = [...BASE_KEYS, ...ADDITIONS.slice(0, additions)];
   const errors = validateSnapshotData(data, required, version);
   if (isRecord(data)) {

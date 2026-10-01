@@ -2,6 +2,7 @@
  * 任務 CRUD、子任務、今日計畫與完成邏輯
  */
 import { dbGetAll, dbPut, dbDelete, STORES } from './db.js';
+import { putWithAwakeningProgress } from './petAwakeningService.js';
 import { claimTaskReward } from './rewardService.js';
 import { normalizeTask } from './taskMigration.js';
 import {
@@ -146,7 +147,7 @@ export async function updateTask(id, updates) {
     await recordPlanToday();
   }
 
-  await dbPut(STORES.TASKS, updated);
+  await putWithAwakeningProgress(STORES.TASKS, updated);
   return updated;
 }
 
