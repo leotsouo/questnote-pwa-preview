@@ -8,6 +8,7 @@
  * 4. 只要結果含 SSR+，依原始順序自動播放完整 queue，再交回結果畫面。
  * 5. 主動畫略過 ≠ SSR+ queue 略過（由呼叫端區分；本模組只處理 reveal queue skip）。
  */
+import { createSwordwildShanheScene } from './swordwildShanheScene.js';
 import { getPetImageSrc, preloadPetImage, delay } from './imagePreloadService.js';
 import { resolvePetRevealKey, resolvePetRevealPresentation } from './poolContentContract.js';
 
@@ -237,6 +238,7 @@ function buildFallingPetalsHtml(reduceMotion) {
 }
 
 function themeClassName(theme) {
+  if (['sword_eagle', 'sword_toad', 'sword_ape'].includes(theme)) return 'is-ur is-shanhe-reveal';
   if (theme === 'caramel') return 'is-ur is-caramel-ur';
   if (theme === 'cream') return 'is-ur is-cream-ur';
   if (theme === 'moon') return 'is-ur is-moon-ur';
@@ -260,6 +262,7 @@ function durationForTheme(theme, reduce) {
   if (theme === 'petal') return DURATION.UR_PETAL;
   if (theme === 'caramel') return DURATION.UR_CARAMEL;
   if (theme === 'cream') return DURATION.UR_CREAM;
+  if (['sword_eagle', 'sword_toad', 'sword_ape'].includes(theme)) return 2600;
   if (theme === 'ur') return DURATION.UR;
   return DURATION.SSR;
 }
@@ -326,6 +329,11 @@ export function createSummonRevealOverlay({ rarity, pet, reduceMotion, theme, pr
   const progressEl = overlay.querySelector('[data-role="progress"]');
   if (progressEl && progressText) progressEl.textContent = progressText;
 
+  const shanheMotifs = { sword_eagle: 'eagle', sword_toad: 'toad', sword_ape: 'ape' };
+  if (!fallback && (presentationKey === 'swordwild_shanhe' || Object.hasOwn(shanheMotifs, resolvedTheme))) {
+    overlay.classList.add('is-shanhe-reveal');
+    overlay.querySelector('.summon-reveal-bg').replaceWith(createSwordwildShanheScene(shanheMotifs[resolvedTheme] || 'ink'));
+  }
   const frame = overlay.querySelector('.summon-reveal-pet-frame');
   if (!fallback && ['caramel', 'cream'].includes(resolvedTheme)) {
     const ornament = document.createElement('div');

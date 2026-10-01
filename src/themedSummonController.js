@@ -7,6 +7,7 @@
  * - 略過／錯誤／Reduced Motion 都只能改變展示，不可重抽
  */
 import { getPetImageSrc, preloadImage, delay } from './imagePreloadService.js';
+import { createSwordwildShanheScene, swordwildPreludeDurations } from './swordwildShanheScene.js';
 import { createGlacierArrivalScene } from './glacierArrivalScene.js';
 import { createHoneylightSugarScene, sugarPreludeDurations } from './honeylightSugarScene.js';
 import {
@@ -81,7 +82,7 @@ function setState(next, liveEl) {
   if (liveEl && (next === 'rarityOmen' || next === 'revealing' || next === 'summary' || next === 'complete')) {
     const labels = {
       rarityOmen: '稀有度預兆顯現',
-      revealing: activeOverlay?.dataset.animation === 'honeylight_sugar' ? '糖庭夥伴登場' : activeOverlay?.dataset.animation === 'glacier_arrival' ? '遠航夥伴抵達' : '夥伴甦醒中',
+      revealing: activeOverlay?.dataset.animation === 'swordwild_shanhe' ? '山河夥伴赴約' : activeOverlay?.dataset.animation === 'honeylight_sugar' ? '糖庭夥伴登場' : activeOverlay?.dataset.animation === 'glacier_arrival' ? '遠航夥伴抵達' : '夥伴甦醒中',
       summary: '召喚結果整理',
       complete: '召喚演出結束',
     };
@@ -240,8 +241,8 @@ function createOverlay({ mode, reduceMotion, highestRarity, poolName, animationK
     </div>
   `;
 
-  if (glacier || animationKey === 'honeylight_sugar') {
-    overlay.querySelector('.dream-bloom-bg').replaceWith(glacier ? createGlacierArrivalScene() : createHoneylightSugarScene());
+  if (glacier || animationKey === 'honeylight_sugar' || animationKey === 'swordwild_shanhe') {
+    overlay.querySelector('.dream-bloom-bg').replaceWith(animationKey === 'swordwild_shanhe' ? createSwordwildShanheScene() : glacier ? createGlacierArrivalScene() : createHoneylightSugarScene());
     overlay.querySelectorAll('[data-role="dust"], [data-role="ripple"], [data-role="buds"], [data-role="crest"]').forEach((node) => node.remove());
   }
 
@@ -357,7 +358,7 @@ function setupBuds(container, count, reduceMotion) {
  */
 export async function playThemedSummon(options = {}) {
   const animationKey = options.animationKey || 'dream_bloom';
-  if (!['dream_bloom', 'glacier_arrival', 'honeylight_sugar'].includes(animationKey)) {
+  if (!['dream_bloom', 'glacier_arrival', 'honeylight_sugar', 'swordwild_shanhe'].includes(animationKey)) {
     return { ok: false, fallback: true, state: STATES.FALLBACK };
   }
   const results = Array.isArray(options.results) ? options.results.slice() : [];
@@ -373,7 +374,8 @@ export async function playThemedSummon(options = {}) {
   const mode = options.mode === 'ten' || results.length > 1 ? 'ten' : 'single';
   const highestRarity = getHighestRarity(results);
   const sugar = animationKey === 'honeylight_sugar';
-  const sugarMs = sugarPreludeDurations(highestRarity, mode, reduce);
+  const swordwild = animationKey === 'swordwild_shanhe';
+  const sugarMs = swordwild ? swordwildPreludeDurations(highestRarity, mode, reduce) : sugarPreludeDurations(highestRarity, mode, reduce);
   const previousFocus = document.activeElement;
   const controller = new AbortController();
   activeAbort = controller;
@@ -486,14 +488,14 @@ export async function playThemedSummon(options = {}) {
     if (!options.skipRitual) {
       await runPhase(
         STATES.DREAM_DUST,
-        sugar ? sugarMs[0] : reduce ? PHASE_MS.dreamDust.reduced : PHASE_MS.dreamDust[mode],
+        (sugar || swordwild) ? sugarMs[0] : reduce ? PHASE_MS.dreamDust.reduced : PHASE_MS.dreamDust[mode],
       );
       await runPhase(
         STATES.MIRROR_RIPPLE,
-        sugar ? sugarMs[1] : reduce ? PHASE_MS.mirrorRipple.reduced : PHASE_MS.mirrorRipple[mode],
+        (sugar || swordwild) ? sugarMs[1] : reduce ? PHASE_MS.mirrorRipple.reduced : PHASE_MS.mirrorRipple[mode],
       );
-      await runPhase(STATES.RARITY_OMEN, sugar ? sugarMs[2] : omenMs);
-      await runPhase(STATES.BLOOM, sugar ? sugarMs[3] : bloomMs);
+      await runPhase(STATES.RARITY_OMEN, (sugar || swordwild) ? sugarMs[2] : omenMs);
+      await runPhase(STATES.BLOOM, (sugar || swordwild) ? sugarMs[3] : bloomMs);
     } else {
       introSkipped = true;
     }
@@ -531,8 +533,8 @@ export async function playThemedSummon(options = {}) {
         const eyebrow = overlay.querySelector('[data-role="summary-eyebrow"]');
         const title = overlay.querySelector('[data-role="summary-title"]');
         const grid = overlay.querySelector('[data-role="summary-grid"]');
-        if (eyebrow) eyebrow.textContent = sugar ? '十連糖庭邀請' : animationKey === 'glacier_arrival' ? '十連遠航契約' : '十連夢境花印';
-        if (title) title.textContent = sugar ? '甜蜜夥伴已到來' : animationKey === 'glacier_arrival' ? '遠航夥伴已抵達' : '沉睡生命已甦醒';
+        if (eyebrow) eyebrow.textContent = swordwild ? '十連山河赴約' : sugar ? '十連糖庭邀請' : animationKey === 'glacier_arrival' ? '十連遠航契約' : '十連夢境花印';
+        if (title) title.textContent = swordwild ? '同行者已踏上古道' : sugar ? '甜蜜夥伴已到來' : animationKey === 'glacier_arrival' ? '遠航夥伴已抵達' : '沉睡生命已甦醒';
         if (grid) buildSummaryCards(grid, results);
       }
     }
@@ -639,7 +641,7 @@ export async function playPoolDebutPresentation(options = {}) {
 
   const overlay = document.createElement('div');
   overlay.className = 'dream-debut-overlay';
-  overlay.dataset.animation = sugar ? 'honeylight_sugar' : glacier ? 'glacier_arrival' : 'dream_bloom';
+  overlay.dataset.animation = options.presentation?.animationKey === 'swordwild_shanhe' ? 'swordwild_shanhe' : sugar ? 'honeylight_sugar' : glacier ? 'glacier_arrival' : 'dream_bloom';
   if (reduce) overlay.classList.add('is-reduced');
   if (!full) overlay.classList.add('is-short');
   overlay.setAttribute('role', 'dialog');
@@ -676,6 +678,7 @@ export async function playPoolDebutPresentation(options = {}) {
     <button type="button" class="dream-debut-skip" data-role="skip" aria-label="略過登場演出">略過</button>
   `;
 
+  if (options.presentation?.animationKey === 'swordwild_shanhe') overlay.querySelector('.dream-debut-stage').replaceWith(createSwordwildShanheScene());
   if (glacier) overlay.querySelector('.dream-debut-stage').replaceWith(createGlacierArrivalScene());
   if (sugar) overlay.querySelector('.dream-debut-stage').replaceWith(createHoneylightSugarScene());
   const lines = options.presentation?.debutLines || [];

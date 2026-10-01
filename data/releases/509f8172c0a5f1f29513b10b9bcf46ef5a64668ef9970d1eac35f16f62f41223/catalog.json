@@ -1951,7 +1951,7 @@
         "element": "earth_mountain",
         "visualTheme": "ink_jade_mountain",
         "presentation": {
-          "revealKey": "ur",
+          "revealKey": "sword_eagle",
           "revealCaption": "山重，而一諾更重"
         },
         "imageVariants": {
@@ -1973,7 +1973,7 @@
         "element": "fire_cinnabar",
         "visualTheme": "ink_jade_mountain",
         "presentation": {
-          "revealKey": "ur",
+          "revealKey": "sword_toad",
           "revealCaption": "一聲低鳴，百毒止步"
         },
         "imageVariants": {
@@ -1995,7 +1995,7 @@
         "element": "wood_bamboo",
         "visualTheme": "ink_jade_mountain",
         "presentation": {
-          "revealKey": "ur",
+          "revealKey": "sword_ape",
           "revealCaption": "一劍素心，萬葉知路"
         },
         "imageVariants": {
@@ -8792,8 +8792,8 @@
           ]
         },
         "presentation": {
-          "themeKey": "glacier_arrival",
-          "animationKey": "glacier_arrival",
+          "themeKey": "swordwild_shanhe",
+          "animationKey": "swordwild_shanhe",
           "heroPetId": "pet_ur16",
           "featuredPetIds": [
             "pet_ur17",
@@ -8811,7 +8811,7 @@
           ],
           "debutLabel": "踏入雲棧古道",
           "detailsNote": "20 隻夥伴從第一抽全部開放，無抽數解鎖或贈寵。三 UR：玄翎重岳雕、丹砂鎮嶺蛤、素心劍猿；主打角色不另加權。同一稀有度內依既有抽卡規則選取。",
-          "candidateNote": "僅含劍隱山河 20 隻夥伴；不含其他系列。山道登場沿用既有雪嶺燈火演出。"
+          "candidateNote": "僅含劍隱山河20隻夥伴；不含其他系列。專屬山河啟卷入場、劍光赴約抽獎與三UR故事揭露。"
         }
       }
     ],

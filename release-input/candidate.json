@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
-  "candidateId": "c1b379187f0d7b8cf5ccb01647a90344dfea30154eed448b698d1ebff8ee4dcd",
+  "candidateId": "eaa3e4d2e525439b7c3dd430ad4a9421c1655f4d4776626a8fcb84c7ba8fa2c6",
   "releaseReady": false,
   "baselineHash": "d37b7b471b9d3462fca921249029e9b454b5886c09c72926c2b9c6c7fe596f8a",
   "sopVersion": 2,
   "files": {
-    "approvals.json": "6bbb782829905c12d35a7604fb94e42c8973c181fc353346ff1fd5235c676a45",
+    "approvals.json": "39b2f878d836d33b1cffca657d773286a9af53c493f6af16df483f528ed83119",
     "assets/pets/pet_n36.png": "c6994d0a0ab86e64220c1228b0a1757fdede37d2df2d3014ed17db040f6bb9d4",
     "assets/pets/pet_n37.png": "c08f25e96e7255fae5551423bc69bc977208cf6dbf4635581b045a3facb30cff",
     "assets/pets/pet_n38.png": "3926a8e7fa898edb8e96b45a9372a297772bbc1b57893f1ca9fe268ed326db97",
@@ -66,7 +66,7 @@
     "assets/pets/variants/pet_ur17-stage-960-94d0549cc5cd.webp": "2498a5d4a6d0089d156ddd66a2dc48a9fd554fc26270e9cfd018c8b6411af3ff",
     "assets/pets/variants/pet_ur18-card-384-17d2eb5fc3df.webp": "a1de723602647b977359937f69f3b146238a8b5c2f234757e3f541d14e7e5a06",
     "assets/pets/variants/pet_ur18-stage-960-17d2eb5fc3df.webp": "2de061e35176ca6d8642b4ccb7565212c44958788f2534f7f0d29a307c30d596",
-    "catalog.json": "cdfbea0dba172c49de6ffa5ae23fe2646c51ac10188aab4cf58fac504a172348",
+    "catalog.json": "509f8172c0a5f1f29513b10b9bcf46ef5a64668ef9970d1eac35f16f62f41223",
     "companion-baseline/data/craftables.json": "bb66e4a8b11327f6b0016c1df1b38a35820329daa41c5d53f42c369e09d286ae",
     "companion-baseline/data/expeditions.json": "20c9ea6a7ddbcf8a0300268c4653a1d7619c8561cabd35d3cf21a3e31be0c7a3",
     "companion-baseline/data/gift-affinities.json": "6ba487beaa8d99d9cd26a83a5e3412c147caeafc40894338e378f00ca6472ffe",
@@ -75,7 +75,7 @@
     "companion/data/expeditions.json": "9d14ec309b570be01c65c29dfa8236c1f05b8d5447374e562df5a37537f08530",
     "companion/data/gift-affinities.json": "5c4ae4f64bd97acf70d0ac5d229ddf344c6251f4c54c0dbb5fb2ed63da8afee5",
     "companion/data/materials.json": "ef3aa0d8d7833c5c15504634de7680d43a7404a4012a1377d7d540796125c08c",
-    "ecosystem.json": "ec2d03ca32d96df58a12c6af0eaea2796b77dc86ecaa81b133bb445e541fd216",
+    "ecosystem.json": "968903fd0e73baab7a147682d4f02f4959be32894a2783598bcd36eea0e7fa69",
     "validation.json": "65bf024526c3251064ab09c271646c305a99d52433a0403e9dc1ab0492357854"
   }
 }
