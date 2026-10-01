@@ -1,14 +1,15 @@
 import { RELEASE_PROFILE } from './releaseProfile.js';
 import { askWorker } from './updateProtocol.js';
+import { readServiceWorker, readSessionStorage, unavailableBrowserError, isBlockedRegistration, renderBootstrapRecovery } from './bootstrapRecovery.js';
 
 /** Never open a release database from an uncontrolled, potentially mixed deployment. */
 export async function bootApplication({
   profile = RELEASE_PROFILE,
   marker = document.querySelector('meta[name="questnote-artifact"]')?.content || null,
-  serviceWorker = navigator.serviceWorker,
+  serviceWorker = readServiceWorker(),
   baseUrl = new URL('../', import.meta.url),
   reload = () => location.reload(),
-  attemptStorage = sessionStorage,
+  attemptStorage = readSessionStorage(),
   start = () => import('./app.js'),
   timeoutMs = 60000,
 } = {}) {
@@ -17,7 +18,8 @@ export async function bootApplication({
     || new URL(baseUrl).pathname !== profile.scopePath) {
     throw new Error('發布檔案版本不一致，請稍後重新開啟。');
   }
-  if (!serviceWorker) throw new Error('此發布版本需要安全連線與 Service Worker，請使用 HTTPS 開啟。');
+  if (!serviceWorker) throw unavailableBrowserError();
+  if (!attemptStorage) throw unavailableBrowserError();
   const expectedWorkerUrl = new URL(`service-worker.js?artifact=${profile.artifactId}`, baseUrl).href;
   const attemptKey = `questnote-boot:${profile.artifactId}`;
   // update() may install new verified bytes at the previous worker's script URL.
@@ -35,10 +37,16 @@ export async function bootApplication({
   const incompatibleController = !!serviceWorker.controller;
   if (attemptStorage.getItem(attemptKey)) throw new Error('無法取得已驗證的離線版本，請關閉其他 QuestNote 視窗後重試。');
 
-  const registration = await serviceWorker.register(
-    expectedWorkerUrl,
-    { scope: profile.scopePath, updateViaCache: 'none' },
-  );
+  let registration;
+  try {
+    registration = await serviceWorker.register(
+      expectedWorkerUrl,
+      { scope: profile.scopePath, updateViaCache: 'none' },
+    );
+  } catch (error) {
+    if (isBlockedRegistration(error)) throw unavailableBrowserError(error);
+    throw error;
+  }
   // An existing active generation can serve a coherent page even if a newer one is waiting.
   const worker = incompatibleController
     ? registration.installing || registration.waiting || registration.active
@@ -71,16 +79,11 @@ export async function bootApplication({
 
 if (typeof document !== 'undefined') {
   bootApplication().catch((error) => {
-    const host = document.getElementById('app-loader') || document.body;
-    const message = document.createElement('p');
-    message.textContent = error.message || '啟動失敗，請稍後重試。';
-    const retry = document.createElement('button');
-    retry.type = 'button';
-    retry.textContent = '重新載入';
-    retry.addEventListener('click', () => {
-      try { sessionStorage.removeItem(`questnote-boot:${RELEASE_PROFILE?.artifactId}`); } catch { /* Keep failure visible when storage is unavailable. */ }
-      location.reload();
+    renderBootstrapRecovery(error, {
+      retry: () => {
+        try { sessionStorage.removeItem(`questnote-boot:${RELEASE_PROFILE?.artifactId}`); } catch { /* Keep failure visible when storage is unavailable. */ }
+        location.reload();
+      },
     });
-    host.replaceChildren(message, retry);
   });
 }

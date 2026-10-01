@@ -232,6 +232,23 @@ body::before {
   animation: spin 0.8s linear infinite;
 }
 
+.app-loader--recovery { justify-content: flex-start; overflow-y: auto; padding: max(28px, env(safe-area-inset-top)) 20px max(28px, env(safe-area-inset-bottom)); gap: 0; }
+.boot-recovery { width: 100%; max-width: 390px; margin: auto; color: var(--text); }
+.boot-recovery-icon { border-radius: 13px; margin-bottom: 18px; }
+.boot-recovery-brand { margin: 0 0 12px; color: var(--primary); font-size: 13px; font-weight: 600; letter-spacing: .03em; }
+.boot-recovery-title { margin: 0 0 18px; font-size: clamp(25px, 7vw, 30px); font-weight: 600; line-height: 1.5; white-space: pre-line; }
+.boot-recovery-intro { margin: 0; color: var(--text-muted); font-size: 16px; line-height: 1.8; overflow-wrap: anywhere; }
+.boot-recovery-steps { display: grid; gap: 14px; padding-left: 24px; margin: 28px 0; font-size: 16px; line-height: 1.75; }
+.boot-recovery-steps li { padding-left: 3px; }
+.boot-recovery-steps li::marker { color: var(--primary); font-weight: 600; }
+.boot-recovery-action { width: 100%; min-height: 50px; margin-top: 22px; padding: 12px 16px; border: 0; border-radius: 12px; background: var(--primary); color: #101928; font: inherit; font-size: 16px; font-weight: 600; cursor: pointer; }
+.boot-recovery-label { display: block; margin: 24px 0 8px; color: var(--text-muted); font-size: 13px; }
+.boot-recovery-link { width: 100%; min-height: 50px; padding: 12px; border: 1px solid var(--border); border-radius: 10px; color: var(--text); background: var(--bg-card); font: inherit; font-size: 16px; }
+.boot-recovery-status { min-height: 25px; margin: 8px 0; color: var(--text-muted); font-size: 13px; line-height: 1.8; }
+.boot-recovery-installed { padding-top: 20px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 14px; line-height: 1.8; }
+.boot-recovery-website { display: inline-flex; align-items: center; min-height: 44px; margin-top: 18px; color: var(--primary); font-size: 14px; }
+.boot-recovery-action:focus-visible,.boot-recovery-link:focus-visible,.boot-recovery-website:focus-visible { outline: 3px solid var(--primary); outline-offset: 4px; }
+
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
@@ -17818,6 +17835,18 @@ body.is-pet-image-viewer-open .onboarding-dock { visibility: hidden; }
 .expedition-objective span { font-size: .78rem; opacity: .75; }
 .expedition-objective.is-selected { outline: 2px solid #8d78cf; }
 .expedition-pet-option__specialty { font-size: .78rem; }
+.expedition-dispatch-modal__objective-section { margin-bottom: 16px; }
+.expedition-recommendation {
+  display: grid;
+  gap: 8px;
+  margin: 8px 0 12px;
+  padding: 10px;
+  border: 1px solid var(--primary);
+  border-radius: 10px;
+}
+.expedition-recommendation__summary { margin: 0; font-size: .85rem; line-height: 1.5; }
+.expedition-recommendation__button { width: 100%; white-space: normal; }
+.expedition-pet-option__recommended { color: var(--primary); font-size: .78rem; font-weight: 700; }
 .expedition-report-event { line-height: 1.6; }
 @media (max-width: 520px) { .expedition-objectives { grid-template-columns: 1fr; } .journey-list button { display: grid; } }
 

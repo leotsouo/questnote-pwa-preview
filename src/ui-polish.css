@@ -43,11 +43,16 @@ body[data-theme] #task-form :is(.form-input, .form-textarea, .form-select):focus
 
 body[data-theme="default"] #task-form input[type="date"] { color-scheme: dark; }
 body[data-theme="sweet"] #task-form input[type="date"] { color-scheme: light; }
-#task-form :is(.form-field, .subtask-form-input) { min-width: 0; }
-#task-form .form-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); }
+#task-form, #task-form > *, #task-form :is(.form-field, .subtask-form-input) { min-width: 0; max-width: 100%; }
+#task-form .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr)); gap: var(--space-3); }
 #task-form .form-field { display: grid; gap: var(--space-2); }
 #task-form :is(.subtask-form-add, .subtask-form-item) { display: flex; align-items: center; gap: var(--space-2); }
-#task-form :is(.subtask-form-add, .subtask-form-item) > .btn { flex-shrink: 0; min-height: var(--tap-min); }
+#task-form .subtask-form-add { flex-wrap: wrap; }
+#task-form .subtask-form-add > .form-input { flex: 1 1 10rem; }
+#task-form .subtask-form-item > .form-input { flex: 1 1 0; }
+#task-form :is(.subtask-form-add, .subtask-form-item) > .btn { flex-shrink: 0; min-height: var(--tap-min); max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
+#task-form :is(.form-hint, .form-label, .settings-toggle__text) { overflow-wrap: anywhere; }
+#task-form .segmented-control__btn { min-width: 0; white-space: normal; overflow-wrap: anywhere; }
 #task-form .form-hint { color: var(--color-text-secondary); font-size: var(--font-size-sm); line-height: var(--line-height-normal); }
 
 /* VP-02: the daily list precedes optional companion / adventure summaries. */
@@ -138,6 +143,11 @@ body[data-theme] .modal:not(:has(.sweet-summon-result, .default-summon-result)) 
   padding: var(--space-6);
   padding-bottom: calc(var(--space-6) + var(--safe-bottom));
   scroll-padding: var(--space-6) 0;
+}
+body[data-theme] .modal:has(#task-form) > .modal-body {
+  overflow-x: hidden;
+  overflow-y: auto;
+  touch-action: pan-y pinch-zoom;
 }
 body[data-theme] .modal:not(:has(.sweet-summon-result, .default-summon-result)) .modal-title {
   min-height: var(--tap-min);

@@ -1,8 +1,8 @@
 /** Expedition planning is pure so the same rules can drive dispatch and reports. */
 export const EXPEDITION_OBJECTIVES = Object.freeze({
-  explore: { label: '探索', description: '優先尋找新路線與故事' },
-  gather: { label: '採集', description: '優先帶回地區素材' },
-  bond: { label: '羈絆', description: '讓同行夥伴累積更多親密度' },
+  explore: { label: '探索', description: '優先尋找新路線與故事', role: 'scout', benefit: '增加地區探索進度' },
+  gather: { label: '採集', description: '優先帶回地區素材', role: 'gatherer', benefit: '多帶回地區素材' },
+  bond: { label: '羈絆', description: '讓同行夥伴累積更多親密度', role: 'companion', benefit: '增加隊伍親密度' },
 });
 
 export const SPECIALTY_LABELS = Object.freeze({
@@ -41,6 +41,29 @@ function hashText(text) {
   return hash >>> 0;
 }
 
+/** Only available, owned pets can be recommended; specialty strength comes first. */
+export function getExpeditionRecommendations(pets, objective = 'explore', { companionId, unavailablePetIds = [] } = {}) {
+  if (!Object.hasOwn(EXPEDITION_OBJECTIVES, objective)) throw new Error('探險目標不存在');
+  const target = EXPEDITION_OBJECTIVES[objective];
+  const unavailable = new Set(unavailablePetIds);
+  const rarityRank = { N: 1, R: 2, SR: 3, SSR: 4, UR: 5 };
+  const candidates = pets.filter((pet) => pet.owned && !unavailable.has(pet.id)).map((pet) => ({
+    pet, specialty: getPetSpecialty(pet),
+  }));
+  candidates.sort((a, b) => {
+    const matching = Number(b.specialty.role === target.role) - Number(a.specialty.role === target.role);
+    return matching || b.specialty.level - a.specialty.level
+      || Number(b.pet.id === companionId) - Number(a.pet.id === companionId)
+      || (rarityRank[b.pet.rarity] || 0) - (rarityRank[a.pet.rarity] || 0)
+      || (b.pet.bondLevel || 1) - (a.pet.bondLevel || 1)
+      || a.pet.id.localeCompare(b.pet.id);
+  });
+  const recommended = candidates.filter(({ specialty }) => specialty.role === target.role).map(({ pet }) => pet);
+  const others = candidates.filter(({ specialty }) => specialty.role !== target.role).map(({ pet }) => pet);
+  return { recommended, others, teamPetIds: recommended.slice(0, 3).map((pet) => pet.id),
+    role: target.role, label: SPECIALTY_LABELS[target.role], benefit: target.benefit };
+}
+
 export function getDispatchTerms(area, firstJourney = false) {
   return firstJourney && area.id === 'mist_forest'
     ? { energyCost: 1, durationMinutes: 3, firstJourney: true }
@@ -51,7 +74,7 @@ export function planExpeditionResult(area, pets, objective = 'explore', random =
   if (!Object.hasOwn(EXPEDITION_OBJECTIVES, objective)) throw new Error('探險目標不存在');
   if (!Array.isArray(pets) || pets.length < 1 || pets.length > 3) throw new Error('請選擇 1～3 隻寵物');
   const specialties = pets.map(getPetSpecialty);
-  const matchingRole = { explore: 'scout', gather: 'gatherer', bond: 'companion' }[objective];
+  const matchingRole = EXPEDITION_OBJECTIVES[objective].role;
   const rolePower = specialties.filter((s) => s.role === matchingRole).reduce((sum, s) => sum + s.level, 0);
   const scholarPower = specialties.filter((s) => s.role === 'scholar').reduce((sum, s) => sum + s.level, 0);
   const guardianPower = specialties.filter((s) => s.role === 'guardian').reduce((sum, s) => sum + s.level, 0);

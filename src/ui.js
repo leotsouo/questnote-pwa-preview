@@ -168,7 +168,7 @@ import {
   formatRemainingTime,
   isPetOnExpedition,
 } from './expeditionService.js';
-import { EXPEDITION_OBJECTIVES, getDispatchTerms, getPetSpecialty } from './expeditionGameplay.js';
+import { EXPEDITION_OBJECTIVES, getDispatchTerms, getPetSpecialty, getExpeditionRecommendations } from './expeditionGameplay.js';
 import { CAMP_UPGRADES, upgradeCamp } from './campService.js';
 import {
   createHabit,
@@ -7048,35 +7048,19 @@ function renderExplorationMilestoneCard(areaId, milestone) {
 
 /* ─── V2.7.2 派遣選單 Modal ─── */
 
-const DISPATCH_RARITY_RANK = { UR: 5, SSR: 4, SR: 3, R: 2, N: 1 };
-
-/**
- * 取得已擁有寵物並依推薦排序（僅影響顯示，不改資料）：
- * 陪伴寵物 > 高稀有度 > 高親密度 > 名稱。
- */
-function getDispatchablePetsSorted() {
-  const companionId = state?.companion?.id;
-  const pets = getOwnedPets().slice();
-  pets.sort((a, b) => {
-    const ca = a.id === companionId ? 1 : 0;
-    const cb = b.id === companionId ? 1 : 0;
-    if (ca !== cb) return cb - ca;
-    const targetRole = { explore: 'scout', gather: 'gatherer', bond: 'companion' }[dispatchObjective];
-    const sa = getPetSpecialty(a);
-    const sb = getPetSpecialty(b);
-    const pa = sa.role === targetRole ? sa.level : 0;
-    const pb = sb.role === targetRole ? sb.level : 0;
-    if (pa !== pb) return pb - pa;
-    const ra = DISPATCH_RARITY_RANK[a.rarity] ?? 0;
-    const rb = DISPATCH_RARITY_RANK[b.rarity] ?? 0;
-    if (sa.level !== sb.level) return sb.level - sa.level;
-    if (ra !== rb) return rb - ra;
-    const la = a.bondLevel ?? 1;
-    const lb = b.bondLevel ?? 1;
-    if (la !== lb) return lb - la;
-    return petDisplayName(a).localeCompare(petDisplayName(b), 'zh-Hant');
+function getDispatchRecommendations() {
+  const pets = getOwnedPets();
+  return getExpeditionRecommendations(pets, dispatchObjective, {
+    companionId: state?.companion?.id,
+    unavailablePetIds: pets.filter((pet) => isPetOnExpedition(pet.id, state.activeExpedition)).map((pet) => pet.id),
   });
-  return pets;
+}
+
+/** Match the objective first; busy pets remain visible at the end. */
+function getDispatchablePetsSorted() {
+  const { recommended, others } = getDispatchRecommendations();
+  return [...recommended, ...others,
+    ...getOwnedPets().filter((pet) => isPetOnExpedition(pet.id, state.activeExpedition))];
 }
 
 /** 開啟派遣選單 Modal */
@@ -7088,17 +7072,9 @@ function openExpeditionDispatchModal(areaId) {
   }
   dispatchAreaId = areaId;
 
-  // 預設選中：只有一隻可派遣寵物→自動選；否則優先陪伴寵物
-  const pets = getDispatchablePetsSorted();
-  const selectable = pets.filter((p) => !isPetOnExpedition(p.id, state.activeExpedition));
-  const companionId = state?.companion?.id;
+  // 先選目標，再用推薦或手動組隊。
   dispatchSelectedPetIds = [];
   dispatchObjective = 'explore';
-  if (selectable.length === 1) {
-    dispatchSelectedPetIds = [selectable[0].id];
-  } else if (companionId && selectable.some((p) => p.id === companionId)) {
-    dispatchSelectedPetIds = [companionId];
-  }
 
   let overlay = document.getElementById('expedition-dispatch-modal');
   if (!overlay) {
@@ -7168,8 +7144,20 @@ function handleDispatchModalClick(e) {
     return;
   }
   if (action === 'dispatch-objective') {
+    const scrollTop = overlay.querySelector('.expedition-dispatch-modal__body')?.scrollTop || 0;
     dispatchObjective = t.dataset.objective;
     renderExpeditionDispatchModal();
+    overlay.querySelector('.expedition-dispatch-modal__body').scrollTop = scrollTop;
+    overlay.querySelector(`[data-objective="${dispatchObjective}"]`)?.focus({ preventScroll: true });
+    return;
+  }
+  if (action === 'dispatch-recommend') {
+    if (t.disabled) return;
+    const scrollTop = overlay.querySelector('.expedition-dispatch-modal__body')?.scrollTop || 0;
+    dispatchSelectedPetIds = getDispatchRecommendations().teamPetIds;
+    renderExpeditionDispatchModal();
+    overlay.querySelector('.expedition-dispatch-modal__body').scrollTop = scrollTop;
+    overlay.querySelector('[data-action="dispatch-recommend"]')?.focus({ preventScroll: true });
     return;
   }
   if (action === 'dispatch-confirm') {
@@ -7198,6 +7186,7 @@ function renderExpeditionDispatchModal() {
     (a) => a.areaId === dispatchAreaId
   );
   const pets = getDispatchablePetsSorted();
+  const recommendations = getDispatchRecommendations();
   const selectedPets = pets.filter((p) => dispatchSelectedPetIds.includes(p.id));
 
   const petListHtml =
@@ -7239,8 +7228,20 @@ function renderExpeditionDispatchModal() {
           ${!unlocked ? `<p class="expedition-dispatch-area__unlock">解鎖條件：${escapeHtml(hint)}</p>` : ''}
           ${state.activeExpedition ? '<p class="expedition-dispatch-area__unlock">領取目前旅程的獎勵後，就能再次派遣。</p>' : ''}
         </div>
+        <section class="expedition-dispatch-modal__objective-section" aria-labelledby="dispatch-objective-title">
+          <h3 class="expedition-dispatch-modal__pet-title" id="dispatch-objective-title">1. 選擇探險目標</h3>
+          <div class="expedition-objectives" role="group" aria-label="探險目標">
+            ${Object.entries(EXPEDITION_OBJECTIVES).map(([id, entry]) => `<button type="button" class="expedition-objective ${dispatchObjective === id ? 'is-selected' : ''}" data-action="dispatch-objective" data-objective="${id}" aria-pressed="${dispatchObjective === id}"><strong>${entry.label}</strong><span>${entry.description}</span></button>`).join('')}
+          </div>
+        </section>
         <div class="expedition-dispatch-modal__pet-section">
-          <h3 class="expedition-dispatch-modal__pet-title">選擇 1～3 隻出發寵物</h3>
+          <h3 class="expedition-dispatch-modal__pet-title">2. 選擇 1～3 隻出發寵物</h3>
+          <div class="expedition-recommendation">
+            <p class="expedition-recommendation__summary" aria-live="polite">${recommendations.recommended.length
+              ? `推薦${recommendations.label}專長夥伴，${recommendations.benefit}。依專長等級優先排序，可一鍵帶入前 ${recommendations.teamPetIds.length} 隻後調整隊伍。`
+              : `目前沒有可派遣的${recommendations.label}專長夥伴，仍可手動選擇其他寵物出發。`}</p>
+            <button type="button" class="btn btn--secondary expedition-recommendation__button" data-action="dispatch-recommend" ${recommendations.teamPetIds.length ? '' : 'disabled'}>一鍵帶入推薦隊伍${recommendations.teamPetIds.length ? `（${recommendations.teamPetIds.length} 隻）` : ''}</button>
+          </div>
           <p class="expedition-dispatch-modal__pet-note">陪伴中的寵物也可以派遣，不會取消目前的陪伴設定。</p>
           <details class="expedition-specialty-help" ${specialtyHelpOpen ? 'open' : ''}>
             <summary>專長是什麼？看隊伍如何影響收穫</summary>
@@ -7256,9 +7257,6 @@ function renderExpeditionDispatchModal() {
           <div class="expedition-dispatch-modal__pet-list">
             ${petListHtml}
           </div>
-        </div>
-        <div class="expedition-objectives" role="group" aria-label="探險目標">
-          ${Object.entries(EXPEDITION_OBJECTIVES).map(([id, entry]) => `<button type="button" class="expedition-objective ${dispatchObjective === id ? 'is-selected' : ''}" data-action="dispatch-objective" data-objective="${id}" aria-pressed="${dispatchObjective === id}"><strong>${entry.label}</strong><span>${entry.description}</span></button>`).join('')}
         </div>
       </div>
       <div class="expedition-dispatch-modal__preview">
@@ -7277,6 +7275,7 @@ function buildDispatchPetOptionHtml(pet) {
   const onExp = isPetOnExpedition(pet.id, state.activeExpedition);
   const selected = dispatchSelectedPetIds.includes(pet.id);
   const specialty = getPetSpecialty(pet);
+  const recommended = !onExp && specialty.role === EXPEDITION_OBJECTIVES[dispatchObjective].role;
   const rarityClass = `rarity-${pet.rarity}`;
   const liberated = pet.bondLiberated;
   const isCompanion = !!pet.isCompanion || pet.id === state?.companion?.id;
@@ -7296,6 +7295,7 @@ function buildDispatchPetOptionHtml(pet) {
           <span class="badge badge--rarity ${rarityClass}">${pet.rarity}</span>
           <span class="expedition-pet-option__bond">親密 Lv.${pet.bondLevel || 1}</span>
           <span class="expedition-pet-option__specialty">${specialty.label} Lv.${specialty.level} · ${pet.stars || 1}★</span>
+          ${recommended ? '<span class="expedition-pet-option__recommended">符合目標 · 推薦</span>' : ''}
           ${isCompanion ? '<span class="expedition-pet-option__companion">陪伴中</span>' : ''}
           ${liberated ? '<span class="expedition-pet-option__liberated">羈絆解放</span>' : ''}
           ${onExp ? '<span class="expedition-pet-option__busy">探險中</span>' : ''}

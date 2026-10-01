@@ -152,7 +152,7 @@ export function getLessonStepContent(id, step, state = {}) {
     },
     'expedition/dispatch': {
       title: '組隊並選擇探險目標',
-      body: `${getLessonAvailability('expedition', state)} 點「查看地區」後，選 1～3 隻夥伴，再選探索、採集或羈絆目標。展開「專長是什麼？」可比較夥伴的隊伍作用；一星也有專長。確認能量花費後才會出發，途中不用操作。`,
+      body: `${getLessonAvailability('expedition', state)} 點「查看地區」後，先選探索、採集或羈絆目標，再用「一鍵帶入推薦隊伍」選擇符合專長的夥伴，也可手動調整 1～3 隻隊伍。展開「專長是什麼？」可比較夥伴的隊伍作用；一星也有專長。確認能量花費後才會出發，途中不用操作。`,
       target: { view: 'expedition' }, selector: c.active ? '#expedition-active' : '#expedition-areas [data-area-id="mist_forest"]', action: '查看派遣操作',
     },
     'expedition/claim': {
