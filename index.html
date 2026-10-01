@@ -36,7 +36,8 @@
   <link rel="stylesheet" href="src/theme-refinements.css" />
   <link rel="stylesheet" href="src/reminder-settings.css" />
   <link rel="stylesheet" href="src/font-size-settings.css" />
-  <meta name="questnote-artifact" content="8f8c933b2e939632b2807e33ef21e18b9d3021052b67805b6f03472cf390e92f">
+  <link rel="stylesheet" href="src/bond-journey.css" />
+  <meta name="questnote-artifact" content="b17d7c169da54a430abd4f94cfefb1b8fdf8d5d55ec6625c4346042279b7c526">
 </head>
 <body data-theme="default">
   <div id="app-loader" class="app-loader">
@@ -110,6 +111,7 @@
       <section id="habit-summary" class="habit-summary card" data-action="go-habits" role="button" tabindex="0"></section>
 
       <section id="companion-section" class="companion-section"></section>
+      <section id="bond-journey-home" class="bond-home-section" aria-label="夥伴故事與同行約定" hidden></section>
 
       <section id="home-hub" class="home-hub" aria-label="首頁功能選單">
         <div class="home-hub__icons" role="tablist" aria-label="每日祝福、冒險任務、稱號">
@@ -488,21 +490,24 @@
 
       <section class="guide-overview card" aria-labelledby="guide-overview-title">
         <p class="guide-overview__eyebrow">快速開始</p>
-        <h2 id="guide-overview-title">讓任務帶著夥伴一起成長</h2>
+        <h2 id="guide-overview-title">從一件小事開始</h2>
+        <p>完成任務，遇見夥伴，慢慢走出自己的旅程。</p>
+        <details class="guide-start-details"><summary>五步快速開始</summary>
         <ol class="guide-steps">
           <li><b class="guide-step-number" aria-hidden="true">1</b><strong>記下任務</strong><span>按任務頁右下角「＋」；今天要做的事可加入今日計畫。</span></li>
           <li><b class="guide-step-number" aria-hidden="true">2</b><strong>完成並領資源</strong><span>做完後點「完成」，獲得星塵、冒險能量與陪伴夥伴的親密度。</span></li>
           <li><b class="guide-step-number" aria-hidden="true">3</b><strong>召喚夥伴</strong><span>用星塵召喚；星塵不足時看看信箱、任務與每日祝福。</span></li>
-          <li><b class="guide-step-number" aria-hidden="true">4</b><strong>收藏與陪伴</strong><span>到圖鑑切換「已獲得」，選一隻設為陪伴。</span></li>
+          <li><b class="guide-step-number" aria-hidden="true">4</b><strong>收藏、陪伴與故事</strong><span>到圖鑑選一隻設為陪伴；親密度 Lv.2 起可閱讀故事，再選自己的任務或習慣完成同行約定。</span></li>
           <li><b class="guide-step-number" aria-hidden="true">5</b><strong>派遣探險</strong><span>有寵物與足夠能量時選擇地區，派遣後回來領獎。</span></li>
         </ol>
+        </details>
         <p id="guide-tutorial-status" class="guide-overview__status"></p>
         <button id="guide-tutorial-button" class="btn btn--primary btn--block" type="button" data-onboarding-action="replay">重新體驗引導</button>
       </section>
 
       <section class="guide-growth" aria-labelledby="guide-growth-title">
         <h2 id="guide-growth-title">帶著夥伴繼續成長</h2>
-        <p>建議依序閱讀，也能自由選章。每章約 1–2 分鐘；等待探險與累積資源的時間另計。先了解或自願實作，進度都會保留。</p>
+        <p>挑一章看看。隨時可停下，進度會保留。</p>
         <div id="guide-chapters" class="guide-chapters"></div>
       </section>
 

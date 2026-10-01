@@ -119,8 +119,8 @@ function stepContent() {
         title: '到圖鑑找到你的夥伴',
         body: ownedPets().length
           ? ownedFilterActive
-            ? '已顯示你獲得的夥伴；點「設為陪伴」，牠就會出現在任務首頁。'
-            : '切到「已獲得」，就能快速找到剛召喚的夥伴。再點「設為陪伴」，牠會出現在任務首頁。'
+            ? '已顯示你獲得的夥伴；點「設為陪伴」，牠就會出現在任務首頁。一起完成任務、撫摸或送禮可累積親密度；Lv.2 起能從「故事與同行」閱讀專屬故事，再選自己的任務或習慣完成約定。'
+            : '切到「已獲得」，就能快速找到剛召喚的夥伴。再點「設為陪伴」，牠會出現在任務首頁。親密度 Lv.2 起有專屬故事與同行約定，可以跟著自己的日常慢慢解鎖。'
           : '召喚得到的寵物會收進圖鑑；之後用「已獲得」篩選，再選一隻設為陪伴。',
         primary: ['前往圖鑑', 'locate-collection'],
         secondary: ['稍後再選夥伴', 'later-collection'],
@@ -227,7 +227,7 @@ function renderGuideStatus() {
       <div class="guide-chapter__top"><span>成長章節 ${index + 1}</span><span class="guide-chapter__status" data-status="${progress.status}">${LESSON_STATUS_LABELS[progress.status]}</span></div>
       <h3 id="guide-chapter-${lesson.id}">${lesson.title}</h3>
       <p>${lesson.summary}</p>
-      <p class="guide-chapter__condition">${escapeText(getLessonAvailability(lesson.id, appState))}</p>
+      <details class="guide-chapter__help"><summary>開始前的小提醒</summary><p>${escapeText(getLessonAvailability(lesson.id, appState))}</p></details>
       ${resumable ? `<p class="guide-chapter__resume">進度 ${lesson.steps.indexOf(progress.step) + 1} / ${lesson.steps.length}：${getLessonStepContent(lesson.id, progress.step, appState).title}</p>` : ''}
       <button class="btn btn--secondary" type="button" data-onboarding-action="lesson:${lesson.id}" aria-label="${label}：${lesson.title}">${label}</button>
     </article>`;
@@ -252,6 +252,13 @@ function render() {
     primary: [chapterContent.action, 'lesson-locate'],
     secondary: [progress.step === lesson.steps.at(-1) ? '我了解了，完成本章' : lesson.practice[progress.step] ? '先了解，下一步' : '下一步', 'lesson-next'],
   } : record.status === 'active' ? stepContent() : null;
+  const coachBrief = content?.brief || ({
+    task: '記下一件真正想做的事。今天要做，就加入今日計畫。',
+    reward: '真的做完後再點「完成」，星塵與能量就會入帳。',
+    summon: '用星塵召喚第一位夥伴。資源不夠也可以稍後再來。',
+    collection: '在圖鑑選一隻設為陪伴。Lv.2 起，一起閱讀故事、完成約定。',
+    expedition: '選地區、夥伴與目標，確認能量花費後出發。',
+  })[record.step];
   const signature = JSON.stringify({ record, content, showCompletion, lessonCompleted, collapsed });
   if (signature !== lastSignature) {
     const focusedAction = root.contains(document.activeElement)
@@ -267,8 +274,8 @@ function render() {
             <img class="onboarding-dialog__logo" src="assets/icons/icon-192.png" alt="" width="64" height="64">
             <p class="onboarding-eyebrow">歡迎來到 QuestNote</p>
             <h2 id="onboarding-welcome-title">把待辦事項變成一場小冒險</h2>
-            <p>記下真正要做的事，完成後獲得星塵與冒險能量；用星塵召喚夥伴，再帶牠去探險。</p>
-            <p class="onboarding-dialog__hint">接下來會直接在 App 裡練習，約需幾分鐘。所有操作都使用你的正式資料。</p>
+            <p>完成一件小事，遇見一位夥伴。</p>
+            <p class="onboarding-dialog__hint">用自己的任務試試看。隨時可以停下來。</p>
             <div class="onboarding-dialog__actions">
               <button class="btn btn--primary" type="button" data-onboarding-action="start">用自己的任務開始</button>
               <button class="btn btn--ghost" type="button" data-onboarding-action="skip">略過教學</button>
@@ -280,9 +287,9 @@ function render() {
         <div class="onboarding-scrim">
           <section class="onboarding-dialog" role="dialog" aria-modal="true" aria-labelledby="onboarding-done-title">
             <p class="onboarding-eyebrow">新手教學完成</p>
-            <h2 id="onboarding-done-title">你已經知道怎麼開始冒險了</h2>
-            <p>每天可以先安排任務，完成後累積星塵與能量；召喚、陪伴和探險會讓旅程繼續向前。</p>
-            <p class="onboarding-dialog__hint">下一步可以到「更多 → 使用教學」練習升星、親密度、探險領獎和工坊；每日功能也有入口速查。</p>
+            <h2 id="onboarding-done-title">接下來，照自己的步調走</h2>
+            <p>Lv.2 起，聽夥伴的故事，再選一件小事一起完成約定。</p>
+            <p class="onboarding-dialog__hint">想了解更多，隨時到「更多 → 使用教學」。</p>
             <div class="onboarding-dialog__actions">
               <button class="btn btn--primary" type="button" data-onboarding-action="close-summary">開始使用</button>
               <button class="btn btn--ghost" type="button" data-onboarding-action="summary-guide">查看使用教學</button>
@@ -299,21 +306,24 @@ function render() {
         <button class="btn btn--ghost btn--sm" type="button" data-onboarding-action="lesson-close">繼續使用 App</button></div></aside>`;
     } else if (content) {
       root.innerHTML = `
-        <aside class="onboarding-dock${lesson ? ' onboarding-lesson-dock' : ''}" data-step="${lesson ? progress.step : record.step}" aria-label="${lesson ? lesson.title : '新手教學'}">
+        <aside class="onboarding-dock${lesson ? ' onboarding-lesson-dock' : ''}" data-step="${lesson ? progress.step : record.step}" data-collapsed="${collapsed}" aria-label="${lesson ? lesson.title : '新手教學'}">
           <div class="onboarding-dock__top">
             <span>${lesson ? `${lesson.title} ${lesson.steps.indexOf(progress.step) + 1} / ${lesson.steps.length}` : `新手教學 ${STEP_NUMBER[record.step]} / 5`}</span>
             <button type="button" data-onboarding-action="collapse" aria-expanded="${!collapsed}" aria-controls="onboarding-step-body">${collapsed ? '展開' : '收起'}</button>
             <button type="button" data-onboarding-action="${lesson ? 'lesson-pause' : 'pause'}">稍後</button>
           </div>
           <h2>${escapeText(content.title)}</h2>
+          <progress class="onboarding-progress" value="${lesson ? lesson.steps.indexOf(progress.step) + 1 : STEP_NUMBER[record.step]}" max="${lesson ? lesson.steps.length : 5}" aria-label="教學進度"></progress>
           <div id="onboarding-step-body" ${collapsed ? 'hidden' : ''}>
-          <p aria-live="polite" aria-atomic="true">${escapeText(content.body)}</p>
-          ${lesson?.practice[progress.step] ? '<p class="onboarding-practice-note">實際操作成功後會自動前進；也可先了解、稍後練習。</p>' : ''}
+          <p class="onboarding-brief" aria-live="polite" aria-atomic="true">${escapeText(coachBrief || content.body)}</p>
           <div class="onboarding-dock__actions">
             <button class="btn btn--primary btn--sm" type="button" data-onboarding-action="${content.primary[1]}">${content.primary[0]}</button>
-            <button class="btn btn--ghost btn--sm" type="button" data-onboarding-action="${content.secondary[1]}">${content.secondary[0]}</button>
+            <button class="btn btn--ghost btn--sm" type="button" data-onboarding-action="${content.secondary[1]}">${lesson && progress.step === lesson.steps.at(-1) ? '完成教學' : content.secondary[0]}</button>
           </div>
-          ${lesson ? `<button class="onboarding-dock__skip" type="button" data-onboarding-action="lesson-back" ${progress.step === lesson.steps[0] ? 'disabled' : ''}>上一步</button>` : '<button class="onboarding-dock__skip" type="button" data-onboarding-action="skip">略過整個教學</button>'}
+          <div class="onboarding-dock__footer">
+          <details class="onboarding-more"><summary>想了解更多</summary><ul>${(content.tips || [content.body]).map((tip) => `<li>${escapeText(tip)}</li>`).join('')}</ul></details>
+          ${lesson ? `<button class="onboarding-dock__skip" type="button" data-onboarding-action="lesson-back" ${progress.step === lesson.steps[0] ? 'disabled' : ''}>上一步</button>` : '<button class="onboarding-dock__skip" type="button" data-onboarding-action="skip">略過教學</button>'}
+          </div>
           </div>
         </aside>`;
     } else {

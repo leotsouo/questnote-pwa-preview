@@ -6,7 +6,11 @@
     "description": "迷霧森林中常見的靈性嫩葉，適合製作基礎親密度道具。",
     "category": "nature",
     "sourceArea": "迷霧森林",
-    "futureTags": ["crafting", "bond_item", "future_area_unlock"]
+    "futureTags": [
+      "crafting",
+      "bond_item",
+      "future_area_unlock"
+    ]
   },
   {
     "id": "lava_core",
@@ -15,7 +19,11 @@
     "description": "熔岩裂谷中凝結出的火熱核心，常用於製作火系與行動力相關道具。",
     "category": "fire",
     "sourceArea": "熔岩裂谷",
-    "futureTags": ["crafting", "bond_item", "awakening"]
+    "futureTags": [
+      "crafting",
+      "bond_item",
+      "awakening"
+    ]
   },
   {
     "id": "machine_part",
@@ -24,7 +32,11 @@
     "description": "古代機械遺跡中發現的精密零件，適合製作機械型寵物喜好的道具。",
     "category": "machine",
     "sourceArea": "古代機械遺跡",
-    "futureTags": ["crafting", "bond_item", "workshop_upgrade"]
+    "futureTags": [
+      "crafting",
+      "bond_item",
+      "workshop_upgrade"
+    ]
   },
   {
     "id": "star_shard",
@@ -33,7 +45,12 @@
     "description": "星界裂縫中漂浮的稀有碎片，蘊含高密度星光能量。",
     "category": "rare",
     "sourceArea": "星界裂縫",
-    "futureTags": ["crafting", "bond_item", "bond_unlock", "future_awakening"]
+    "futureTags": [
+      "crafting",
+      "bond_item",
+      "bond_unlock",
+      "future_awakening"
+    ]
   },
   {
     "id": "aurora_ice",
@@ -42,7 +59,11 @@
     "description": "極北冰岸凝結的極光結晶，蘊含寒霜靈性。",
     "category": "ice",
     "sourceArea": "極北冰岸",
-    "futureTags": ["crafting", "bond_item", "future_area_unlock"]
+    "futureTags": [
+      "crafting",
+      "bond_item",
+      "future_area_unlock"
+    ]
   },
   {
     "id": "harvest_charm",
@@ -51,6 +72,10 @@
     "description": "豐穗遠郊田埂間拾得的護符，帶有踏實的田野氣息。",
     "category": "nature",
     "sourceArea": "豐穗遠郊",
-    "futureTags": ["crafting", "bond_item", "future_area_unlock"]
+    "futureTags": [
+      "crafting",
+      "bond_item",
+      "future_area_unlock"
+    ]
   }
 ]

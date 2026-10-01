@@ -1,0 +1,110 @@
+{
+  "version": 2,
+  "areas": [
+    {
+      "id": "mist_forest",
+      "name": "迷霧森林",
+      "description": "薄霧繚繞的初階探險地，適合剛起步的夥伴。",
+      "unlock": {
+        "type": "default"
+      },
+      "energyCost": 3,
+      "durationMinutes": 15,
+      "rewards": {
+        "stardust": { "min": 15, "max": 30 },
+        "material": { "id": "forest_leaf", "name": "森林之葉", "min": 1, "max": 2 },
+        "bondExp": 5
+      }
+    },
+    {
+      "id": "lava_rift",
+      "name": "熔岩裂谷",
+      "description": "熾熱裂谷深處藏有熔岩核心，需火屬性夥伴引路。",
+      "unlock": {
+        "type": "fire_pet",
+        "elements": ["火", "fire"],
+        "keywords": ["火", "焰", "熔岩"],
+        "hint": "擁有火屬性或名稱／描述含「火」「焰」「熔岩」的寵物"
+      },
+      "energyCost": 5,
+      "durationMinutes": 60,
+      "rewards": {
+        "stardust": { "min": 30, "max": 60 },
+        "material": { "id": "lava_core", "name": "熔岩核心", "min": 1, "max": 2 },
+        "bondExp": 10
+      }
+    },
+    {
+      "id": "machine_ruins",
+      "name": "古代機械遺跡",
+      "description": "失落文明的機械殘骸，機械系夥伴能解讀遺跡密碼。",
+      "unlock": {
+        "type": "mechanical_pet",
+        "elements": ["機械", "mechanical", "machine"],
+        "keywords": ["機械", "機神", "鋼", "鐵"],
+        "hint": "擁有機械類型或名稱／描述含「機械」「機神」「鋼」「鐵」的寵物"
+      },
+      "energyCost": 5,
+      "durationMinutes": 60,
+      "rewards": {
+        "stardust": { "min": 30, "max": 60 },
+        "material": { "id": "machine_part", "name": "機械零件", "min": 1, "max": 2 },
+        "bondExp": 10
+      }
+    },
+    {
+      "id": "astral_rift",
+      "name": "星界裂縫",
+      "description": "連接星界的裂縫，僅 UR 夥伴能穩定穿越。",
+      "unlock": {
+        "type": "ur_pet",
+        "hint": "擁有至少 1 隻 UR 寵物"
+      },
+      "energyCost": 10,
+      "durationMinutes": 240,
+      "rewards": {
+        "stardust": { "min": 80, "max": 150 },
+        "material": { "id": "star_shard", "name": "星界碎片", "min": 1, "max": 2 },
+        "bondExp": 20
+      }
+    },
+    {
+      "id": "polar_shore",
+      "name": "極北冰岸",
+      "description": "極光與寒潮交會的北境海岸，維京戰魂曾在此遠征，極光白熊與北海霸主亦在此守護。需極寒或北境系夥伴引路，方能穿越風雪。",
+      "unlock": {
+        "type": "frost_pet",
+        "elements": ["冰", "ice", "frost", "aurora"],
+        "poolTags": ["frost_spirit", "nordic_spirit", "ocean_spirit"],
+        "keywords": ["冰", "極", "寒", "霜", "北", "潮", "維京", "極光", "玄冰", "晶龍", "暴雪", "冰岸"],
+        "hint": "擁有 frost／nordic 標籤，或名稱／描述含「冰」「極」「北境」「極光」的夥伴"
+      },
+      "energyCost": 6,
+      "durationMinutes": 90,
+      "rewards": {
+        "stardust": { "min": 40, "max": 75 },
+        "material": { "id": "aurora_ice", "name": "極光冰晶", "min": 1, "max": 2 },
+        "bondExp": 12
+      }
+    },
+    {
+      "id": "harvest_fields",
+      "name": "豐穗遠郊",
+      "description": "稻浪與村落交錯的田園邊境，稻穗守望者日夜巡守田埂。適合踏實、耐心的夥伴，在這裡一步一印累積成果。",
+      "unlock": {
+        "type": "rustic_pet",
+        "elements": ["木", "harvest", "sprout", "sprout_nature"],
+        "poolTags": ["rustic_spirit", "daily_spirit"],
+        "keywords": ["稻", "田", "村落", "田野", "豐收", "萌芽", "守望", "田園", "耕耘", "苔蘚", "豆芽", "守護"],
+        "hint": "擁有 rustic／daily 標籤，或名稱／描述含「稻」「田」「萌芽」「守護」的夥伴"
+      },
+      "energyCost": 6,
+      "durationMinutes": 90,
+      "rewards": {
+        "stardust": { "min": 35, "max": 70 },
+        "material": { "id": "harvest_charm", "name": "豐穗護符", "min": 1, "max": 2 },
+        "bondExp": 12
+      }
+    }
+  ]
+}

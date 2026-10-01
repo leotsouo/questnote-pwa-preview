@@ -161,6 +161,67 @@
     "pet_ssr12": [],
     "pet_ssr13": [],
     "pet_ur09": [],
-    "pet_ur10": []
+    "pet_ur10": [],
+    "pet_n36": [
+      "nature"
+    ],
+    "pet_n37": [
+      "harvest"
+    ],
+    "pet_n38": [
+      "nature"
+    ],
+    "pet_r36": [
+      "fire",
+      "harvest"
+    ],
+    "pet_r37": [
+      "harvest"
+    ],
+    "pet_r38": [
+      "nature"
+    ],
+    "pet_r39": [
+      "nature"
+    ],
+    "pet_r40": [
+      "nature"
+    ],
+    "pet_sr30": [
+      "nature"
+    ],
+    "pet_sr31": [
+      "frost"
+    ],
+    "pet_sr32": [
+      "nature"
+    ],
+    "pet_sr33": [
+      "harvest"
+    ],
+    "pet_sr34": [
+      "frost"
+    ],
+    "pet_ssr21": [
+      "nature"
+    ],
+    "pet_ssr22": [
+      "frost"
+    ],
+    "pet_ssr23": [
+      "nature"
+    ],
+    "pet_ssr24": [
+      "nature"
+    ],
+    "pet_ur16": [
+      "harvest"
+    ],
+    "pet_ur17": [
+      "fire"
+    ],
+    "pet_ur18": [
+      "nature"
+    ]
   }
 }

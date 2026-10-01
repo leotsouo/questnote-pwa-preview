@@ -40,6 +40,12 @@ export const EXPEDITION_STATUS_LINES = {
     '你的夥伴拾起一枚手作護符...',
     '遠方村落傳來黃昏的鐘聲...',
   ],
+  cloudrest_trail: [
+    '正在循著石階穿過竹林...',
+    '夥伴停在路碑旁辨認旅圖...',
+    '山亭的茶香隨風飄來...',
+    '正在為下一位旅人整理橋板...',
+  ],
 };
 
 export const EXPEDITION_COMPLETE_MSG = '探險完成！你的夥伴帶回了戰利品。';

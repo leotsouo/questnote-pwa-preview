@@ -24,6 +24,7 @@ const AREA_DISCOVERIES = {
   astral_rift: '漂浮星光排列成一幅未完成的星圖。',
   polar_shore: '風雪散開，極光下出現一段舊航路。',
   harvest_fields: '田埂的守望記號指向村落留下的祕密倉庫。',
+  cloudrest_trail: '竹亭下的舊旅圖指向一處可以避雨、採集嫩葉的山道。',
 };
 
 export function getPetSpecialty(pet) {

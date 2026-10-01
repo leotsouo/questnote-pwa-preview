@@ -24,6 +24,7 @@ import { normalizeCollectionMilestoneState } from './collectionMilestoneService.
 import { normalizeGlobalMailboxState } from './mailboxService.js';
 import { validateBackupEnvelope, validateSnapshotData, validateStoredSnapshot } from './backupSchema.js';
 import { APP_VERSION } from './version.js';
+import { normalizeBondJourney } from './bondJourneyCore.js';
 
 export { APP_VERSION };
 const APP_NAME = 'QuestNote';
@@ -57,6 +58,7 @@ const DATA_KEYS = [
   'poolDebutSeen',
   'poolUnlockState',
   'idempotentGrants',
+  'bondJourney',
 ];
 
 /**
@@ -83,6 +85,7 @@ function buildDataPayload({
   poolDebutSeen,
   poolUnlockState,
   idempotentGrants,
+  bondJourney,
 }) {
   const walletData = {
     stardust: wallet.stardust ?? 0,
@@ -136,6 +139,7 @@ function buildDataPayload({
     poolDebutSeen,
     poolUnlockState,
     idempotentGrants,
+    bondJourney,
   };
 }
 
@@ -378,6 +382,7 @@ function normalizePayloadData(rawBackup) {
     poolDebutSeen: normalizePoolDebutSeen(data.poolDebutSeen),
     poolUnlockState: normalizePoolUnlockState(data.poolUnlockState),
     idempotentGrants: normalizeIdempotentGrants(data.idempotentGrants),
+    bondJourney: normalizeBondJourney(data.bondJourney),
   };
 }
 
@@ -449,6 +454,7 @@ export function migrateImportedData(normalizedBackup) {
   const poolDebutSeen = normalizePoolDebutSeen(normalizedBackup.poolDebutSeen);
   const poolUnlockState = normalizePoolUnlockState(normalizedBackup.poolUnlockState);
   const idempotentGrants = normalizeIdempotentGrants(normalizedBackup.idempotentGrants);
+  const bondJourney = normalizeBondJourney(normalizedBackup.bondJourney);
 
   return {
     ...normalizedBackup,
@@ -473,6 +479,7 @@ export function migrateImportedData(normalizedBackup) {
     poolDebutSeen,
     poolUnlockState,
     idempotentGrants,
+    bondJourney,
   };
 }
 
@@ -570,6 +577,7 @@ export async function safeReplaceAllData(migratedData) {
     poolDebutSeen: migratedData.poolDebutSeen,
     poolUnlockState: migratedData.poolUnlockState,
     idempotentGrants: migratedData.idempotentGrants,
+    bondJourney: migratedData.bondJourney,
   });
 }
 

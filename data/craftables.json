@@ -209,5 +209,29 @@
       "bond_item",
       "bond_unlock"
     ]
+  },
+  {
+    "id": "item_pine_trail_riceball",
+    "name": "松香行旅糰",
+    "type": "favorite_bond_item",
+    "rarity": "R",
+    "description": "以靈性嫩葉包住田園補給的溫熱小糰，帶著清淡松香，適合在山亭歇腳時分享。自然與田園喜好的夥伴特別喜歡。",
+    "enabled": true,
+    "favoriteTags": [
+      "nature",
+      "harvest"
+    ],
+    "effect": {
+      "bondExp": 75,
+      "favoriteBonusBondExp": 150
+    },
+    "recipe": {
+      "forest_leaf": 6,
+      "harvest_charm": 2
+    },
+    "futureTags": [
+      "bond_item",
+      "swordwild_shanhe_v3"
+    ]
   }
 ]

@@ -7,15 +7,16 @@ import {
 import { canCraft, DAILY_BOND_ITEM_LIMIT } from './workshopService.js';
 import { isExpeditionTimeComplete } from './expeditionService.js';
 import { getDispatchTerms } from './expeditionGameplay.js';
+import { CHAPTER_LEVELS, CHAPTER_REWARDS, HABIT_TARGETS, DAILY_COMPANION_REWARD } from './bondJourneyCore.js';
 
 export const LESSONS = Object.freeze([
-  { id: 'stars', title: '升星與寵物碎片', summary: '從重複召喚到升星，看懂每隻夥伴的成長。',
+  { id: 'stars', title: '升星與寵物碎片', summary: '重複召喚，讓夥伴變強。',
     steps: ['fragments', 'cost', 'upgrade'], practice: { upgrade: 'star-upgraded' } },
-  { id: 'bond', title: '陪伴與親密度', summary: '撫摸、一起完成任務，逐步解鎖羈絆內容。',
-    steps: ['sources', 'pet', 'unlocks'], practice: { pet: 'companion-petted' } },
-  { id: 'expedition', title: '組隊探險與旅程報告', summary: '認識隊伍專長、三種目標與領獎，帶回材料升級營地。',
+  { id: 'bond', title: '陪伴、故事與同行約定', summary: '聽牠的故事，一起完成小事。',
+    steps: ['sources', 'pet', 'unlocks', 'story', 'agreement', 'keepsake'], practice: { pet: 'companion-petted' } },
+  { id: 'expedition', title: '組隊探險與旅程報告', summary: '選好隊伍，帶回旅程收穫。',
     steps: ['prepare', 'dispatch', 'claim'], practice: { dispatch: 'expedition-started', claim: 'expedition-claimed' } },
-  { id: 'workshop', title: '工坊製作與送禮', summary: '查看配方、製作一份禮物，再選擇夥伴贈送。',
+  { id: 'workshop', title: '工坊製作與送禮', summary: '把探險材料做成一份心意。',
     steps: ['materials', 'craft', 'gift'], practice: { craft: 'item-crafted', gift: 'gift-given' } },
 ]);
 
@@ -107,6 +108,10 @@ export function getLessonStepContent(id, step, state = {}) {
   const target = { view: 'collection', filter: 'owned', petId: c.starPet?.id };
   const collectionSelector = c.starPet
     ? `.collection-card[data-pet-id="${c.starPet.id}"]` : '#collection-filters';
+  const storyPet = c.companion || c.pets[0];
+  const storyTarget = { view: 'collection', filter: 'owned', petId: storyPet?.id };
+  const storySelector = storyPet
+    ? `.collection-card[data-pet-id="${storyPet.id}"] [data-action="view-detail"]` : '#collection-filters';
   const descriptions = {
     'stars/fragments': {
       title: '重複夥伴會變成牠的碎片',
@@ -136,14 +141,29 @@ export function getLessonStepContent(id, step, state = {}) {
       target: { view: c.companion ? 'tasks' : 'collection', filter: 'owned' }, selector: c.companion ? '[data-action="companion-pet"]' : '#collection-filters', action: c.companion ? '找到撫摸按鈕' : '前往設定陪伴',
     },
     'bond/unlocks': {
-      title: '等級會解鎖新的羈絆內容',
+      title: '慢慢解鎖牠的故事',
       body: BOND_LEVEL_THRESHOLDS.slice(1).map((exp, index) => {
         const level = index + 2;
         const previous = new Set(getBondUnlocksByLevel(level - 1));
         const names = getBondUnlocksByLevel(level).filter((key) => !previous.has(key) && UNLOCK_NAMES[key]).map((key) => UNLOCK_NAMES[key]);
         return `累積 ${exp} 點到 Lv.${level}：${names.join('、')}`;
-      }).join('；') + '。點圖鑑的夥伴資訊，可查看已解鎖內容與故事。',
-      target: { view: 'collection', filter: 'owned', petId: c.companion?.id }, selector: '.collection-card [data-action="view-detail"]', action: '查看夥伴詳情入口',
+      }).join('；') + '。親密度 Lv.2～5 各有一章專屬故事；等級達標，並完成、領取前一章約定獎勵後，才能閱讀下一章。滿級也可以從第一章開始。接下來會介紹故事與約定怎麼進行。',
+      target: storyTarget, selector: storySelector, action: '查看夥伴詳情入口',
+    },
+    'bond/story': {
+      title: '聽聽牠的心事',
+      body: '在任務首頁點「故事與同行」，或在圖鑑點夥伴名稱，再點「閱讀故事與同行約定」。選擇可閱讀的章節，讀完後挑一個回應；沒有標準答案，兩種回應都會走向同一個結局，也能回顧另一種回應。親密度還沒到 Lv.2 時，可以先了解，之後再回來閱讀。',
+      target: storyTarget, selector: storySelector, action: '找到故事入口',
+    },
+    'bond/agreement': {
+      title: '選一件小事一起做',
+      body: `讀完故事後，選一項尚未完成的任務，或一項啟用中的習慣。任務完成一次即可；習慣依 Lv.${CHAPTER_LEVELS.join('、Lv.')} 章節，分別需 ${CHAPTER_LEVELS.map((level) => HABIT_TARGETS[level]).join('、')} 個不同日期完成，不必連續。接受約定後，回任務或習慣頁照常完成，進度就會累積；接受前或暫停期間的完成不會補算。同時只能有一個約定，沒有期限，也不會因為休息而扣親密度。可暫停再繼續，換目標會從零重新累積。沒有合適目標時，先記下真正想做的事，或稍後再開始。`,
+      target: storyTarget, selector: storySelector, action: '查看同行約定入口',
+    },
+    'bond/keepsake': {
+      title: '把同行留在身邊',
+      body: `達成約定後，回「故事與同行」領取獎勵。Lv.${CHAPTER_LEVELS.join('、Lv.')} 章節各可領 ${CHAPTER_LEVELS.map((level) => CHAPTER_REWARDS[level]).join('、')} 星塵，每隻夥伴每章限一次，領取後才會開放下一章。完成並領取 Lv.5 的最後一章後，會解鎖專屬紀念物，可展示在首頁與營地；也能開始日常同行，選一項任務或習慣完成一次，再領 ${DAILY_COMPANION_REWARD} 星塵。日常同行每天最多領一次，換寵物也不會增加每日次數。可以先完成教學，之後再慢慢體驗。`,
+      target: storyTarget, selector: storySelector, action: '查看故事與獎勵入口',
     },
     'expedition/prepare': {
       title: '先確認地區與首次短程行程',
@@ -176,5 +196,36 @@ export function getLessonStepContent(id, step, state = {}) {
       target: { view: 'workshop', tab: 'gift' }, selector: '#workshop-content', action: '查看送禮與預覽',
     },
   };
-  return descriptions[`${id}/${step}`] || null;
+  const content = descriptions[`${id}/${step}`];
+  if (!content) return null;
+  const briefs = {
+    'stars/fragments': '召喚到重複夥伴，就會得到牠的碎片。',
+    'stars/cost': '在圖鑑查看碎片數量，足夠就能升星。',
+    'stars/upgrade': !c.starPet ? '先召喚一隻夥伴，之後再回來練習。'
+      : stars >= 5 ? '夥伴已滿星，可以往下看。'
+        : `下一星需要 ${cost} 個碎片；目前有 ${c.starPet.fragments || 0} 個。`,
+    'bond/sources': '設為陪伴後，完成任務就能一起累積親密度。',
+    'bond/pet': !c.companion ? '先到圖鑑選一隻設為陪伴。'
+      : getPetCooldownRemaining(c.companion) > 0 ? '夥伴正在休息，可以先往下看。'
+        : `輕觸首頁的撫摸按鈕，親密度 +${PET_BOND_EXP_GAIN}。`,
+    'bond/unlocks': 'Lv.2 起，每級都有新故事。完成前一章約定並領獎，就能繼續。',
+    'bond/story': '打開夥伴故事，選一個想說的回應。沒有對錯，照自己的心意就好。',
+    'bond/agreement': '選一項任務或習慣，接受約定後照常完成。沒有期限，休息也沒關係。',
+    'bond/keepsake': '完成約定後回來領星塵。走完最後一章，留下專屬紀念物，開啟日常同行。',
+    'expedition/prepare': '選一個地區，先看看時間與能量花費。',
+    'expedition/dispatch': '選 1～3 隻夥伴與探險目標，確認後出發。',
+    'expedition/claim': '旅程結束後回來領獎。晚點來，收穫也會等你。',
+    'workshop/materials': '探險領獎後，材料才會放進工坊。',
+    'workshop/craft': c.craftable ? `先看「${c.craftable.name}」配方，材料足夠再製作。` : '先看配方，材料足夠再製作。',
+    'workshop/gift': '選好禮物與夥伴，確認親密度效果後送出。',
+  };
+  const tips = {
+    'bond/story': ['入口在首頁「故事與同行」，或圖鑑的夥伴詳情。', 'Lv.2 才能閱讀第一章；現在也能先了解。', '兩種回應走向同一個結局，之後可回顧另一種回應。'],
+    'bond/agreement': ['任務：選尚未完成的一項，完成一次即可。', `習慣：Lv.${CHAPTER_LEVELS.join('、Lv.')} 分別需 ${CHAPTER_LEVELS.map((level) => HABIT_TARGETS[level]).join('、')} 個不同日期，不必連續。`, '接受前與暫停期間的完成不會補算。', '同時只能有一個約定；可暫停、繼續或結束。換目標會從零累積。'],
+    'bond/keepsake': [`章節獎勵：${CHAPTER_LEVELS.map((level) => `Lv.${level} +${CHAPTER_REWARDS[level]}`).join('、')} 星塵。每隻每章限領一次，領取後開放下一章。`, '完成並領取 Lv.5 約定後，可在首頁與營地展示紀念物。', `日常同行：完成一項任務或習慣，再領 ${DAILY_COMPANION_REWARD} 星塵。全角色合計每天一次。`],
+  };
+  const actions = { 'bond/sources': '查看陪伴', 'bond/pet': c.companion ? '找到撫摸' : '設定陪伴',
+    'bond/unlocks': '查看夥伴', 'bond/story': '找到故事', 'bond/agreement': '查看約定', 'bond/keepsake': '查看獎勵' };
+  return { ...content, action: actions[`${id}/${step}`] || content.action,
+    brief: briefs[`${id}/${step}`], tips: tips[`${id}/${step}`] || [content.body] };
 }

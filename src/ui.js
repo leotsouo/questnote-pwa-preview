@@ -76,6 +76,8 @@ import { setTheme, applyThemeToDocument, normalizeTheme, setFontSize, applyFontS
 import { initQuestIconLanguage } from './iconPresentation.js';
 import { THEME_DIRECTIONS } from './themeRegistry.js';
 import { twilightIcon, getCompanionScene, initTwilightChrome, syncTwilightHome, syncTwilightGacha, setTwilightCompanionLine, reactTwilightCompanion } from './twilightPresentation.js';
+import { createBondJourneyController } from './bondJourneyController.js';
+import { renderBondHome, renderBondDetail, renderBondKeepsake } from './bondJourneyView.js';
 import {
   pickStatusLine,
   randomStatusInterval,
@@ -589,6 +591,9 @@ export function initUI(appState, refreshCallback, achievementCheckCallback) {
   uiInitialized = true;
   try {
     initTwilightChrome();
+    createBondJourneyController({ getState: () => state, refresh: (...args) => onRefresh(...args),
+      openModal, closeModal, showToast, switchView,
+      portrait: (pet) => petImageHtml(pet, { size: 'md', loading: 'eager', eager: true }) }).mount();
     initQuestIconLanguage();
     bindNavigation();
     initFilterGestures();
@@ -1765,7 +1770,24 @@ export function renderSharedUI() {
   renderGachaDailyBlessingEntry();
   maybeRefreshExpeditionBubble();
   syncTwilightHome(state);
+  renderBondHomeSection();
   refreshOnboarding();
+}
+
+function renderBondHomeSection() {
+  const root = document.getElementById('bond-journey-home');
+  if (!root) return;
+  const html = renderBondHome(state);
+  const opener = document.getElementById('modal-overlay')?.classList.contains('open')
+    ? root.querySelector('[data-bond-open]') : null;
+  // Preserve a connected dialog opener while updating the lightweight home card.
+  root.innerHTML = html;
+  const replacement = root.querySelector('[data-bond-open]');
+  if (opener && replacement && opener.dataset.bondOpen === replacement.dataset.bondOpen) {
+    opener.textContent = replacement.textContent;
+    replacement.replaceWith(opener);
+  }
+  root.hidden = !html;
 }
 
 /** 渲染指定 view */
@@ -1928,6 +1950,7 @@ function renderTasksView() {
   syncTwilightHome(state);
 
   const catFilterEl = document.getElementById('task-category-filters');
+  renderBondHomeSection();
   if (catFilterEl) {
     catFilterEl.hidden = taskViewMode === 'smart' && !activeSmartListId;
   }
@@ -4736,22 +4759,6 @@ const BOND_UNLOCK_ITEM_LABELS = {
   bondStoryLv5: '羈絆故事',
 };
 
-/** 羈絆故事：通用開頭 + 依稀有度段落 */
-const BOND_STORY_INTRO =
-  '經過長時間的陪伴，牠已經不只是被召喚而來的夥伴，而是願意與你一起完成每一天目標的同行者。';
-
-const BOND_STORY_BY_RARITY = {
-  N: '牠在日常陪伴中慢慢信任你，成為最穩定的小夥伴。',
-  R: '牠在日常陪伴中慢慢信任你，成為最穩定的小夥伴。',
-  SR: '牠開始主動回應你的努力，像是在提醒你不要放棄。',
-  SSR: '牠身上的力量因你們的羈絆而更加穩定，彷彿願意守護你的每個重要時刻。',
-  UR: '傳說級靈獸真正認可了你。從此，牠不只是被召喚的存在，而是與你並肩前行的命運夥伴。',
-};
-
-function getBondStoryText(rarity) {
-  return BOND_STORY_BY_RARITY[rarity] || BOND_STORY_BY_RARITY.N;
-}
-
 /** 取得羈絆徽章 HTML（Lv.3 以上顯示；Lv.5 顯示羈絆解放） */
 function bondBadgeHtml(pet) {
   const bondLevel = pet?.bondLevel ?? 0;
@@ -6258,12 +6265,7 @@ function openPetDetailModal(petId) {
     const liberatedLabel = st.bondLiberated
       ? '<span class="bond-liberated-label">羈絆解放</span>'
       : '';
-    const storyHtml = bondLevel >= 5
-      ? `<div class="bond-story is-unlocked">
-           <p class="bond-story__intro">${escapeHtml(BOND_STORY_INTRO)}</p>
-           <p class="bond-story__rarity">${escapeHtml(getBondStoryText(pet.rarity))}</p>
-         </div>`
-      : '<div class="bond-story is-locked"><p>親密度達到 Lv.5 後解鎖羈絆故事。</p></div>';
+    const storyHtml = renderBondDetail(pet, state);
     bondStatusSection = `
       <section class="bond-section">
         <div class="bond-section__title-row">
@@ -6542,6 +6544,7 @@ function renderExpeditionView() {
 }
 
 function expeditionAreaImageUrl(areaId) {
+  if (areaId === 'cloudrest_trail') return './assets/expeditions/cloudrest_trail.svg';
   return `./assets/expeditions/${encodeURIComponent(areaId)}.webp`;
 }
 
@@ -6612,6 +6615,7 @@ function renderCampPanel() {
     <details class="camp-card__details" ${wasOpen ? 'open' : ''}>
       <summary class="camp-card__summary"><span><strong>共用營地 · Lv.${level}</strong><small>${next ? `下一步：${next.name}` : '全部建設完成'}</small></span><span class="camp-card__summary-action">${affordable ? '可升級' : '查看'}</span></summary>
       <div class="camp-card__content">
+        ${renderBondKeepsake(state)}
         <p>六區素材一起建設營地，升級會永久保留。</p>
         <div class="camp-unlocks">${CAMP_UPGRADES.map((entry) => `<span class="camp-unlock ${level >= entry.level ? 'is-open' : ''}">${level >= entry.level ? '✓' : '○'} ${entry.name}</span>`).join('')}</div>
         ${next ? `<p>${next.description}</p><div class="camp-costs">${costs}</div><button type="button" class="btn btn--primary" data-action="upgrade-camp" ${affordable ? '' : 'disabled'}>投入素材升級</button>` : '<p>營地已完成全部建設。</p>'}

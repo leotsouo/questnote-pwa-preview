@@ -1,11 +1,12 @@
 /** Backup profiles verified against historical exporters; no database or DOM access. */
 import { SUPPORTED_THEMES } from './themeRegistry.js';
 import { FONT_SIZES } from './preferencesService.js';
+import { validateBondJourney } from './bondJourneyCore.js';
 const BASE_KEYS = ['tasks', 'wallet', 'collection', 'gachaStats', 'expeditions',
   'achievements', 'taskStats', 'userPreferences', 'habits'];
 const ADDITIONS = ['inventory', 'workshopStats', 'dailyCheckIn', 'questProgress',
   'explorationProgress', 'collectionMilestones', 'globalMailboxState',
-  'poolDebutSeen', 'poolUnlockState', 'idempotentGrants', 'campProgress'];
+  'poolDebutSeen', 'poolUnlockState', 'idempotentGrants', 'campProgress', 'bondJourney'];
 export const SNAPSHOT_KEYS = [...BASE_KEYS, ...ADDITIONS];
 // Counts come from actual versioned exports, not inferred release dates.
 const LEGACY_PROFILES = {
@@ -32,7 +33,7 @@ const QUEST_TARGETS = {
   weekly: { weekly_complete_tasks_20: 20, weekly_complete_habits_10: 10,
     weekly_checkin_5: 5, weekly_expedition_5: 5, weekly_gift_5: 5 },
 };
-const AREA_IDS = ['mist_forest', 'lava_rift', 'machine_ruins', 'astral_rift', 'polar_shore', 'harvest_fields'];
+const AREA_IDS = ['mist_forest', 'lava_rift', 'machine_ruins', 'astral_rift', 'polar_shore', 'harvest_fields', 'cloudrest_trail'];
 const COLLECTION_MILESTONE_IDS = ['collection_005', 'collection_010', 'collection_020',
   'collection_030', 'collection_040', 'collection_050', 'collection_all', 'rarity_first_sr',
   'rarity_first_ssr', 'rarity_first_ur', 'rarity_all_n', 'rarity_all_r', 'rarity_sr_5',
@@ -263,7 +264,11 @@ export function validateSnapshotData(data, requiredKeys = SNAPSHOT_KEYS, profile
     progress: scalar((n) => Number.isInteger(n) && n >= 0 && n <= 100, '探索進度無效'), completedRuns: integer,
     claimedMilestones: list(oneOf([10, 25, 50, 75, 100]), true), unlockedStories: storyIds,
     completedAt: nullable(timestamp), lastExploredAt: nullable(timestamp) })(area, areaPath), oneOf(AREA_IDS))(value, path);
-    const requiredAreas = profile === 'current' || profile === '3.4.18' ? AREA_IDS : AREA_IDS.slice(0, 4);
+    const versionParts = String(profile).split('.').map(Number);
+    const atLeast = (minor, patch) => versionParts[0] > 3 || (versionParts[0] === 3
+      && (versionParts[1] > minor || (versionParts[1] === minor && versionParts[2] >= patch)));
+    const requiredAreas = profile === 'current' || atLeast(5, 2) ? AREA_IDS
+      : atLeast(4, 18) ? AREA_IDS.slice(0, 6) : AREA_IDS.slice(0, 4);
     for (const id of requiredAreas) if (!Object.hasOwn(value || {}, id)) fail(`${path}.${id}`, '缺少持久化項目');
   };
   state('explorationProgress', { areas: explorationAreas,
@@ -292,6 +297,7 @@ export function validateSnapshotData(data, requiredKeys = SNAPSHOT_KEYS, profile
       visit(item, next);
     }
   };
+  if (Object.hasOwn(data, 'bondJourney')) errors.push(...validateBondJourney(data.bondJourney));
   visit(data, '');
   return errors;
 }
@@ -347,7 +353,9 @@ export function validateBackupEnvelope(raw, currentVersion) {
   const data = raw.data === undefined ? raw : raw.data;
   const preCampRelease = actual[0] < 3 || (actual[0] === 3
     && (actual[1] < 4 || (actual[1] === 4 && (actual[2] ?? 0) <= 17)));
-  const additions = LEGACY_PROFILES[version] ?? (preCampRelease ? 10 : ADDITIONS.length);
+  const preBondRelease = actual[0] < 3 || (actual[0] === 3
+    && (actual[1] < 5 || (actual[1] === 5 && (actual[2] ?? 0) < 1)));
+  const additions = LEGACY_PROFILES[version] ?? (preCampRelease ? 10 : preBondRelease ? 11 : ADDITIONS.length);
   const required = [...BASE_KEYS, ...ADDITIONS.slice(0, additions)];
   const errors = validateSnapshotData(data, required, version);
   if (isRecord(data)) {

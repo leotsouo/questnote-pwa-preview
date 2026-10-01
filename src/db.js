@@ -330,6 +330,7 @@ export async function replaceAllStores(payload) {
       if (payload.poolDebutSeen) metaStore.put(payload.poolDebutSeen);
       if (payload.poolUnlockState) metaStore.put(payload.poolUnlockState);
       if (payload.idempotentGrants) metaStore.put(payload.idempotentGrants);
+      if (payload.bondJourney) metaStore.put(payload.bondJourney);
     } catch (error) {
       writeError = error;
       tx.abort();

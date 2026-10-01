@@ -116,6 +116,7 @@ import { initOnboarding } from './onboardingController.js';
 import { runAppHealthCheck } from './healthCheckService.js';
 import { getServiceWorkerRegisterUrl } from './version.js';
 import { loadCatalogBundle } from './releaseCatalog.js';
+import { loadBondStories, syncBondJourney } from './bondJourneyService.js';
 import { preloadCompanionImage, preloadOwnedPetImages } from './imagePreloadService.js';
 
 
@@ -330,6 +331,13 @@ async function refreshState(options = {}) {
   appState.collectionMilestoneSummary = await getCollectionMilestoneSummary(appState.allPets);
 
   appState.companion = await getCompanion(appState.allPets);
+  try {
+    appState.bondJourney = await syncBondJourney();
+    appState.bondJourneyError = null;
+  } catch (error) {
+    console.error('[QuestNote] 同行約定載入失敗:', error);
+    appState.bondJourneyError = '同行紀錄暫時無法載入，請重試；原始紀錄已保留。';
+  }
 
   appState.activeExpedition = await getActiveExpedition();
   appState.recentExpeditions = await getRecentExpeditions();
@@ -591,6 +599,10 @@ async function initApp() {
     try {
 
       await loadGameData();
+      appState.bondStories = await loadBondStories().catch((error) => {
+        console.warn('[QuestNote] 夥伴故事載入失敗:', error);
+        return null;
+      });
 
     } catch (err) {
 

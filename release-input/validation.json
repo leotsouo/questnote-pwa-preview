@@ -1,0 +1,382 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "errors": [],
+  "warnings": [
+    {
+      "level": "warning",
+      "code": "PET_NO_STANDARD",
+      "message": "新寵物未加入 standard，不會進入目前標準召喚",
+      "path": "pets[0].poolTags"
+    },
+    {
+      "level": "warning",
+      "code": "PET_NO_STANDARD",
+      "message": "新寵物未加入 standard，不會進入目前標準召喚",
+      "path": "pets[1].poolTags"
+    },
+    {
+      "level": "warning",
+      "code": "PET_NO_STANDARD",
+      "message": "新寵物未加入 standard，不會進入目前標準召喚",
+      "path": "pets[2].poolTags"
+    },
+    {
+      "level": "warning",
+      "code": "PET_NO_STANDARD",
+      "message": "新寵物未加入 standard，不會進入目前標準召喚",
+      "path": "pets[3].poolTags"
+    },
+    {
+      "level": "warning",
+      "code": "PET_NO_STANDARD",
+      "message": "新寵物未加入 standard，不會進入目前標準召喚",
+      "path": "pets[4].poolTags"
+    },
+    {
+      "level": "warning",
+      "code": "PET_NO_STANDARD",
+      "message": "新寵物未加入 standard，不會進入目前標準召喚",
+      "path": "pets[5].poolTags"
+    },
+    {
+      "level": "warning",
+      "code": "PET_NO_STANDARD",
+      "message": "新寵物未加入 standard，不會進入目前標準召喚",
+      "path": "pets[6].poolTags"
+    },
+    {
+      "level": "warning",
+      "code": "PET_NO_STANDARD",
+      "message": "新寵物未加入 standard，不會進入目前標準召喚",
+      "path": "pets[7].poolTags"
+    },
+    {
+      "level": "warning",
+      "code": "PET_NO_STANDARD",
+      "message": "新寵物未加入 standard，不會進入目前標準召喚",
+      "path": "pets[8].poolTags"
+    },
+    {
+      "level": "warning",
+      "code": "PET_NO_STANDARD",
+      "message": "新寵物未加入 standard，不會進入目前標準召喚",
+      "path": "pets[9].poolTags"
+    },
+    {
+      "level": "warning",
+      "code": "PET_NO_STANDARD",
+      "message": "新寵物未加入 standard，不會進入目前標準召喚",
+      "path": "pets[10].poolTags"
+    },
+    {
+      "level": "warning",
+      "code": "PET_NO_STANDARD",
+      "message": "新寵物未加入 standard，不會進入目前標準召喚",
+      "path": "pets[11].poolTags"
+    },
+    {
+      "level": "warning",
+      "code": "PET_NO_STANDARD",
+      "message": "新寵物未加入 standard，不會進入目前標準召喚",
+      "path": "pets[12].poolTags"
+    },
+    {
+      "level": "warning",
+      "code": "PET_NO_STANDARD",
+      "message": "新寵物未加入 standard，不會進入目前標準召喚",
+      "path": "pets[13].poolTags"
+    },
+    {
+      "level": "warning",
+      "code": "PET_NO_STANDARD",
+      "message": "新寵物未加入 standard，不會進入目前標準召喚",
+      "path": "pets[14].poolTags"
+    },
+    {
+      "level": "warning",
+      "code": "PET_NO_STANDARD",
+      "message": "新寵物未加入 standard，不會進入目前標準召喚",
+      "path": "pets[15].poolTags"
+    },
+    {
+      "level": "warning",
+      "code": "PET_NO_STANDARD",
+      "message": "新寵物未加入 standard，不會進入目前標準召喚",
+      "path": "pets[16].poolTags"
+    },
+    {
+      "level": "warning",
+      "code": "PET_NO_STANDARD",
+      "message": "新寵物未加入 standard，不會進入目前標準召喚",
+      "path": "pets[17].poolTags"
+    },
+    {
+      "level": "warning",
+      "code": "PET_NO_STANDARD",
+      "message": "新寵物未加入 standard，不會進入目前標準召喚",
+      "path": "pets[18].poolTags"
+    },
+    {
+      "level": "warning",
+      "code": "PET_NO_STANDARD",
+      "message": "新寵物未加入 standard，不會進入目前標準召喚",
+      "path": "pets[19].poolTags"
+    },
+    {
+      "level": "warning",
+      "code": "IMAGE_LARGE",
+      "message": "Review large image dimensions or byte size",
+      "path": "images/pet_n36.png"
+    },
+    {
+      "level": "warning",
+      "code": "IMAGE_LARGE",
+      "message": "Review large image dimensions or byte size",
+      "path": "images/pet_n37.png"
+    },
+    {
+      "level": "warning",
+      "code": "IMAGE_LARGE",
+      "message": "Review large image dimensions or byte size",
+      "path": "images/pet_n38.png"
+    },
+    {
+      "level": "warning",
+      "code": "IMAGE_LARGE",
+      "message": "Review large image dimensions or byte size",
+      "path": "images/pet_r36.png"
+    },
+    {
+      "level": "warning",
+      "code": "IMAGE_LARGE",
+      "message": "Review large image dimensions or byte size",
+      "path": "images/pet_r37.png"
+    },
+    {
+      "level": "warning",
+      "code": "IMAGE_LARGE",
+      "message": "Review large image dimensions or byte size",
+      "path": "images/pet_r38.png"
+    },
+    {
+      "level": "warning",
+      "code": "IMAGE_LARGE",
+      "message": "Review large image dimensions or byte size",
+      "path": "images/pet_r39.png"
+    },
+    {
+      "level": "warning",
+      "code": "IMAGE_LARGE",
+      "message": "Review large image dimensions or byte size",
+      "path": "images/pet_r40.png"
+    },
+    {
+      "level": "warning",
+      "code": "IMAGE_LARGE",
+      "message": "Review large image dimensions or byte size",
+      "path": "images/pet_sr30.png"
+    },
+    {
+      "level": "warning",
+      "code": "IMAGE_LARGE",
+      "message": "Review large image dimensions or byte size",
+      "path": "images/pet_sr31.png"
+    },
+    {
+      "level": "warning",
+      "code": "IMAGE_LARGE",
+      "message": "Review large image dimensions or byte size",
+      "path": "images/pet_sr32.png"
+    },
+    {
+      "level": "warning",
+      "code": "IMAGE_LARGE",
+      "message": "Review large image dimensions or byte size",
+      "path": "images/pet_sr33.png"
+    },
+    {
+      "level": "warning",
+      "code": "IMAGE_LARGE",
+      "message": "Review large image dimensions or byte size",
+      "path": "images/pet_sr34.png"
+    },
+    {
+      "level": "warning",
+      "code": "IMAGE_LARGE",
+      "message": "Review large image dimensions or byte size",
+      "path": "images/pet_ssr21.png"
+    },
+    {
+      "level": "warning",
+      "code": "IMAGE_LARGE",
+      "message": "Review large image dimensions or byte size",
+      "path": "images/pet_ssr22.png"
+    },
+    {
+      "level": "warning",
+      "code": "IMAGE_LARGE",
+      "message": "Review large image dimensions or byte size",
+      "path": "images/pet_ssr23.png"
+    },
+    {
+      "level": "warning",
+      "code": "IMAGE_LARGE",
+      "message": "Review large image dimensions or byte size",
+      "path": "images/pet_ssr24.png"
+    },
+    {
+      "level": "warning",
+      "code": "IMAGE_LARGE",
+      "message": "Review large image dimensions or byte size",
+      "path": "images/pet_ur16.png"
+    },
+    {
+      "level": "warning",
+      "code": "IMAGE_LARGE",
+      "message": "Review large image dimensions or byte size",
+      "path": "images/pet_ur17.png"
+    },
+    {
+      "level": "warning",
+      "code": "IMAGE_LARGE",
+      "message": "Review large image dimensions or byte size",
+      "path": "images/pet_ur18.png"
+    }
+  ],
+  "previews": [
+    {
+      "poolId": "standard",
+      "locked": 56,
+      "unlocked": 56
+    },
+    {
+      "poolId": "eternal_slumber_bloom",
+      "locked": 12,
+      "unlocked": 16
+    },
+    {
+      "poolId": "frost_oath_fjord",
+      "locked": 12,
+      "unlocked": 12
+    },
+    {
+      "poolId": "honeylight_sugar_garden_v2",
+      "locked": 12,
+      "unlocked": 12
+    },
+    {
+      "poolId": "swordwild_shanhe_v3",
+      "locked": 20,
+      "unlocked": 20
+    }
+  ],
+  "changes": {
+    "pets": {
+      "added": [
+        "pet_n36",
+        "pet_n37",
+        "pet_n38",
+        "pet_r36",
+        "pet_r37",
+        "pet_r38",
+        "pet_r39",
+        "pet_r40",
+        "pet_sr30",
+        "pet_sr31",
+        "pet_sr32",
+        "pet_sr33",
+        "pet_sr34",
+        "pet_ssr21",
+        "pet_ssr22",
+        "pet_ssr23",
+        "pet_ssr24",
+        "pet_ur16",
+        "pet_ur17",
+        "pet_ur18"
+      ],
+      "changed": [],
+      "removed": []
+    },
+    "pools": {
+      "added": [
+        "swordwild_shanhe_v3"
+      ],
+      "changed": [],
+      "removed": []
+    },
+    "lore": {
+      "added": [
+        "pet_n36",
+        "pet_n37",
+        "pet_n38",
+        "pet_r36",
+        "pet_r37",
+        "pet_r38",
+        "pet_r39",
+        "pet_r40",
+        "pet_sr30",
+        "pet_sr31",
+        "pet_sr32",
+        "pet_sr33",
+        "pet_sr34",
+        "pet_ssr21",
+        "pet_ssr22",
+        "pet_ssr23",
+        "pet_ssr24",
+        "pet_ur16",
+        "pet_ur17",
+        "pet_ur18"
+      ],
+      "changed": [],
+      "removed": []
+    },
+    "series": {
+      "added": [
+        "swordwild_shanhe_v3"
+      ],
+      "changed": [],
+      "removed": []
+    }
+  },
+  "imageBuild": {
+    "version": "2",
+    "options": {
+      "card": 384,
+      "stage": 960,
+      "quality": 82,
+      "effort": 5
+    },
+    "encoder": {
+      "aom": "3.14.1",
+      "archive": "3.8.9",
+      "cairo": "1.18.4",
+      "cgif": "0.5.3",
+      "exif": "0.6.26",
+      "expat": "2.8.3",
+      "ffi": "3.8.0",
+      "fontconfig": "2.18.3",
+      "freetype": "2.14.3",
+      "fribidi": "1.0.16",
+      "glib": "2.89.4",
+      "harfbuzz": "14.3.1",
+      "heif": "1.23.2",
+      "highway": "1.4.0",
+      "imagequant": "2.4.1",
+      "lcms": "2.19.1",
+      "mozjpeg": "0826579",
+      "pango": "1.58.2",
+      "pixman": "0.46.4",
+      "png": "1.6.58",
+      "proxy-libintl": "0.5",
+      "rsvg": "2.62.91",
+      "tiff": "4.7.2",
+      "uhdr": "2.0.2",
+      "vips": "8.18.6",
+      "webp": "1.6.0",
+      "xml2": "2.15.3",
+      "zlib-ng": "2.3.3",
+      "sharp": "0.35.4"
+    }
+  }
+}

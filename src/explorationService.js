@@ -31,11 +31,16 @@ export const AREA_STORIES = {
   astral_rift_story_10: '星光碎片漂浮在半空中，牠們像是在等待某個願望被完成。',
   polar_shore_story_10: '風雪短暫停歇，隊伍看見冰岸上通往極光的古老航路。',
   harvest_fields_story_10: '田埂旁的小路連向村落，夥伴發現居民留下的守望記號。',
+  cloudrest_trail_story_10: '斷橋邊的無字路碑下，藏著一張旅人留下的修橋草圖。山裡的靈獸每天送來一截木枝，卻始終少一個能把它們接起來的同行者。你們放下行囊，決定先替下一位過路人鋪好第一塊橋板。',
+  cloudrest_trail_story_25: '竹林小亭沒有掌門的座位，只有一排大小不同的茶碗。靈貂帶回失落的繩索，玉蜂指出裂開的橋墩，白猿把草圖翻到最後一頁。你這才知道，這條路的功夫是把別人擅長的事情接在一起。',
+  cloudrest_trail_story_50: '山口的風把半卷舊信吹到石階上。信中沒有失傳祕笈，只記著沿途願意借宿的人家與可以避雨的屋簷。你們把新的落腳處添上去，讓一份只屬於過去的記錄，成為今日仍能使用的路。',
+  cloudrest_trail_story_75: '重岳雕在橋頭收起雙翼，讓最膽小的白驹先踏過去。大家曾以為只有最強的夥伴能領路，這次卻看見白驹回頭等了每一位同行者。橋上的腳步聲不整齊，卻沒有任何一個被落下。',
+  cloudrest_trail_story_100: '你們將最後一塊橋板固定在晨光裡。靈獸們沒有把山路改成誰的名字，只在路碑下留下一碗溫熱的行旅糰。此後每位經過的人，都可以先歇一口氣，再帶著自己的事情走向下一段山河。',
 };
 
 /**
  * 地區探索度定義：每個地區的每次增加量與里程碑內容。
- * 六個地區都保留探索進度與里程碑。
+ * 每個已登錄地區都保留探索進度與里程碑。
  */
 export const AREA_EXPLORATION_DEFS = {
   mist_forest: {
@@ -216,6 +221,16 @@ export const AREA_EXPLORATION_DEFS = {
       { percent: 100, title: '豐穗遠郊完全探索', description: '完成遠郊的主要探索。', reward: { stardust: 350, materials: { harvest_charm: 5 }, title: '遠郊完成者', badgeId: 'badge_harvest_fields_100' } },
     ],
   },
+  cloudrest_trail: {
+    areaId: 'cloudrest_trail', name: '雲棧古道', increment: 4,
+    milestones: [
+      { percent: 10, title: '無字路碑', description: '在斷橋邊找到修橋的第一張草圖。', storyId: 'cloudrest_trail_story_10', reward: { stardust: 50 } },
+      { percent: 25, title: '群獸茶會', description: '替竹亭備妥補給，將各自的專長接成一條路。', storyId: 'cloudrest_trail_story_25', reward: { stardust: 80, materials: { forest_leaf: 5 } } },
+      { percent: 50, title: '借一處屋簷', description: '把可以避雨的落腳處添進旅圖。', storyId: 'cloudrest_trail_story_50', reward: { stardust: 120, title: '雲棧同行者', badgeId: 'badge_cloudrest_trail_50' } },
+      { percent: 75, title: '等一個腳步', description: '護送每位夥伴穿過新修的橋。', storyId: 'cloudrest_trail_story_75', reward: { stardust: 180, materials: { harvest_charm: 3 } } },
+      { percent: 100, title: '山河有歸途', description: '古道重新暢通，為下一位行旅者留下補給。', storyId: 'cloudrest_trail_story_100', reward: { stardust: 300, materials: { forest_leaf: 8 }, title: '山河守諾者', badgeId: 'badge_cloudrest_trail_100' } },
+    ],
+  },
 };
 
 /** 探索度系統支援的地區 id 清單 */
@@ -235,6 +250,8 @@ const BADGE_LABELS = {
   badge_polar_shore_100: '極北冰岸完成徽章',
   badge_harvest_fields_50: '田野守護徽章',
   badge_harvest_fields_100: '豐穗遠郊完成徽章',
+  badge_cloudrest_trail_50: '雲棧同行徽章',
+  badge_cloudrest_trail_100: '山河守諾徽章',
 };
 
 function clampProgress(value) {

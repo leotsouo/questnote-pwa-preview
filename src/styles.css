@@ -17758,11 +17758,6 @@ html:has(body.onboarding-active) { scroll-padding-bottom: calc(var(--nav-height)
   box-shadow: 0 14px 36px rgba(0, 0, 0, 0.42);
   padding: var(--space-4);
 }
-.onboarding-dock[data-step='task'],
-.onboarding-dock[data-step='expedition'] {
-  top: calc(var(--safe-top) + 76px);
-  bottom: auto;
-}
 .onboarding-dock__top { display: flex; justify-content: space-between; gap: var(--space-2); color: var(--color-primary-light); font-size: 0.75rem; font-weight: 700; }
 .onboarding-dock__top button,
 .onboarding-dock__skip { border: 0; background: none; color: var(--color-text-secondary); cursor: pointer; text-decoration: underline; }
@@ -18135,3 +18130,37 @@ body[data-theme] #app #view-workshop .workshop-gift-preview__levelup { color: va
 /* Keep horizontal filter gestures within their own scroll row. */
 .filter-bar { overscroll-behavior-x: contain; user-select: none; cursor: grab; }
 .filter-bar.is-dragging, .filter-bar.is-dragging .filter-btn { cursor: grabbing; }
+
+/* Teaching uses a short invitation first; rules remain available on demand. */
+.onboarding-dock {
+  box-sizing: border-box;
+  /* Anchor the header; only the content grows within the reserved lower region. */
+  top: max(calc(var(--safe-top) + 10px), calc(100dvh - var(--nav-height) - var(--safe-bottom) - min(52dvh, 380px) - 10px));
+  bottom: auto;
+  height: auto;
+  max-height: min(52dvh, 380px, calc(100dvh - var(--nav-height) - var(--safe-bottom) - var(--safe-top) - 20px));
+  padding: 16px 20px;
+  overscroll-behavior-y: contain;
+}
+.onboarding-progress { display: block; width: 100%; height: 4px; margin: 10px 0 14px; border: 0; border-radius: 4px; accent-color: var(--color-primary-light); }
+.onboarding-progress::-webkit-progress-bar { background: var(--color-border); border-radius: 4px; }
+.onboarding-progress::-webkit-progress-value { background: var(--color-primary-light); border-radius: 4px; }
+.onboarding-dock .onboarding-brief { font-size: .9rem; line-height: 1.65; margin-bottom: 10px; }
+.onboarding-more { margin: 0 0 12px; border-top: 1px solid var(--color-border); }
+.onboarding-more summary, .guide-start-details summary, .guide-chapter__help summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; gap: 8px; color: var(--color-text-secondary); font-size: .82rem; }
+.onboarding-more summary::before, .guide-start-details summary::before, .guide-chapter__help summary::before { content: '+'; font-size: 1rem; }
+.onboarding-more[open] summary::before, .guide-start-details[open] summary::before, .guide-chapter__help[open] summary::before { content: '−'; }
+.onboarding-more ul { padding-inline-start: 20px; margin: 0 0 12px; color: var(--color-text-secondary); font-size: .82rem; line-height: 1.7; }
+.onboarding-more li + li { margin-top: 8px; }
+.onboarding-dock__actions .btn { flex: 1 1 100px; }
+.onboarding-dock__footer { display: flex; align-items: flex-start; gap: 12px; margin-top: 12px; border-top: 1px solid var(--color-border); }
+.onboarding-dock__footer .onboarding-more { flex: 1; min-width: 0; margin: 0; border: 0; }
+.onboarding-dock__footer .onboarding-dock__skip { min-width: 44px; min-height: 44px; flex-shrink: 0; margin: 0; }
+.guide-chapter__help p { margin: 0 0 12px; }
+#guide-chapters { grid-template-columns: minmax(0, 1fr); }
+@media (max-width: 600px) {
+  #guide-chapters { grid-template-columns: minmax(0, 1fr); }
+  #guide-chapters .guide-chapter { padding: 16px 20px; }
+  .onboarding-dock__top { align-items: center; }
+  .onboarding-dock__top > span { flex: 1; min-width: 0; }
+}
