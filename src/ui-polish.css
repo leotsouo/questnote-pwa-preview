@@ -184,3 +184,22 @@ body[data-theme] :is(.modal-body, .global-mailbox-modal__sheet, .expedition-disp
   #task-form .form-row { grid-template-columns: 1fr; }
   body[data-theme] .modal:not(:has(.sweet-summon-result, .default-summon-result)) > .modal-body { padding-inline: var(--space-4); }
 }
+
+/* Daily habits can be completed beside today's tasks in every theme. */
+.today-habits { margin-block: var(--space-4); }
+.today-habits__header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-3); }
+.today-habits__header .section-title { margin: 0; min-width: 0; }
+.today-habits__header .btn { min-height: 44px; white-space: normal; }
+.today-habits__list { display: grid; gap: var(--space-2); }
+.today-habit-card { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-bg-card); }
+.today-habit-check { display: grid; place-items: center; flex: 0 0 44px; width: 44px; height: 44px; padding: 0; border: 1px solid var(--color-primary-border); border-radius: 50%; background: var(--color-primary-soft); color: var(--color-primary); font: inherit; font-size: var(--font-size-xl); cursor: pointer; }
+.today-habit-check:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 3px; }
+.today-habit-check:disabled { opacity: 0.6; cursor: wait; }
+.today-habit-card__body { flex: 1; min-width: 0; }
+.today-habit-card__name { margin: 0; color: var(--color-text-main); font-size: var(--font-size-base); line-height: var(--line-height-normal); overflow-wrap: anywhere; }
+.today-habit-card__meta, .today-habits__hint { margin: var(--space-1) 0 0; color: var(--color-text-secondary); font-size: var(--font-size-sm); line-height: var(--line-height-normal); overflow-wrap: anywhere; }
+.today-habit-card--done { background: var(--color-bg-card-soft); }
+.today-habit-card--done .today-habit-card__name { color: var(--color-text-muted); }
+.today-habit-card--done .today-habit-check { color: var(--color-success); background: var(--color-success-soft); border-color: var(--color-success); }
+.today-habits__empty { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-3); padding: var(--space-3); border: 1px dashed var(--color-border); border-radius: var(--radius-md); }
+.today-habits__empty .btn { min-height: 44px; white-space: normal; }

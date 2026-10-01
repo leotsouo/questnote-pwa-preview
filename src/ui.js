@@ -192,6 +192,7 @@ import {
   getWeekMonday,
   hasWeeklyNearGoal,
 } from './habitService.js';
+import { getTodayDailyHabits, renderTodayHabits } from './todayHabitsView.js';
 import {
   craftItem,
   useBondItem,
@@ -424,6 +425,7 @@ let selectedGiftPetId = null;
 let selectedGiftItemId = null;
 let workshopGiftMessage = '';
 let workshopGiftBusy = false;
+let habitActionBusy = false;
 const expandedTaskIds = new Set();
 const recentlyCompletedTaskIds = new Set();
 
@@ -714,6 +716,20 @@ function bindDelegatedEvents() {
     const card = target.closest('.task-card');
     const id = card?.dataset.id;
     const action = target.dataset.action;
+
+    if (action === 'habit-complete' || action === 'habit-uncomplete') {
+      const habitCard = target.closest('.today-habit-card');
+      if (habitCard) await handleHabitCompletion(action, habitCard.dataset.id, habitCard);
+      return;
+    }
+    if (action === 'go-habits') {
+      switchView('habits');
+      return;
+    }
+    if (action === 'habit-create-first') {
+      openHabitForm();
+      return;
+    }
 
     if (action === 'home-hub') {
       const hub = target.dataset.hub;
@@ -1279,42 +1295,8 @@ function bindDelegatedEvents() {
     const id = card?.dataset.id;
     const action = target.dataset.action;
 
-    if (action === 'habit-complete' && id) {
-      const cardEl = target.closest('.habit-card');
-      cardEl?.classList.add('habit-card--completing');
-      const result = await completeHabitToday(id);
-      if (result.success) {
-        await trackQuest('complete_habit');
-        await onRefresh({ renderMode: ['habits', 'tasks'] });
-        renderHabitsView();
-        const parts = [];
-        if (result.stardustGiven > 0) parts.push(`星塵 +${result.stardustGiven}`);
-        if (result.energyGiven > 0) parts.push(`冒險能量 +${result.energyGiven}`);
-        if (result.bondGiven > 0) parts.push('親密度 +1');
-        if (parts.length > 0) {
-          showToast(`習慣完成！${parts.join('、')}`, 'success');
-        } else if (result.stardustCapped) {
-          showToast('今日習慣星塵已達上限，仍已記錄完成。', 'warning');
-        } else {
-          showToast('習慣已記錄完成', 'success');
-        }
-        if (result.bondGiven > 0) {
-          await notifyBondUnlocks(state.companion?.id);
-        }
-        await handleAchievementCheckAfterAction();
-      } else {
-        cardEl?.classList.remove('habit-card--completing');
-        showToast(result.error || '完成失敗', 'error');
-      }
-    } else if (action === 'habit-uncomplete' && id) {
-      const result = await uncompleteHabitToday(id);
-      if (result.success) {
-        await onRefresh({ renderMode: ['habits', 'tasks'] });
-        renderHabitsView();
-        showToast('已取消今日完成', 'info');
-      } else {
-        showToast(result.error || '操作失敗', 'error');
-      }
+    if ((action === 'habit-complete' || action === 'habit-uncomplete') && id) {
+      await handleHabitCompletion(action, id, card);
     } else if (action === 'habit-edit' && id) {
       openHabitForm(id);
     } else if (action === 'habit-archive' && id) {
@@ -1939,6 +1921,50 @@ function maybeRefreshExpeditionBubble() {
 
 /* ─── 任務頁 ─── */
 
+async function handleHabitCompletion(action, id, card) {
+  if (habitActionBusy) return;
+  const restoreFocus = card?.contains(document.activeElement);
+  const view = card?.closest('.view');
+  habitActionBusy = true;
+  const buttons = '[data-action="habit-complete"], [data-action="habit-uncomplete"]';
+  document.querySelectorAll(buttons).forEach((button) => { button.disabled = true; });
+  card?.classList.add('habit-card--completing');
+  try {
+    const completing = action === 'habit-complete';
+    const result = await (completing ? completeHabitToday(id) : uncompleteHabitToday(id));
+    if (!result.success) {
+      showToast(result.error || '操作失敗', 'error');
+      return;
+    }
+    if (completing) await trackQuest('complete_habit');
+    await onRefresh({ renderMode: ['habits', 'tasks'] });
+    if (completing) {
+      const parts = [];
+      if (result.stardustGiven > 0) parts.push(`星塵 +${result.stardustGiven}`);
+      if (result.energyGiven > 0) parts.push(`冒險能量 +${result.energyGiven}`);
+      if (result.bondGiven > 0) parts.push('親密度 +1');
+      showToast(parts.length ? `習慣完成！${parts.join('、')}`
+        : result.stardustCapped ? '今日習慣星塵已達上限，仍已記錄完成。' : '習慣已記錄完成',
+      result.stardustCapped && !parts.length ? 'warning' : 'success');
+      if (result.bondGiven > 0) await notifyBondUnlocks(state.companion?.id);
+      await handleAchievementCheckAfterAction();
+    } else {
+      showToast('已取消今日完成', 'info');
+    }
+  } catch (error) {
+    console.warn('[Habits] Completion failed:', error);
+    showToast('無法更新習慣，請稍後再試。', 'error');
+    await onRefresh({ renderMode: ['habits', 'tasks'] });
+  } finally {
+    habitActionBusy = false;
+    card?.classList.remove('habit-card--completing');
+    document.querySelectorAll(buttons).forEach((button) => { button.disabled = false; });
+    if (restoreFocus) {
+      view?.querySelector(`[data-id="${CSS.escape(String(id))}"] [data-action^="habit-"]`)?.focus({ preventScroll: true });
+    }
+  }
+}
+
 function renderTasksView() {
   const { tasks, wallet, todayCompleted, companion, companionLine, achievementSummary, categories } = state;
   const today = getTodayDateString();
@@ -1991,7 +2017,7 @@ function renderHabitSummary() {
   if (!el) return;
 
   const stats = state.habitStats;
-  if (!stats?.hasHabits) {
+  if (taskViewMode === 'today' || !stats?.hasHabits) {
     el.hidden = true;
     return;
   }
@@ -2846,7 +2872,8 @@ function renderTodayView(tasks, today) {
   const filtered = applyCategoryFilter(tasks);
   const sections = getTodayViewSections(filtered, today);
 
-  const plannedEmpty = sections.plannedIncomplete.length === 0
+  const plannedEmpty = sections.planned.length === 0
+    && !getTodayDailyHabits(state.habits || [], today, taskCategoryFilter).length
     ? emptyStateHtml(
         '📅',
         '今天還沒有安排任務',
@@ -2857,6 +2884,10 @@ function renderTodayView(tasks, today) {
     : '';
 
   let html = renderTaskListSection('今日計畫', sections.planned, plannedEmpty);
+  html += renderTodayHabits(state.habits || [], {
+    today, categories: state.categories, categoryFilter: taskCategoryFilter,
+    loadError: state.habitsLoadError, busy: habitActionBusy,
+  });
   html += renderTaskListSection('今天到期', sections.dueToday);
   html += renderTaskListSection('今天開始', filtered.filter((task) => !task.completed && task.startDate === today
     && task.plannedDate !== today && task.dueDate !== today));

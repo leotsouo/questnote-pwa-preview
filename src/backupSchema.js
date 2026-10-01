@@ -358,7 +358,7 @@ export function validateBackupEnvelope(raw, currentVersion) {
   const preBondRelease = actual[0] < 3 || (actual[0] === 3
     && (actual[1] < 5 || (actual[1] === 5 && (actual[2] ?? 0) < 1)));
   const preAwakeningRelease = actual[0] < 3 || (actual[0] === 3
-    && (actual[1] < 5 || (actual[1] === 5 && (actual[2] ?? 0) < 4)));
+    && (actual[1] < 5 || (actual[1] === 5 && (actual[2] ?? 0) < 5)));
   const additions = LEGACY_PROFILES[version] ?? (preCampRelease ? 10 : preBondRelease ? 11 : preAwakeningRelease ? ADDITIONS.length - 1 : ADDITIONS.length);
   const required = [...BASE_KEYS, ...ADDITIONS.slice(0, additions)];
   const errors = validateSnapshotData(data, required, version);

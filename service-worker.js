@@ -6,7 +6,7 @@
  * 寵物圖片不得加入 App Shell precache
  */
 
-const CACHE_NAME = 'questnote-preview-app-d0fdaaa989ec678e4c38ccc899b0ab7ff2b844458e30b35e9f0e8bcd01960f84';
+const CACHE_NAME = 'questnote-preview-app-dd1896c0b4d6b5256313acdb060652c7b0690bf2ebf579c0a258827fd02129a7';
 const PET_IMAGE_CACHE = 'questnote-preview-pet-images-v1';
 const MAILBOX_RUNTIME_CACHE = 'questnote-preview-mailbox-runtime-v1';
 const MAILBOX_FETCH_TIMEOUT_MS = 7000;
@@ -40,8 +40,8 @@ self.addEventListener('notificationclick', (event) => {
 const BUILD_PROFILE = {
   "schemaVersion": 1,
   "profile": "preview",
-  "artifactId": "d0fdaaa989ec678e4c38ccc899b0ab7ff2b844458e30b35e9f0e8bcd01960f84",
-  "sourceCommit": "cb6f66e1e687e2cc52ecdae2bc792ff7a7ddafab",
+  "artifactId": "dd1896c0b4d6b5256313acdb060652c7b0690bf2ebf579c0a258827fd02129a7",
+  "sourceCommit": "38242746077131d08d7d4c38b8e0af3470e50e81",
   "scopePath": "/questnote-pwa-preview/",
   "runtimeContentSchema": 1,
   "dbName": "QuestNotePreviewDB",
@@ -86,12 +86,12 @@ const PRECACHE_HASHES = {
   "data/pools.json": "4fd1cdc8674e5592b6b2256603bad59b5bf555650c482237eedb6a86b3867fcc",
   "data/releases/000e1dc13374a553d6561116cfcf9417c3ebabe531a334596aa5706c26632680/catalog.json": "000e1dc13374a553d6561116cfcf9417c3ebabe531a334596aa5706c26632680",
   "data/titles.json": "318675b79872dfabccc4b8beb99f77eb248a40e5e50bbbd4e4dc24886b3a1398",
-  "index.html": "aaa51de4f7fcf744bdac16877408ea9fd53f18d420fdf3bb039360eefc84c200",
+  "index.html": "617353dad9412784784f04e6931b78ea72e527af5e536483d8ef7169f3271bd9",
   "manifest.webmanifest": "92eebd112db700add8829cda91380b117bcf4f4d91723ea899055ebde22caad0",
   "src/achievementService.js": "92fb005c528359dd95da57f780379dfa3864d6cd0055d73fe8233b4b5de37083",
   "src/adventureHandbookService.js": "d9dc8d34fc08a83c0c2f36682698fd4d96ebd0852c8cb0fde161a5a718d065b9",
   "src/app.js": "a5eeb1049c339cdcbdf20093956f1fedbdfc06b9ce1adb8799eb0fb12cf17396",
-  "src/backupSchema.js": "ee3aaba408fa50dc149d6f94a04b0909c8d2bd96f3333e1b6e9fad32e36d924e",
+  "src/backupSchema.js": "323dc5fa1dc03d4c3fa99e5d198ffe74e6c133cdee80e162608d90f3ba90a5fe",
   "src/backupService.js": "fef735bc5f4484204edd1e2d28dd6196584b4775d76eae0b1bea72823369e820",
   "src/bond-journey.css": "c5ada471a6ac232974153239c91b6d4628dc5c4decf32b5f256f031f2346ee49",
   "src/bondJourneyController.js": "cfaabae2b18fbf0917cb074e878a11b557801a449a442e71ef9368124aa81805",
@@ -155,7 +155,7 @@ const PRECACHE_HASHES = {
   "src/questIcons.js": "7f9395e0af7db0fda7fa273e793275c94d5b8e3bdd2fb249b726e5f6c2046ad0",
   "src/questService.js": "93e6c875b21a3fb6cf8d0c0ad2ddae2b4307cee870da3b1b92a2a0969977d8a6",
   "src/releaseCatalog.js": "38ac32aedef26d927638ef7413ec78520c0f9d114623a4a61283d488d99cbb4a",
-  "src/releaseProfile.js": "9aff55288627a14b41a3806be3adf19a07cc0d9896f55bf450e988c3e38061de",
+  "src/releaseProfile.js": "5c5bbf3773402046ea6d9bece72bb35e116a13675fdbed3ad0b482546266fd48",
   "src/reminder-settings.css": "e90f6e75ac50b3fef946c454c4849f3322cd4e0c06c0b10feb718fef60a878b4",
   "src/reminderController.js": "4ba72d19acca52c417445956521d97ce57b3873b1a61924840fdc47b8a9ad5b5",
   "src/reminderRules.js": "fb8939a256305ef880ecebf063d029dc8a1d37a58e330851b2d96ac001ee57bb",
@@ -176,14 +176,15 @@ const PRECACHE_HASHES = {
   "src/themedSummonController.js": "bdec20f49d44b1e061083b3ed3bf8e5121ed24bb39333a85ed6955d470a7d809",
   "src/themeRegistry.js": "d4c935dd737d662dffc17bcd4fe6d243aac583095ab5ac2ec43b76126df7bafb",
   "src/themeTokens.css": "7a898e987663c925e1913aafaa318d352048b294553affa068360f2d4ec3a596",
+  "src/todayHabitsView.js": "51a16e89416241eda1e105e2fe1d2ce6c6f846a7943f65dd81603432e956879a",
   "src/twilightPresentation.js": "f5868b44baea107e67d6673ce2e6db31c0c6b9da4f2fa9265746e233194cb6d2",
-  "src/ui-polish.css": "ca66a2c6bb7ecd4e1062c34889533bb2ebab5264e218d830fbd1a9982c1a26da",
-  "src/ui.js": "66ec7714c4dd1af7654675a3bc5fa2272b21917cfeb70ece7931302d017bc93a",
+  "src/ui-polish.css": "d320d927f151a01bf2a26d8f60840d42d75b42cf5a5fbeb3354a37f2a74a076a",
+  "src/ui.js": "2dcfde78040214af55d43d383c43f81660818e5fbc5b76ee6dee7ba16d47f307",
   "src/uiHelpers.js": "875f08583510e7c246eebeff4b39d6a7273d2643f6a2a2931281672c6c4d7de6",
   "src/updateActivity.js": "a7032e043a14561ad07ab521b649a2bd508aeca6801376066fcab701e3d2b641",
   "src/updateController.js": "e038b05c3fa2e97158cb3a363996e34b10eba3f243dc5284ec540ea0753c93b9",
   "src/updateProtocol.js": "53e770213f0074208c348d7d4a12d68cad79404637eddbe7c2f7c8d3c2cd39c0",
-  "src/version.js": "d540d59c1ccc3d9de23c58b109838a56afd1735088af95e3c0f8d6da60049f2a",
+  "src/version.js": "35f163d1ab5620729535bb944ec815ba5222a62281972038c4bce1f1a38cfba3",
   "src/workshopGiftView.js": "6ea791929caaee1e1127cbb23bac061f155bcf24cc6071b78db5d84e5509bb2c",
   "src/workshopService.js": "5c1940a3116e93e8e9376a102621f02ff3a58c9d575491e875420dd4890b9480"
 };
@@ -316,6 +317,7 @@ const PRECACHE_URLS = [
   "src/themeRegistry.js",
   "src/themeTokens.css",
   "src/themedSummonController.js",
+  "src/todayHabitsView.js",
   "src/twilightPresentation.js",
   "src/ui-polish.css",
   "src/ui.js",
