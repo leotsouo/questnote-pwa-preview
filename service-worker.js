@@ -6,7 +6,7 @@
  * 寵物圖片不得加入 App Shell precache
  */
 
-const CACHE_NAME = 'questnote-preview-app-b17d7c169da54a430abd4f94cfefb1b8fdf8d5d55ec6625c4346042279b7c526';
+const CACHE_NAME = 'questnote-preview-app-472a10006cb4d729a4bb090c29d06f75a7e96e742a23de017c00c6230bbb532e';
 const PET_IMAGE_CACHE = 'questnote-preview-pet-images-v1';
 const MAILBOX_RUNTIME_CACHE = 'questnote-preview-mailbox-runtime-v1';
 const MAILBOX_FETCH_TIMEOUT_MS = 7000;
@@ -40,8 +40,8 @@ self.addEventListener('notificationclick', (event) => {
 const BUILD_PROFILE = {
   "schemaVersion": 1,
   "profile": "preview",
-  "artifactId": "b17d7c169da54a430abd4f94cfefb1b8fdf8d5d55ec6625c4346042279b7c526",
-  "sourceCommit": "05693e3212c757064230be0335b4c5d6296bffaf",
+  "artifactId": "472a10006cb4d729a4bb090c29d06f75a7e96e742a23de017c00c6230bbb532e",
+  "sourceCommit": "28c598ec8a335a017f5101c7b60cb9884b02dc9c",
   "scopePath": "/questnote-pwa-preview/",
   "runtimeContentSchema": 1,
   "dbName": "QuestNotePreviewDB",
@@ -84,12 +84,12 @@ const PRECACHE_HASHES = {
   "data/pools.json": "4fd1cdc8674e5592b6b2256603bad59b5bf555650c482237eedb6a86b3867fcc",
   "data/releases/cdfbea0dba172c49de6ffa5ae23fe2646c51ac10188aab4cf58fac504a172348/catalog.json": "cdfbea0dba172c49de6ffa5ae23fe2646c51ac10188aab4cf58fac504a172348",
   "data/titles.json": "318675b79872dfabccc4b8beb99f77eb248a40e5e50bbbd4e4dc24886b3a1398",
-  "index.html": "d0435a49b069ef340d3057b1508077da27a872e57fb9ebd1462680e598ac1135",
+  "index.html": "c981679f7e4eaacdf17c412a5665fed78e95b8cbcb2529a40231c086b650cdac",
   "manifest.webmanifest": "92eebd112db700add8829cda91380b117bcf4f4d91723ea899055ebde22caad0",
   "src/achievementService.js": "25eba10a95247380c424a59dd539b7c0e55b866992a2eb6404ac74d3fb4b0316",
   "src/adventureHandbookService.js": "d9dc8d34fc08a83c0c2f36682698fd4d96ebd0852c8cb0fde161a5a718d065b9",
-  "src/app.js": "1ffc7cfc2c569e8b9a09e1042086b34dad002c9e30c51120e6a4920d808ce934",
-  "src/backupSchema.js": "bf5d4356ba0460870db57f12e140d69cd8ca0f40357d807ddd7e8dec028f5c0b",
+  "src/app.js": "e67f958f35fe4b0b527611746c460aedcf600c944d22f9d143905f0ecccc4a70",
+  "src/backupSchema.js": "1fb16edc82d05c96776d8ac6d19e6dc195d5705457e88c1b0031c6b1605e3ff8",
   "src/backupService.js": "cdf8b2c1bf2c5ac85f83c8f2805c4dce6aeac4f19bf3aa2877dc42b3c67cf42f",
   "src/bond-journey.css": "c5ada471a6ac232974153239c91b6d4628dc5c4decf32b5f256f031f2346ee49",
   "src/bondJourneyController.js": "cfaabae2b18fbf0917cb074e878a11b557801a449a442e71ef9368124aa81805",
@@ -146,7 +146,7 @@ const PRECACHE_HASHES = {
   "src/questIcons.js": "7f9395e0af7db0fda7fa273e793275c94d5b8e3bdd2fb249b726e5f6c2046ad0",
   "src/questService.js": "93e6c875b21a3fb6cf8d0c0ad2ddae2b4307cee870da3b1b92a2a0969977d8a6",
   "src/releaseCatalog.js": "38ac32aedef26d927638ef7413ec78520c0f9d114623a4a61283d488d99cbb4a",
-  "src/releaseProfile.js": "21eedff1d7dd5479d4ab5137a0837ecfd84a1e458ca5ed4f57f89fa281df61a5",
+  "src/releaseProfile.js": "5051ee4c22f369a0209f98511db63dd33bd0a36f6baccec872fe6eea4ca2e6dd",
   "src/reminder-settings.css": "e90f6e75ac50b3fef946c454c4849f3322cd4e0c06c0b10feb718fef60a878b4",
   "src/reminderController.js": "4ba72d19acca52c417445956521d97ce57b3873b1a61924840fdc47b8a9ad5b5",
   "src/reminderRules.js": "fb8939a256305ef880ecebf063d029dc8a1d37a58e330851b2d96ac001ee57bb",
@@ -172,7 +172,7 @@ const PRECACHE_HASHES = {
   "src/updateActivity.js": "a7032e043a14561ad07ab521b649a2bd508aeca6801376066fcab701e3d2b641",
   "src/updateController.js": "e038b05c3fa2e97158cb3a363996e34b10eba3f243dc5284ec540ea0753c93b9",
   "src/updateProtocol.js": "53e770213f0074208c348d7d4a12d68cad79404637eddbe7c2f7c8d3c2cd39c0",
-  "src/version.js": "777199d861731559da3a69de608ff948915be90f7fa81c41e438d0c109740df5",
+  "src/version.js": "e4df26ee60de56e2e0b120adddcab9da194bc3bc2a1720c59bd3b77263abb552",
   "src/workshopGiftView.js": "6ea791929caaee1e1127cbb23bac061f155bcf24cc6071b78db5d84e5509bb2c",
   "src/workshopService.js": "5c1940a3116e93e8e9376a102621f02ff3a58c9d575491e875420dd4890b9480"
 };

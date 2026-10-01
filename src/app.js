@@ -34,6 +34,8 @@ import {
 
   getGachaStats,
 
+  setSelectedPoolId,
+
 } from './gachaService.js';
 
 import {
@@ -538,6 +540,8 @@ async function initApp() {
     await initWallet();
 
     await initGachaStats();
+    // Each App launch starts on standard; later refreshes retain manual selection.
+    await setSelectedPoolId('standard');
 
   await ensurePoolUnlockLegacyBackfillMarked();
 

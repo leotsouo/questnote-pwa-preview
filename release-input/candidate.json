@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
-  "candidateId": "f5ffd7be9bc9c8c8d1cffbef75a2a22cf5042908c8fa98ae4638fc00a9745de4",
+  "candidateId": "c1b379187f0d7b8cf5ccb01647a90344dfea30154eed448b698d1ebff8ee4dcd",
   "releaseReady": false,
   "baselineHash": "d37b7b471b9d3462fca921249029e9b454b5886c09c72926c2b9c6c7fe596f8a",
   "sopVersion": 2,
   "files": {
-    "approvals.json": "1e36f61b5974861cc2b59db2e8ea6c32d6a825a8c8740a279fcc72e79b453c75",
+    "approvals.json": "6bbb782829905c12d35a7604fb94e42c8973c181fc353346ff1fd5235c676a45",
     "assets/pets/pet_n36.png": "c6994d0a0ab86e64220c1228b0a1757fdede37d2df2d3014ed17db040f6bb9d4",
     "assets/pets/pet_n37.png": "c08f25e96e7255fae5551423bc69bc977208cf6dbf4635581b045a3facb30cff",
     "assets/pets/pet_n38.png": "3926a8e7fa898edb8e96b45a9372a297772bbc1b57893f1ca9fe268ed326db97",

@@ -267,7 +267,7 @@ export function validateSnapshotData(data, requiredKeys = SNAPSHOT_KEYS, profile
     const versionParts = String(profile).split('.').map(Number);
     const atLeast = (minor, patch) => versionParts[0] > 3 || (versionParts[0] === 3
       && (versionParts[1] > minor || (versionParts[1] === minor && versionParts[2] >= patch)));
-    const requiredAreas = profile === 'current' || atLeast(5, 2) ? AREA_IDS
+    const requiredAreas = profile === 'current' || atLeast(5, 3) ? AREA_IDS
       : atLeast(4, 18) ? AREA_IDS.slice(0, 6) : AREA_IDS.slice(0, 4);
     for (const id of requiredAreas) if (!Object.hasOwn(value || {}, id)) fail(`${path}.${id}`, '缺少持久化項目');
   };
