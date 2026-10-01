@@ -38,7 +38,7 @@ export function createSwordwildShanheScene(motif = 'summon') {
     <div class="shanhe-scroll"><i></i><i></i></div>
     <div class="shanhe-cloud shanhe-cloud--left"></div><div class="shanhe-cloud shanhe-cloud--right"></div>
     <div class="shanhe-sword-stroke"></div>
-    <div class="shanhe-seals"><span>諾</span><span>俠</span><span>心</span></div>
+    <div class="shanhe-seals"><span>俠</span></div>
     <svg class="shanhe-motif" viewBox="0 0 1000 1000" focusable="false">
       <g class="shanhe-wing" fill="#c9b17d" stroke="#f4e3b5" stroke-width="2">
         <path d="M498 455Q378 374 207 192l52 155-149-69 129 145-169-30 177 103-158 5 189 59-112 35 197-5 123-75Z"/>

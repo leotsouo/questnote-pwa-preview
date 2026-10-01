@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "artifactId": "f9bf15eabb426db00c85e0eabbf72b3afd9d80a5c1fe84684efccdbc956f000f",
-  "sourceCommit": "d7f18e724b25c38fa2cad97fe6835a05435f2ee5",
+  "artifactId": "55d97da0030025cf816497f241e15ad3eb6b30dd1c301315aa603d334ce0d508",
+  "sourceCommit": "87b72364f72f395a37469726e98cab0e0ab5b3a8",
   "profile": {
     "schemaVersion": 1,
     "profile": "preview",
-    "artifactId": "f9bf15eabb426db00c85e0eabbf72b3afd9d80a5c1fe84684efccdbc956f000f",
-    "sourceCommit": "d7f18e724b25c38fa2cad97fe6835a05435f2ee5",
+    "artifactId": "55d97da0030025cf816497f241e15ad3eb6b30dd1c301315aa603d334ce0d508",
+    "sourceCommit": "87b72364f72f395a37469726e98cab0e0ab5b3a8",
     "scopePath": "/questnote-pwa-preview/",
     "runtimeContentSchema": 1,
     "dbName": "QuestNotePreviewDB",
@@ -411,7 +411,7 @@
     "data/titles.json": "318675b79872dfabccc4b8beb99f77eb248a40e5e50bbbd4e4dc24886b3a1398",
     "index.html": "23eb907e4ae3b6eca8aa14b7608a040c4bd4b7823c51e3c7cb0b40466af25fae",
     "manifest.webmanifest": "9045e56d30d015634a8d68a5b6b3cd60d813c500150fea0d48b08b4eefcb45ba",
-    "service-worker.js": "983e9b26cbe367e430d2fd8056372b8e43c8ce6e9dbc2509d9c338188d5b7cae",
+    "service-worker.js": "6d9060f98da86e6c085079dc7f4ab99d3097859a4ddfb1bdf94297eace7e634b",
     "src/achievementService.js": "25eba10a95247380c424a59dd539b7c0e55b866992a2eb6404ac74d3fb4b0316",
     "src/adventureHandbookService.js": "d9dc8d34fc08a83c0c2f36682698fd4d96ebd0852c8cb0fde161a5a718d065b9",
     "src/app.js": "e67f958f35fe4b0b527611746c460aedcf600c944d22f9d143905f0ecccc4a70",
@@ -483,7 +483,7 @@
     "src/summon-polish.css": "0d3cbae026034e11034be8ecabc6ff9613a461fbaee616376a26f90f4b924bda",
     "src/summonRevealService.js": "cfdbc7d48699373b7a1644dc1fbe9bd01f7134a83c62e013620d0aa91ee705b0",
     "src/swordwild-shanhe.css": "366ac697dd358a9d277cad9a49c97e628394255d2c78305dc66503b56af24852",
-    "src/swordwildShanheScene.js": "6047edfb33b505b1877355d299340f8511e74cc0cc509fc50ea924fe753554c6",
+    "src/swordwildShanheScene.js": "3c723ec4be07478a5125de310b677380223f2c55e391d50b29cb936fde07fada",
     "src/taskFilterService.js": "687858edc36119afcb388fc3fd75ebd058d0a93117da42740c8a1f18d4b00471",
     "src/taskMigration.js": "67055f714b759d43e1a333ce7d039619eca3537f5e83ce46ee76a0d4692f25b1",
     "src/taskService.js": "e12190eb4cf777b79e49d327547544be53af707e1237928b8d7c93c040ceca84",
@@ -2050,7 +2050,7 @@
       "bytes": 6119
     },
     "index.html": {
-      "sha256": "f2542af3a09a859934c6a0d37388e40447d5e80ab3d9bd680d75b06f44f31db4",
+      "sha256": "df0ef66a8d802dbf7e7787c4a8b29fb40c6b3bcd425bc46cee4309d1673e782c",
       "bytes": 58504
     },
     "manifest.webmanifest": {
@@ -2090,8 +2090,8 @@
       "bytes": 9744
     },
     "service-worker.js": {
-      "sha256": "06296fb7bb044a1b5c4e7982b2a60d43ae23f08b17b83d3ea369b86d1004e302",
-      "bytes": 30069
+      "sha256": "26c1bfe5c790d6999d496a93c6375a161327c287756c058c896ac7f902b8f4f5",
+      "bytes": 30068
     },
     "src/achievementService.js": {
       "sha256": "25eba10a95247380c424a59dd539b7c0e55b866992a2eb6404ac74d3fb4b0316",
@@ -2334,7 +2334,7 @@
       "bytes": 4727
     },
     "src/releaseProfile.js": {
-      "sha256": "2f7f8f568be9c0b415be1c98c803670aa3d32a9aec8dde04d90d2a84d27fa1d6",
+      "sha256": "abcf4eafdf0d2ce8215665bd9db67754c19c43497cf0240cf5ea25b4807ddfbe",
       "bytes": 631
     },
     "src/reminder-settings.css": {
@@ -2378,8 +2378,8 @@
       "bytes": 13556
     },
     "src/swordwildShanheScene.js": {
-      "sha256": "6047edfb33b505b1877355d299340f8511e74cc0cc509fc50ea924fe753554c6",
-      "bytes": 3827
+      "sha256": "3c723ec4be07478a5125de310b677380223f2c55e391d50b29cb936fde07fada",
+      "bytes": 3795
     },
     "src/taskFilterService.js": {
       "sha256": "687858edc36119afcb388fc3fd75ebd058d0a93117da42740c8a1f18d4b00471",
@@ -2446,7 +2446,7 @@
       "bytes": 695
     },
     "src/version.js": {
-      "sha256": "425d8e95e1ee8d236113e9c2e3bc255c1325d11de964d8c327da3b082a14f78c",
+      "sha256": "a2cd1a9cf53f393767508380458b76b94bbf0da78af552e57c615292c8ca7d70",
       "bytes": 1111
     },
     "src/workshopGiftView.js": {
