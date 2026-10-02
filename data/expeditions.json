@@ -235,6 +235,29 @@
         },
         "bondExp": 8
       }
+    },
+    {
+      "id": "lionheart_city",
+      "name": "獅心城",
+      "description": "高崖與試飛塔隔城對峙。循著銅門、培育溫室與逆造工坊，見證人們模仿完美生命、劍走偏鋒追逐神的代價。回收工坊提供可用古代齒輪。",
+      "unlock": {
+        "type": "default"
+      },
+      "energyCost": 5,
+      "durationMinutes": 60,
+      "rewards": {
+        "stardust": {
+          "min": 30,
+          "max": 60
+        },
+        "material": {
+          "id": "machine_part",
+          "name": "古代齒輪",
+          "min": 1,
+          "max": 2
+        },
+        "bondExp": 10
+      }
     }
   ]
 }

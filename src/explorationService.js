@@ -6,8 +6,8 @@
  *
  * 探索度與領獎在同一筆交易內更新，不在派遣或倒數中增加。
  */
-import { dbGet, dbPut, STORES } from './db.js';
-import { applyRewardBundle } from './rewardService.js';
+import { dbGet, dbPut, dbMutateRecords, STORES } from './db.js';
+import { normalizeWallet } from './rewardService.js';
 import { MATERIAL_LABELS } from './expeditionService.js';
 
 const EXPLORATION_PROGRESS_KEY = 'explorationProgress';
@@ -25,6 +25,11 @@ const REWARD_ITEM_LABELS = {
 
 /** 地區故事文字（達到對應探索度後解鎖顯示） */
 export const AREA_STORIES = {
+  lionheart_city_story_10: "獅心城銅門上的浮雕只有天然羽翼與獅身。居民說，天律之冕・格里芬不需要任何人工增強，牠的血肉、感知與魔法本就完整。學院把每一次展翼都記進冊頁，城名也隨著這份崇敬流傳。",
+  lionheart_city_story_25: "逆造工坊的舊筆記起初只記羽翼曲線，後來卻添上器官接口、壓力管線與人工骨架。人們不再滿足於觀察完美；他們要讓血肉跨過自身的限制。校準鴞說，那是一條追逐神的道路，盤根龜卻看見溫室裡被忽略的自然幼苗。",
+  lionheart_city_story_50: "培育室的紀錄留下第一次自主呼吸：獅首奇美拉的胸腹起伏，人工器官隨之運作，機械翼面一節節張開。牠看向牆上的格里芬圖譜，沒有等待下一道口令。工匠曾想重現原型，眼前的生命卻已開始要求自己的名字與選擇。",
+  lionheart_city_story_75: "試飛塔的蒸汽越過城牆，格里芬從高崖迎風而來。天然巨翼收束乱流，奇美拉則以人工翼架強行突破風壓。第一次交鋒撕開了城市的共識：格里芬拒絕逆造的道路，奇美拉拒絕低頭。工坊與學院的爭論，從此延伸到每條街道。",
+  lionheart_city_story_100: "街道修好了，高崖與試飛塔卻仍隔城對峙。格里芬沒有接納人工造生，奇美拉也沒有放棄超越原型。獅心城保留下研究紀錄，讓後來者看見人們仰望完美、又向完美露齒的每一步。探索結束，這場衝突並未結束。",
   mist_forest_story_10: '你們在森林深處發現一座被苔蘚覆蓋的古老石碑，上面刻著早已模糊的召喚符文。',
   lava_rift_story_10: '裂谷邊緣傳來低沉的轟鳴聲，像是地底火脈仍在呼吸。',
   machine_ruins_story_10: '古老齒輪緩慢轉動，彷彿這座遺跡從未真正沉睡。',
@@ -43,6 +48,69 @@ export const AREA_STORIES = {
  * 每個已登錄地區都保留探索進度與里程碑。
  */
 export const AREA_EXPLORATION_DEFS = {
+  lionheart_city: {
+    "areaId": "lionheart_city",
+    "name": "獅心城",
+    "increment": 4,
+    "milestones": [
+      {
+        "percent": 10,
+        "title": "完美的尺度",
+        "description": "獅心城銅門上的浮雕只有天然羽翼與獅身。居民說，天律之冕・格里芬不需要任何人工增強，牠的血肉、感知與魔法本就完整。學院把每一次展翼都記進冊頁，城名也隨著這份崇敬流傳。",
+        "reward": {
+          "stardust": 30
+        },
+        "storyId": "lionheart_city_story_10"
+      },
+      {
+        "percent": 25,
+        "title": "逆造工坊",
+        "description": "逆造工坊的舊筆記起初只記羽翼曲線，後來卻添上器官接口、壓力管線與人工骨架。人們不再滿足於觀察完美；他們要讓血肉跨過自身的限制。校準鴞說，那是一條追逐神的道路，盤根龜卻看見溫室裡被忽略的自然幼苗。",
+        "reward": {
+          "stardust": 50,
+          "materials": {
+            "machine_part": 1
+          }
+        },
+        "storyId": "lionheart_city_story_25"
+      },
+      {
+        "percent": 50,
+        "title": "第一次呼吸",
+        "description": "培育室的紀錄留下第一次自主呼吸：獅首奇美拉的胸腹起伏，人工器官隨之運作，機械翼面一節節張開。牠看向牆上的格里芬圖譜，沒有等待下一道口令。工匠曾想重現原型，眼前的生命卻已開始要求自己的名字與選擇。",
+        "reward": {
+          "stardust": 80,
+          "materials": {
+            "machine_part": 2
+          }
+        },
+        "storyId": "lionheart_city_story_50"
+      },
+      {
+        "percent": 75,
+        "title": "越界試飛",
+        "description": "試飛塔的蒸汽越過城牆，格里芬從高崖迎風而來。天然巨翼收束乱流，奇美拉則以人工翼架強行突破風壓。第一次交鋒撕開了城市的共識：格里芬拒絕逆造的道路，奇美拉拒絕低頭。工坊與學院的爭論，從此延伸到每條街道。",
+        "reward": {
+          "stardust": 120,
+          "materials": {
+            "machine_part": 2
+          }
+        },
+        "storyId": "lionheart_city_story_75"
+      },
+      {
+        "percent": 100,
+        "title": "未竟的對峙",
+        "description": "街道修好了，高崖與試飛塔卻仍隔城對峙。格里芬沒有接納人工造生，奇美拉也沒有放棄超越原型。獅心城保留下研究紀錄，讓後來者看見人們仰望完美、又向完美露齒的每一步。探索結束，這場衝突並未結束。",
+        "reward": {
+          "stardust": 200,
+          "badgeId": "badge_lionheart_witness",
+          "title": "獅心城見證者"
+        },
+        "storyId": "lionheart_city_story_100"
+      }
+    ]
+  },
   mist_forest: {
     areaId: 'mist_forest',
     name: '迷霧森林',
@@ -238,6 +306,7 @@ export const EXPLORATION_AREA_IDS = Object.keys(AREA_EXPLORATION_DEFS);
 
 /** 徽章顯示名稱（以里程碑 title 為準，這裡提供備援對照） */
 const BADGE_LABELS = {
+  badge_lionheart_witness: '逆造見證者',
   badge_mist_forest_50: '森林巡行徽章',
   badge_mist_forest_100: '迷霧森林完成徽章',
   badge_lava_rift_50: '火脈行者徽章',
@@ -468,48 +537,37 @@ export async function claimExplorationMilestone(areaId, milestonePercent) {
   const milestone = def.milestones.find((m) => m.percent === percent);
   if (!milestone) return { success: false, error: '里程碑不存在' };
 
-  const ep = await getExplorationProgress();
-  const area = ep.areas[areaId];
-
-  if (area.progress < percent) {
-    return { success: false, error: '尚未達到此里程碑' };
-  }
-  if (area.claimedMilestones.includes(percent)) {
-    return { success: false, error: '獎勵已領取' };
-  }
-
-  const reward = milestone.reward || {};
-
   try {
-    await applyRewardBundle({
-      stardust: reward.stardust,
-      materials: reward.materials,
-      items: reward.items,
+    return await dbMutateRecords([
+      { store: STORES.META, key: EXPLORATION_PROGRESS_KEY },
+      { store: STORES.META, key: 'wallet' },
+      { store: STORES.META, key: 'inventory' },
+    ], ([epRaw, walletRaw, inventoryRaw]) => {
+      const ep = normalizeExplorationProgress(epRaw);
+      const area = ep.areas[areaId];
+      if (area.progress < percent) return { puts: [], result: { success: false, error: '尚未達到此里程碑' } };
+      if (area.claimedMilestones.includes(percent)) return { puts: [], result: { success: false, error: '獎勵已領取' } };
+      const reward = milestone.reward || {};
+      const wallet = normalizeWallet(walletRaw);
+      const inventory = { ...inventoryRaw, key: 'inventory', items: { ...(inventoryRaw?.items || {}) }, itemUsageLogs: { ...(inventoryRaw?.itemUsageLogs || {}) } };
+      const add = (current, amount) => {
+        const value = (current || 0) + (amount || 0);
+        if (!Number.isSafeInteger(value) || value < 0) throw new Error('獎勵數值需要檢查，原始紀錄已保留。');
+        return value;
+      };
+      wallet.stardust = add(wallet.stardust, reward.stardust);
+      for (const [id, amount] of Object.entries(reward.materials || {})) wallet.materials[id] = add(wallet.materials[id], amount);
+      for (const [id, amount] of Object.entries(reward.items || {})) inventory.items[id] = add(inventory.items[id], amount);
+      if (reward.title && !ep.unlockedTitles.includes(reward.title)) ep.unlockedTitles.push(reward.title);
+      if (reward.badgeId && !ep.unlockedBadges.includes(reward.badgeId)) ep.unlockedBadges.push(reward.badgeId);
+      area.claimedMilestones = [...area.claimedMilestones, percent].sort((a, b) => a - b);
+      ep.stats.totalMilestonesClaimed += 1;
+      ep.stats.lastUpdatedAt = new Date().toISOString();
+      return { puts: [{ store: STORES.META, value: ep }, { store: STORES.META, value: wallet },
+        ...(Object.keys(reward.items || {}).length ? [{ store: STORES.META, value: inventory }] : [])],
+      result: { success: true, milestone, reward, rewardText: formatMilestoneReward(reward) } };
     });
-  } catch (err) {
-    return { success: false, error: err?.message || '獎勵發放失敗' };
-  }
-
-  // 記錄稱號與徽章（不改動既有稱號 / 成就系統，獨立儲存於 explorationProgress）
-  if (reward.title && !ep.unlockedTitles.includes(reward.title)) {
-    ep.unlockedTitles.push(reward.title);
-  }
-  if (reward.badgeId && !ep.unlockedBadges.includes(reward.badgeId)) {
-    ep.unlockedBadges.push(reward.badgeId);
-  }
-
-  area.claimedMilestones = [...new Set([...area.claimedMilestones, percent])].sort((a, b) => a - b);
-  ep.stats.totalMilestonesClaimed = toSafeInt(ep.stats.totalMilestonesClaimed) + 1;
-  ep.stats.lastUpdatedAt = new Date().toISOString();
-
-  await dbPut(STORES.META, ep);
-
-  return {
-    success: true,
-    milestone,
-    reward,
-    rewardText: formatMilestoneReward(reward),
-  };
+  } catch (error) { return { success: false, error: error?.message || '獎勵發放失敗' }; }
 }
 
 /** 格式化里程碑獎勵文字 */

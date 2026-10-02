@@ -9,6 +9,7 @@
  * 5. 主動畫略過 ≠ SSR+ queue 略過（由呼叫端區分；本模組只處理 reveal queue skip）。
  */
 import { createSwordwildShanheScene } from './swordwildShanheScene.js';
+import { createLionheartScene } from './lionheartScene.js';
 import { getPetImageSrc, preloadPetImage, delay } from './imagePreloadService.js';
 import { resolvePetRevealKey, resolvePetRevealPresentation } from './poolContentContract.js';
 
@@ -238,6 +239,7 @@ function buildFallingPetalsHtml(reduceMotion) {
 }
 
 function themeClassName(theme) {
+  if (['lionheart_griffin', 'lionheart_chimera'].includes(theme)) return 'is-ur is-lionheart-reveal';
   if (['sword_eagle', 'sword_toad', 'sword_ape'].includes(theme)) return 'is-ur is-shanhe-reveal';
   if (theme === 'caramel') return 'is-ur is-caramel-ur';
   if (theme === 'cream') return 'is-ur is-cream-ur';
@@ -254,7 +256,8 @@ function themeCaption(theme, pet) {
   }).caption;
 }
 
-function durationForTheme(theme, reduce) {
+function durationForTheme(theme, reduce, presentationKey) {
+  if (!reduce && (presentationKey === 'lionheart_inverse_oath' || ['lionheart_griffin', 'lionheart_chimera'].includes(theme))) return theme === 'ssr' ? 2500 : 4500;
   if (reduce) {
     return theme === 'ssr' ? DURATION.reducedSsr : DURATION.reducedUr;
   }
@@ -329,6 +332,11 @@ export function createSummonRevealOverlay({ rarity, pet, reduceMotion, theme, pr
   const progressEl = overlay.querySelector('[data-role="progress"]');
   if (progressEl && progressText) progressEl.textContent = progressText;
 
+  if (!fallback && (presentationKey === 'lionheart_inverse_oath' || ['lionheart_griffin', 'lionheart_chimera'].includes(resolvedTheme))) {
+    const motif = resolvedTheme === 'lionheart_griffin' ? 'griffin' : resolvedTheme === 'lionheart_chimera' ? 'chimera' : pet?.expeditionSpecialty === 'gatherer' ? 'roots' : 'bridge';
+    overlay.classList.add('is-lionheart-reveal');
+    overlay.querySelector('.summon-reveal-bg').replaceWith(createLionheartScene(motif));
+  }
   const shanheMotifs = { sword_eagle: 'eagle', sword_toad: 'toad', sword_ape: 'ape' };
   if (!fallback && (presentationKey === 'swordwild_shanhe' || Object.hasOwn(shanheMotifs, resolvedTheme))) {
     overlay.classList.add('is-shanhe-reveal');
@@ -509,7 +517,7 @@ export async function playSummonReveal({
 
     const duration = useFallback
       ? DURATION.fallbackReady
-      : durationForTheme(resolvedTheme, reduce);
+      : durationForTheme(resolvedTheme, reduce, presentationKey);
 
     await new Promise((resolve) => {
       let completed = false;
@@ -587,6 +595,9 @@ export async function playSummonReveal({
       };
 
       const onAnimationEnd = () => {
+        // Lionheart has a staged wing-to-card sequence. A decorative child ending
+        // must not reveal the card early or shorten the bounded presentation.
+        if (overlay.classList.contains('is-lionheart-reveal')) return;
         // 僅作就緒輔助；真正關閉仍需使用者或略過，且冪等
         if (!ready) enterReady();
       };

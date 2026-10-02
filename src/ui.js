@@ -199,6 +199,7 @@ import {
   useBondItem,
   getCraftingPreview,
   getMaterialInfo,
+  getMaterialSourceLabel,
   getCraftableInfo,
   getMaterialName,
   formatItemEffect,
@@ -6637,6 +6638,7 @@ function renderExpeditionView() {
 }
 
 function expeditionAreaImageUrl(areaId) {
+  if (areaId === 'lionheart_city') return './assets/expeditions/lionheart_city.svg';
   return `./assets/expeditions/${encodeURIComponent(areaId)}.webp`;
 }
 
@@ -7794,7 +7796,7 @@ function renderWorkshopView() {
                 </div>
                 <p class="workshop-material-card__qty">數量：<strong>${mat.amount || 0}</strong></p>
                 <p class="workshop-material-card__desc">${escapeHtml(mat.description || '')}</p>
-                ${mat.sourceArea ? `<p class="workshop-material-card__source">來源：${escapeHtml(mat.sourceArea)}</p>` : ''}
+                ${getMaterialSourceLabel(mat, state.expeditionAreas) ? `<p class="workshop-material-card__source">來源：${escapeHtml(getMaterialSourceLabel(mat, state.expeditionAreas))}</p>` : ''}
                 ${tags.length ? `<div class="workshop-tag-row">${tags.map((t) => `<span class="workshop-tag">${escapeHtml(t)}</span>`).join('')}</div>` : ''}
               </article>`;
           })
@@ -7831,7 +7833,7 @@ function renderWorkshopView() {
                 <p class="workshop-craft-card__theme">主題：${escapeHtml(getGiftThemeLabel(craftable))}</p>
                 <p class="workshop-craft-card__desc">${escapeHtml(craftable.description || '')}</p>
                 <p class="workshop-craft-card__affinity">${craftable.type === 'favorite_bond_item' ? '已擁有 ' + (state.enrichedCollection || []).filter((pet) => pet.owned && getFavoriteBonus(craftable, pet).isFavorite).length + ' 位喜歡它的夥伴' : '通用禮物，所有夥伴效果相同'}</p>
-                <p class="workshop-craft-card__source">材料來源：${escapeHtml([...new Set(Object.keys(craftable.recipe || {}).map((id) => getMaterialInfo(id).sourceArea).filter(Boolean))].join('、'))}</p>
+                <p class="workshop-craft-card__source">材料來源：${escapeHtml([...new Set(Object.keys(craftable.recipe || {}).map((id) => getMaterialSourceLabel(getMaterialInfo(id), state.expeditionAreas)).filter(Boolean))].join('、'))}</p>
                 <ul class="workshop-recipe-list">
                   ${preview.materials
                     .map(

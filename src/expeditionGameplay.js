@@ -18,6 +18,7 @@ const ELEMENT_ROLES = [
 ];
 const RARITY_BONUS = { N: 0, R: 0.02, SR: 0.04, SSR: 0.06, UR: 0.08 };
 const AREA_DISCOVERIES = {
+  lionheart_city: '封存試驗紀錄指出，人工翼設計已從模仿格里芬轉向突破格里芬。',
   mist_forest: '霧中露出一條通往古石碑的小路。',
   lava_rift: '火脈短暫平靜，岩壁顯出新的熔岩紋路。',
   machine_ruins: '沉睡的齒輪轉動，露出封存的資料室。',
@@ -29,7 +30,8 @@ const AREA_DISCOVERIES = {
 
 export function getPetSpecialty(pet) {
   const text = [pet.element, pet.speciesType, pet.name, ...(pet.poolTags || [])].join(' ').toLowerCase();
-  const role = ELEMENT_ROLES.find((entry) => entry.words.some((word) => text.includes(word)))?.role
+  const explicitRole = Object.hasOwn(SPECIALTY_LABELS, pet.expeditionSpecialty) ? pet.expeditionSpecialty : null;
+  const role = explicitRole || ELEMENT_ROLES.find((entry) => entry.words.some((word) => text.includes(word)))?.role
     || ['scout', 'gatherer', 'companion', 'scholar', 'guardian'][hashText(pet.id || '') % 5];
   const stars = Math.max(1, Math.min(5, Number(pet.stars) || 1));
   return { role, label: SPECIALTY_LABELS[role], stars, level: stars,
@@ -97,7 +99,7 @@ export function planExpeditionResult(area, pets, objective = 'explore', random =
   const event = discovered
     ? { id: `${area.id}_${objective}_${specialties[0].role}`, title: '隊伍的額外發現',
       text: `${pets.map((p) => p.name).join('、')}${rolePower > 0 ? `發揮${SPECIALTY_LABELS[matchingRole]}專長，` : '合力前行，'}${AREA_DISCOVERIES[area.id] || '發現了新的線索。'}` }
-    : { id: `${area.id}_steady`, title: '平安歸來', text: '隊伍沿著熟悉的路線前進，帶回了穩定收穫。' };
+    : { id: `${area.id}_steady`, title: '平安歸來', text: area.id === 'lionheart_city' ? '隊伍巡查獅心城公共管線，帶回回收零件；研究區的壓力仍在升高。' : '隊伍沿著熟悉的路線前進，帶回了穩定收穫。' };
   const eventMaterial = discovered && (objective === 'gather' || scholarPower > 0) ? 1 : 0;
   return {
     rewards: { stardust: baseStardust + bonusStardust, baseStardust, bonusStardust,

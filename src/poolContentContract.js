@@ -9,10 +9,11 @@ export const POOL_THEME_REGISTRY = Object.freeze({
   glacier_arrival: Object.freeze({ cssTheme: 'glacier_arrival' }),
   honeylight_sugar: Object.freeze({ cssTheme: 'honeylight_sugar' }),
   swordwild_shanhe: Object.freeze({ cssTheme: 'swordwild_shanhe' }),
+  lionheart_inverse_oath: Object.freeze({ cssTheme: 'lionheart_inverse_oath' }),
 });
-export const POOL_SUMMON_REGISTRY = Object.freeze({ none: true, dream_bloom: true, glacier_arrival: true, honeylight_sugar: true, swordwild_shanhe: true });
+export const POOL_SUMMON_REGISTRY = Object.freeze({ none: true, dream_bloom: true, glacier_arrival: true, honeylight_sugar: true, swordwild_shanhe: true, lionheart_inverse_oath: true });
 export const POOL_UNLOCK_REGISTRY = Object.freeze({ pool_unlock: true, morning_garden_unlock: true });
-export const PET_REVEAL_REGISTRY = Object.freeze({ ssr: true, ur: true, moon: true, petal: true, caramel: true, cream: true, sword_eagle: true, sword_toad: true, sword_ape: true });
+export const PET_REVEAL_REGISTRY = Object.freeze({ ssr: true, ur: true, moon: true, petal: true, caramel: true, cream: true, sword_eagle: true, sword_toad: true, sword_ape: true, lionheart_griffin: true, lionheart_chimera: true });
 
 const TOKEN = /^[a-z][a-z0-9_]*$/;
 const PET_ID = /^pet_(?:(?:n|r|sr|ssr|ur)\d{2,}|sp\d{2,})$/;
@@ -303,6 +304,7 @@ export function validatePoolContent(poolsData, { pets, previousPoolsData } = {})
     if (!petId(pet?.id)) errors.push(issue('POOL_PET_ID_INVALID', 'Invalid pet ID', `pets[${index}].id`));
     if (petIds.has(pet?.id)) errors.push(issue('POOL_PET_ID_DUPLICATE', 'Duplicate pet ID', `pets[${index}].id`));
     petIds.add(pet?.id);
+    if (pet?.expeditionSpecialty !== undefined && !['scout', 'gatherer', 'companion', 'scholar', 'guardian'].includes(pet.expeditionSpecialty)) errors.push(issue('PET_SPECIALTY_INVALID', 'Unknown explicit expedition specialty', `pets[${index}].expeditionSpecialty`));
     checkList(pet?.poolTags, `pets[${index}].poolTags`, errors, token, { required: true });
     if (!POOL_RARITIES.includes(pet?.rarity)) errors.push(issue('POOL_PET_RARITY', 'Invalid pet rarity', `pets[${index}].rarity`));
     if (pet?.presentation !== undefined && !record(pet.presentation)) errors.push(issue('PET_PRESENTATION_INVALID', 'Expected an object', `pets[${index}].presentation`));

@@ -222,6 +222,43 @@
     ],
     "pet_ur18": [
       "nature"
+    ],
+    "pet_n39": [
+      "machine"
+    ],
+    "pet_n40": [
+      "nature"
+    ],
+    "pet_r41": [
+      "machine"
+    ],
+    "pet_r42": [
+      "frost"
+    ],
+    "pet_r43": [
+      "fire"
+    ],
+    "pet_sr35": [
+      "machine"
+    ],
+    "pet_sr36": [
+      "frost"
+    ],
+    "pet_sr37": [
+      "fire"
+    ],
+    "pet_ssr25": [
+      "machine"
+    ],
+    "pet_ssr26": [
+      "nature"
+    ],
+    "pet_ur19": [
+      "nature"
+    ],
+    "pet_ur20": [
+      "fire",
+      "machine"
     ]
   }
 }

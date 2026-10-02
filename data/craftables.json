@@ -233,5 +233,30 @@
       "bond_item",
       "swordwild_shanhe_v3"
     ]
+  },
+  {
+    "id": "item_lionheart_gear_crisp",
+    "name": "爐香齒輪酥",
+    "type": "favorite_bond_item",
+    "rarity": "SR",
+    "description": "工坊以齒輪靈質塑形、爐熱烘焙而成的可食用酥點，適合喜歡機械與火系禮物的夥伴。",
+    "enabled": true,
+    "favoriteTags": [
+      "machine",
+      "fire"
+    ],
+    "effect": {
+      "bondExp": 75,
+      "favoriteBonusBondExp": 150
+    },
+    "recipe": {
+      "machine_part": 3,
+      "forest_leaf": 4,
+      "lava_core": 1
+    },
+    "futureTags": [
+      "bond_item",
+      "lionheart_inverse_oath"
+    ]
   }
 ]

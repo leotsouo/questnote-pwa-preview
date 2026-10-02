@@ -8,6 +8,7 @@
  */
 import { getPetImageSrc, preloadImage, delay } from './imagePreloadService.js';
 import { createSwordwildShanheScene, swordwildPreludeDurations } from './swordwildShanheScene.js';
+import { createLionheartScene, lionheartPreludeDurations } from './lionheartScene.js';
 import { createGlacierArrivalScene } from './glacierArrivalScene.js';
 import { createHoneylightSugarScene, sugarPreludeDurations } from './honeylightSugarScene.js';
 import {
@@ -82,7 +83,7 @@ function setState(next, liveEl) {
   if (liveEl && (next === 'rarityOmen' || next === 'revealing' || next === 'summary' || next === 'complete')) {
     const labels = {
       rarityOmen: '稀有度預兆顯現',
-      revealing: activeOverlay?.dataset.animation === 'swordwild_shanhe' ? '山河夥伴赴約' : activeOverlay?.dataset.animation === 'honeylight_sugar' ? '糖庭夥伴登場' : activeOverlay?.dataset.animation === 'glacier_arrival' ? '遠航夥伴抵達' : '夥伴甦醒中',
+      revealing: activeOverlay?.dataset.animation === 'lionheart_inverse_oath' ? '獅心城夥伴登場' : activeOverlay?.dataset.animation === 'swordwild_shanhe' ? '山河夥伴赴約' : activeOverlay?.dataset.animation === 'honeylight_sugar' ? '糖庭夥伴登場' : activeOverlay?.dataset.animation === 'glacier_arrival' ? '遠航夥伴抵達' : '夥伴甦醒中',
       summary: '召喚結果整理',
       complete: '召喚演出結束',
     };
@@ -241,8 +242,8 @@ function createOverlay({ mode, reduceMotion, highestRarity, poolName, animationK
     </div>
   `;
 
-  if (glacier || animationKey === 'honeylight_sugar' || animationKey === 'swordwild_shanhe') {
-    overlay.querySelector('.dream-bloom-bg').replaceWith(animationKey === 'swordwild_shanhe' ? createSwordwildShanheScene() : glacier ? createGlacierArrivalScene() : createHoneylightSugarScene());
+  if (glacier || animationKey === 'honeylight_sugar' || animationKey === 'swordwild_shanhe' || animationKey === 'lionheart_inverse_oath') {
+    overlay.querySelector('.dream-bloom-bg').replaceWith(animationKey === 'lionheart_inverse_oath' ? createLionheartScene() : animationKey === 'swordwild_shanhe' ? createSwordwildShanheScene() : glacier ? createGlacierArrivalScene() : createHoneylightSugarScene());
     overlay.querySelectorAll('[data-role="dust"], [data-role="ripple"], [data-role="buds"], [data-role="crest"]').forEach((node) => node.remove());
   }
 
@@ -358,7 +359,7 @@ function setupBuds(container, count, reduceMotion) {
  */
 export async function playThemedSummon(options = {}) {
   const animationKey = options.animationKey || 'dream_bloom';
-  if (!['dream_bloom', 'glacier_arrival', 'honeylight_sugar', 'swordwild_shanhe'].includes(animationKey)) {
+  if (!['dream_bloom', 'glacier_arrival', 'honeylight_sugar', 'swordwild_shanhe', 'lionheart_inverse_oath'].includes(animationKey)) {
     return { ok: false, fallback: true, state: STATES.FALLBACK };
   }
   const results = Array.isArray(options.results) ? options.results.slice() : [];
@@ -375,7 +376,8 @@ export async function playThemedSummon(options = {}) {
   const highestRarity = getHighestRarity(results);
   const sugar = animationKey === 'honeylight_sugar';
   const swordwild = animationKey === 'swordwild_shanhe';
-  const sugarMs = swordwild ? swordwildPreludeDurations(highestRarity, mode, reduce) : sugarPreludeDurations(highestRarity, mode, reduce);
+  const lionheart = animationKey === 'lionheart_inverse_oath';
+  const sugarMs = lionheart ? lionheartPreludeDurations(reduce) : swordwild ? swordwildPreludeDurations(highestRarity, mode, reduce) : sugarPreludeDurations(highestRarity, mode, reduce);
   const previousFocus = document.activeElement;
   const controller = new AbortController();
   activeAbort = controller;
@@ -488,14 +490,14 @@ export async function playThemedSummon(options = {}) {
     if (!options.skipRitual) {
       await runPhase(
         STATES.DREAM_DUST,
-        (sugar || swordwild) ? sugarMs[0] : reduce ? PHASE_MS.dreamDust.reduced : PHASE_MS.dreamDust[mode],
+        (sugar || swordwild || lionheart) ? sugarMs[0] : reduce ? PHASE_MS.dreamDust.reduced : PHASE_MS.dreamDust[mode],
       );
       await runPhase(
         STATES.MIRROR_RIPPLE,
-        (sugar || swordwild) ? sugarMs[1] : reduce ? PHASE_MS.mirrorRipple.reduced : PHASE_MS.mirrorRipple[mode],
+        (sugar || swordwild || lionheart) ? sugarMs[1] : reduce ? PHASE_MS.mirrorRipple.reduced : PHASE_MS.mirrorRipple[mode],
       );
-      await runPhase(STATES.RARITY_OMEN, (sugar || swordwild) ? sugarMs[2] : omenMs);
-      await runPhase(STATES.BLOOM, (sugar || swordwild) ? sugarMs[3] : bloomMs);
+      await runPhase(STATES.RARITY_OMEN, (sugar || swordwild || lionheart) ? sugarMs[2] : omenMs);
+      await runPhase(STATES.BLOOM, (sugar || swordwild || lionheart) ? sugarMs[3] : bloomMs);
     } else {
       introSkipped = true;
     }
@@ -533,8 +535,8 @@ export async function playThemedSummon(options = {}) {
         const eyebrow = overlay.querySelector('[data-role="summary-eyebrow"]');
         const title = overlay.querySelector('[data-role="summary-title"]');
         const grid = overlay.querySelector('[data-role="summary-grid"]');
-        if (eyebrow) eyebrow.textContent = swordwild ? '十連山河赴約' : sugar ? '十連糖庭邀請' : animationKey === 'glacier_arrival' ? '十連遠航契約' : '十連夢境花印';
-        if (title) title.textContent = swordwild ? '同行者已踏上古道' : sugar ? '甜蜜夥伴已到來' : animationKey === 'glacier_arrival' ? '遠航夥伴已抵達' : '沉睡生命已甦醒';
+        if (eyebrow) eyebrow.textContent = lionheart ? '十連逆造之誓' : swordwild ? '十連山河赴約' : sugar ? '十連糖庭邀請' : animationKey === 'glacier_arrival' ? '十連遠航契約' : '十連夢境花印';
+        if (title) title.textContent = lionheart ? '獅心城的命運已交會' : swordwild ? '同行者已踏上古道' : sugar ? '甜蜜夥伴已到來' : animationKey === 'glacier_arrival' ? '遠航夥伴已抵達' : '沉睡生命已甦醒';
         if (grid) buildSummaryCards(grid, results);
       }
     }
@@ -626,13 +628,14 @@ const DEBUT_DUST_COUNT = { full: 8, short: 3, reduced: 0 };
  * @param {{ poolName?: string, presentation?: object, reduceMotion?: boolean, full?: boolean }} options
  */
 export async function playPoolDebutPresentation(options = {}) {
+  const lionheart = options.presentation?.animationKey === 'lionheart_inverse_oath';
   const glacier = options.presentation?.animationKey === 'glacier_arrival';
   const sugar = options.presentation?.animationKey === 'honeylight_sugar';
   const previousFocus = document.activeElement;
   const reduce = isReduceMotion(options.reduceMotion);
   const full = options.full !== false;
   // 進入「可關閉」狀態前的演出時長（不含等待點擊）
-  const readyMs = reduce && sugar ? 240 : reduce ? (full ? 1400 : 820) : full ? 3400 : 900;
+  const readyMs = lionheart ? (reduce ? 500 : full ? 6000 : 1500) : reduce && sugar ? 240 : reduce ? (full ? 1400 : 820) : full ? 3400 : 900;
   const dissolveMs = reduce && sugar ? 120 : reduce ? 240 : full ? 550 : 360;
 
   const panel = document.getElementById('gacha-panel');
@@ -641,7 +644,7 @@ export async function playPoolDebutPresentation(options = {}) {
 
   const overlay = document.createElement('div');
   overlay.className = 'dream-debut-overlay';
-  overlay.dataset.animation = options.presentation?.animationKey === 'swordwild_shanhe' ? 'swordwild_shanhe' : sugar ? 'honeylight_sugar' : glacier ? 'glacier_arrival' : 'dream_bloom';
+  overlay.dataset.animation = lionheart ? 'lionheart_inverse_oath' : options.presentation?.animationKey === 'swordwild_shanhe' ? 'swordwild_shanhe' : sugar ? 'honeylight_sugar' : glacier ? 'glacier_arrival' : 'dream_bloom';
   if (reduce) overlay.classList.add('is-reduced');
   if (!full) overlay.classList.add('is-short');
   overlay.setAttribute('role', 'dialog');
@@ -679,6 +682,7 @@ export async function playPoolDebutPresentation(options = {}) {
   `;
 
   if (options.presentation?.animationKey === 'swordwild_shanhe') overlay.querySelector('.dream-debut-stage').replaceWith(createSwordwildShanheScene());
+  if (lionheart) overlay.querySelector('.dream-debut-stage').replaceWith(createLionheartScene());
   if (glacier) overlay.querySelector('.dream-debut-stage').replaceWith(createGlacierArrivalScene());
   if (sugar) overlay.querySelector('.dream-debut-stage').replaceWith(createHoneylightSugarScene());
   const lines = options.presentation?.debutLines || [];

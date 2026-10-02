@@ -184,6 +184,13 @@ export function getMaterialInfo(materialId) {
   };
 }
 
+/** Derive current obtainable sources without changing frozen material definitions. */
+export function getMaterialSourceLabel(material, areas = []) {
+  return [...new Set([material?.sourceArea, ...areas
+    .filter((area) => area.rewards?.material?.id === material?.id)
+    .map((area) => area.name)].filter(Boolean))].join('、');
+}
+
 /** 取得道具顯示資訊 */
 export function getCraftableInfo(itemId) {
   const known = craftableById?.get(itemId);

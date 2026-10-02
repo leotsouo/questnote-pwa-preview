@@ -9,6 +9,8 @@
 import { validatePoolContent, normalizePoolDefinition, resolveEffectivePool, resolvePetRevealPresentation } from './poolContentContract.js';
 import { getEligiblePetsForPool as matchPoolCandidates } from './petPoolFilter.js';
 
+import { validateBondStories } from './bondStoryCatalog.js';
+
 export const PET_RARITIES = Object.freeze(['N', 'R', 'SR', 'SSR', 'UR']);
 
 export const PET_ID_TYPES = Object.freeze({
@@ -134,6 +136,7 @@ export function normalizePetForValidation(pet) {
     image: typeof pet.image === 'string' ? pet.image.trim().replace(/\\/g, '/') : pet.image,
     imageVariants: pet.imageVariants,
     presentation: pet.presentation,
+    expeditionSpecialty: pet.expeditionSpecialty,
     description: typeof pet.description === 'string' ? pet.description.trim() : pet.description,
     poolTags: Array.isArray(pet.poolTags) ? pet.poolTags.map((t) => (typeof t === 'string' ? t.trim() : t)) : pet.poolTags,
     seriesId: typeof pet.seriesId === 'string' ? pet.seriesId.trim() : pet.seriesId,
@@ -165,6 +168,7 @@ export function normalizeLoreForValidation(entry) {
       summon: typeof dialogues.summon === 'string' ? dialogues.summon.trim() : dialogues.summon,
     },
     bondUnlocks: { ...bondUnlocks },
+    bondJourneyStory: entry?.bondJourneyStory,
   };
 }
 
@@ -250,6 +254,9 @@ export function validatePet(pet, options = {}) {
   const prefix = options.pathPrefix || 'pet';
   const result = emptyResult();
   const p = normalizePetForValidation(pet);
+  if (p?.expeditionSpecialty !== undefined && !['scout', 'gatherer', 'companion', 'scholar', 'guardian'].includes(p.expeditionSpecialty)) {
+    result.errors.push(createIssue('error', 'PET_SPECIALTY_INVALID', 'expeditionSpecialty must be an existing specialty', `${prefix}.expeditionSpecialty`));
+  }
   if (!p) {
     result.errors.push(createIssue('error', 'PET_INVALID', '寵物資料無效', prefix));
     result.ok = false;
@@ -472,6 +479,10 @@ export function validateLoreEntry(entry, options = {}) {
 
   validateDialogues(e.dialogues, result, `${prefix}.dialogues`, mode);
   validateBondUnlocks(e.bondUnlocks, result, `${prefix}.bondUnlocks`);
+  if (e.bondJourneyStory !== undefined) {
+    const errors = validateBondStories({ schemaVersion: 1, stories: [e.bondJourneyStory] }, [{ id: e.id }]);
+    for (const message of errors) result.errors.push(createIssue('error', 'LORE_BOND_STORY_INVALID', message, `${prefix}.bondJourneyStory`));
+  }
 
   result.ok = result.errors.length === 0;
   return result;
