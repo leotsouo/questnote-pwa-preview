@@ -39,7 +39,7 @@
   <link rel="stylesheet" href="src/reminder-settings.css" />
   <link rel="stylesheet" href="src/font-size-settings.css" />
   <link rel="stylesheet" href="src/bond-journey.css" />
-  <meta name="questnote-artifact" content="0088d32ea80e8a6e224c1ca1fa141e8d221a6d1c82b9a9018c2cbc585cfe3cb4">
+  <meta name="questnote-artifact" content="997d7d457b32ae908fdf7fae5c7b5c93ade73e2a1349861198994e6392f31f58">
 </head>
 <body data-theme="default">
   <div id="app-loader" class="app-loader">
@@ -202,6 +202,17 @@
         </div>
 
         <div class="gacha-rates" id="gacha-rates"></div>
+
+        <section id="gacha-standard-ur" class="standard-ur-preview" aria-label="標準卡池 UR 角色預覽" aria-roledescription="輪播" hidden>
+          <h2>UR 角色預覽</h2>
+          <p class="standard-ur-preview__hint">點擊圖片，預覽下一位 UR 角色</p>
+          <figure class="gacha-theme-hero">
+            <button type="button" class="gacha-theme-hero__frame standard-ur-preview__image" aria-label="預覽下一位 UR 角色">
+              <img class="gacha-theme-hero__img is-silhouette" alt="" decoding="async" width="240" height="240">
+            </button>
+            <figcaption aria-live="polite"><span class="standard-ur-preview__rarity">UR</span> <span data-carousel-name></span> · <span data-carousel-count></span></figcaption>
+          </figure>
+        </section>
 
         <div id="gacha-pool-content" class="gacha-pool-content" hidden>
           <details id="gacha-awakening-panel" class="gacha-awakening-panel" hidden>

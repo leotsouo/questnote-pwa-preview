@@ -156,3 +156,12 @@ body[data-theme] #view-gacha .page-title {
   #view-gacha .pity-bars { gap: var(--space-2); }
   #view-gacha .gacha-theme-stage__heroes { grid-template-columns: 1fr; }
 }
+
+/* Standard pool shares the monochrome character treatment of themed pools. */
+.standard-ur-preview { text-align: center; padding: 1rem; margin-bottom: 1rem; border: 1px solid var(--border); border-radius: 18px; background: var(--bg-card); }
+.standard-ur-preview[hidden] { display: none; }
+.standard-ur-preview h2 { font-size: 1rem; margin: 0 0 0.4rem; }
+.standard-ur-preview__hint { font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 0.8rem; }
+.standard-ur-preview__image { display: block; padding: 0; border: 0; cursor: pointer; width: min(100%, 13rem); }
+.standard-ur-preview__image:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
+.standard-ur-preview__rarity { font-weight: 700; }
