@@ -1,0 +1,63 @@
+{
+  "pools": [
+    {
+      "id": "standard",
+      "name": "標準召喚",
+      "active": true,
+      "cost": 100,
+      "rates": {
+        "N": 0.55,
+        "R": 0.30,
+        "SR": 0.10,
+        "SSR": 0.03,
+        "UR": 0.02
+      },
+      "pity": {
+        "ssr": 30,
+        "ur": 100
+      },
+      "petFilter": {
+        "poolTags": ["standard"]
+      }
+    },
+    {
+      "id": "eternal_slumber_bloom",
+      "name": "永眠花海召喚",
+      "active": true,
+      "cost": 100,
+      "rates": {
+        "N": 0.55,
+        "R": 0.30,
+        "SR": 0.10,
+        "SSR": 0.03,
+        "UR": 0.02
+      },
+      "pity": {
+        "ssr": 30,
+        "ur": 100
+      },
+      "petFilter": {
+        "poolTags": ["eternal_slumber_bloom"]
+      },
+      "presentation": {
+        "themeKey": "eternal_slumber_bloom",
+        "badge": "限定系列",
+        "eyebrow": "月皇花已於長夜中甦醒",
+        "tagline": "將散落的夢塵投入鏡池，喚醒沉睡於花庭深處的生命。",
+        "heroPetId": "pet_ur05",
+        "featuredPetIds": ["pet_ssr05", "pet_ssr06"],
+        "animationKey": "dream_bloom"
+      },
+      "unlockExpansion": {
+        "key": "morning_garden",
+        "threshold": 20,
+        "progressScope": "lifetime_pool_draws",
+        "extraPoolTags": ["eternal_slumber_bloom_awakened"],
+        "rewardPetId": "pet_r16",
+        "animationKey": "morning_garden_unlock",
+        "title": "晨醒花庭",
+        "unlockMessage": "沉眠有歸，甦醒有時。"
+      }
+    }
+  ]
+}

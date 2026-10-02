@@ -1,0 +1,52 @@
+/* Stories use the active world's semantic colors and the user's font scale. */
+.bond-home-section { margin: 12px 0 20px; }
+.bond-home { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; padding: 16px; }
+.bond-home__copy { flex: 1 1 150px; min-width: 0; }
+.bond-home__copy strong, .bond-eyebrow { display: block; }
+.bond-home__copy p { margin: 6px 0 0; font-size: 0.8125rem; color: var(--color-text-muted); overflow-wrap: anywhere; }
+.bond-eyebrow { font-size: 0.75rem; color: var(--color-text-muted); margin-bottom: 6px; }
+.bond-home > .btn { flex: 0 1 auto; min-height: 44px; white-space: normal; }
+.bond-reader { padding: 4px; color: var(--color-text-main); overflow-wrap: anywhere; }
+.bond-reader__header { display: flex; gap: 14px; align-items: center; padding-right: 44px; }
+.bond-reader__header > * { min-width: 0; }
+.bond-reader__header .pet-image, .bond-reader__header img { width: 76px; height: 76px; object-fit: contain; flex: 0 0 76px; }
+.bond-reader .modal-title { margin: 4px 0 14px; text-align: left; font-size: 1.25rem; }
+.bond-reader__header .modal-title { padding-right: 0 !important; }
+.bond-reader h3 { margin: 0 0 10px; font-size: 1rem; }
+.bond-reader p { line-height: 1.85; margin: 10px 0; }
+.bond-reader .bond-note, .bond-detail-entry .bond-note { color: var(--color-text-muted); font-size: 0.8125rem; line-height: 1.8; }
+.bond-reader > .btn { margin: 10px 6px 4px 0; }
+.bond-chapters { list-style: none; padding: 0; display: grid; gap: 10px; margin: 18px 0; }
+.bond-chapter { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; padding: 14px; border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-bg-card-soft); }
+.bond-chapter > div { flex: 1 1 150px; min-width: 0; }
+.bond-chapter strong, .bond-chapter small { display: block; }
+.bond-chapter small { color: var(--color-text-muted); margin-bottom: 5px; font-size: 0.75rem; }
+.bond-chapter p { margin: 5px 0 0; font-size: 0.8125rem; color: var(--color-text-muted); }
+.bond-chapter .btn { min-height: 44px; font-size: 0.8125rem; white-space: normal; }
+.bond-chapter.is-complete { border-color: var(--color-success); }
+.bond-story-text { margin: 20px 0; }
+.bond-choices, .bond-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.bond-choices > .btn { flex: 1 1 200px; text-align: left; white-space: normal; line-height: 1.6; min-height: 48px; }
+.bond-choices > .btn[aria-pressed="true"] { border-color: var(--color-primary); background: var(--color-primary-soft); }
+.bond-reply { padding: 12px 16px; margin: 16px 0; border-left: 3px solid var(--color-primary); background: var(--color-bg-card-soft); border-radius: 0 10px 10px 0; }
+.bond-agreement, .bond-ending, .bond-keepsake { padding: 16px; margin: 18px 0; border: 1px solid var(--color-border); border-radius: 14px; background: var(--color-bg-card-soft); }
+.bond-agreement__heading { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; align-items: baseline; }
+.bond-agreement__heading span { color: var(--color-text-muted); font-size: 0.8125rem; }
+.bond-agreement > strong { display: block; }
+.bond-agreement progress { display: block; width: 100%; height: 8px; accent-color: var(--color-primary); margin: 14px 0; }
+.bond-actions > .btn { min-height: 44px; white-space: normal; }
+.bond-reader .bond-field { display: grid; gap: 8px; margin: 18px 0; }
+.bond-field select { width: 100%; min-width: 0; min-height: 48px; font-size: 1rem; }
+.bond-reader .btn { max-width: 100%; min-height: 44px; white-space: normal; overflow-wrap: anywhere; }
+.bond-reader .btn:focus-visible, .bond-field select:focus-visible, .bond-home .btn:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 3px; }
+.bond-keepsake-display { display: flex; gap: 10px; width: 100%; padding: 12px 14px; border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-bg-card-soft); overflow-wrap: anywhere; }
+.bond-keepsake-display > span { font-size: 1.5rem; color: var(--color-primary); }
+.bond-keepsake-display strong, .bond-keepsake-display small { display: block; }
+.bond-keepsake-display small { margin-top: 3px; color: var(--color-text-muted); font-size: 0.75rem; }
+.bond-detail-entry { text-align: left; }
+@media (max-width: 360px) {
+  .bond-reader__header { align-items: flex-start; }
+  .bond-reader__header .pet-image, .bond-reader__header img { width: 56px; height: 56px; flex-basis: 56px; }
+  .bond-home > .btn, .bond-chapter > .btn { flex-grow: 1; }
+  .bond-agreement, .bond-ending, .bond-keepsake { padding: 12px; }
+}

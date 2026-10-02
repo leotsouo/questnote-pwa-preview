@@ -1,0 +1,33 @@
+{
+  "name": "QuestNote 預覽",
+  "short_name": "QN 預覽",
+  "description": "個人任務記事 App — 完成任務獲得星塵，召喚幻獸！",
+  "start_url": "/questnote-pwa-preview/v3510-review-8c9a3eda/index.html",
+  "scope": "/questnote-pwa-preview/v3510-review-8c9a3eda/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#101a2b",
+  "theme_color": "#101a2b",
+  "lang": "zh-Hant",
+  "icons": [
+    {
+      "src": "assets/brand/questnote-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/brand/questnote-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/brand/questnote-icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "id": "/questnote-pwa-preview/v3510-review-8c9a3eda/"
+}
