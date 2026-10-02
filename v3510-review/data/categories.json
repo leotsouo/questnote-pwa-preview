@@ -1,0 +1,44 @@
+[
+  {
+    "id": "general",
+    "name": "一般",
+    "icon": "",
+    "color": "gray"
+  },
+  {
+    "id": "school",
+    "name": "課業",
+    "icon": "",
+    "color": "blue"
+  },
+  {
+    "id": "project",
+    "name": "專題",
+    "icon": "",
+    "color": "purple"
+  },
+  {
+    "id": "life",
+    "name": "生活",
+    "icon": "",
+    "color": "green"
+  },
+  {
+    "id": "health",
+    "name": "健康",
+    "icon": "",
+    "color": "red"
+  },
+  {
+    "id": "work",
+    "name": "工作",
+    "icon": "",
+    "color": "gold"
+  },
+  {
+    "id": "other",
+    "name": "其他",
+    "icon": "",
+    "color": "gray"
+  }
+]

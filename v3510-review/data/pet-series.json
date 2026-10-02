@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "series": [
+    {
+      "id": "legacy",
+      "name": "既有夥伴",
+      "description": "尚未指定正式系列的既有 QuestNote 寵物。",
+      "enabled": true,
+      "order": 10
+    },
+    {
+      "id": "eternal_slumber_bloom",
+      "name": "永眠花海",
+      "description": "存在於清醒與深眠之間的古老夢境花庭。含永眠期首發 12 隻與晨醒花庭追加 4 隻，共 16 隻。",
+      "enabled": true,
+      "order": 100
+    }
+  ]
+}

@@ -1,0 +1,877 @@
+{
+  "pets": [
+    {
+      "id": "pet_n01",
+      "name": "灰影幼狼",
+      "rarity": "N",
+      "image": "assets/pets/pet_n01.png",
+      "description": "棲息於迷霧森林的低階幻獸，雙眼在夜間泛著幽藍微光。",
+      "poolTags": [
+        "standard"
+      ]
+    },
+    {
+      "id": "pet_n02",
+      "name": "岩甲地鼠",
+      "rarity": "N",
+      "image": "assets/pets/pet_n02.png",
+      "description": "以堅硬岩甲包裹全身的穴居獸，挖掘速度驚人。",
+      "poolTags": [
+        "standard"
+      ]
+    },
+    {
+      "id": "pet_n03",
+      "name": "風語貓頭鷹",
+      "rarity": "N",
+      "image": "assets/pets/pet_n03.png",
+      "description": "能聽見風中低語的夜行鳥，是初階冒險者的可靠夥伴。",
+      "poolTags": [
+        "standard"
+      ]
+    },
+    {
+      "id": "pet_n04",
+      "name": "火花尾蜥",
+      "rarity": "N",
+      "image": "assets/pets/pet_n04.png",
+      "description": "尾巴尖端能迸出小火花的蜥蜴，性格活潑好動。",
+      "poolTags": [
+        "standard"
+      ]
+    },
+    {
+      "id": "pet_n05",
+      "name": "苔蘚史萊姆",
+      "rarity": "N",
+      "image": "assets/pets/pet_n05.png",
+      "description": "由森林苔蘚凝聚而成的軟體生物，對植物有特殊感應。",
+      "poolTags": [
+        "standard"
+      ]
+    },
+    {
+      "id": "pet_n06",
+      "name": "鐵喙渡鴉",
+      "rarity": "N",
+      "image": "assets/pets/pet_n06.png",
+      "description": "喙部如精鐵般堅硬的黑色渡鴉，象徵著旅途的開始。",
+      "poolTags": [
+        "standard"
+      ]
+    },
+    {
+      "id": "pet_n07",
+      "name": "泥沼蟾蜍",
+      "rarity": "N",
+      "image": "assets/pets/pet_n07.png",
+      "description": "棲息於沼澤地帶的兩棲獸，皮膚能分泌麻痹性黏液。",
+      "poolTags": [
+        "standard"
+      ]
+    },
+    {
+      "id": "pet_n08",
+      "name": "晶刺豪豬",
+      "rarity": "N",
+      "image": "assets/pets/pet_n08.png",
+      "description": "背脊長滿半透明晶刺的防禦型幻獸。",
+      "poolTags": [
+        "standard"
+      ]
+    },
+    {
+      "id": "pet_n09",
+      "name": "霧隱兔",
+      "rarity": "N",
+      "image": "assets/pets/pet_n09.png",
+      "description": "能在薄霧中隱身的敏捷生物，耳朵異常靈敏。",
+      "poolTags": [
+        "standard"
+      ]
+    },
+    {
+      "id": "pet_n10",
+      "name": "銅鱗鯉",
+      "rarity": "N",
+      "image": "assets/pets/pet_n10.png",
+      "description": "鱗片如古銅般閃耀的淡水魚，據說能帶來好運。",
+      "poolTags": [
+        "standard"
+      ]
+    },
+    {
+      "id": "pet_r01",
+      "name": "蒼嵐獵狼",
+      "rarity": "R",
+      "image": "assets/pets/pet_r01.png",
+      "description": "馳騁於高原的狼群首領，毛色隨風向變化。",
+      "poolTags": [
+        "standard"
+      ]
+    },
+    {
+      "id": "pet_r02",
+      "name": "赤焰獅崽",
+      "rarity": "R",
+      "image": "assets/pets/pet_r02.png",
+      "description": "鬃毛燃燒著恆定火焰的幼獅，血脈中流淌著王族之力。",
+      "poolTags": [
+        "standard"
+      ]
+    },
+    {
+      "id": "pet_r03",
+      "name": "雷紋飛蛇",
+      "rarity": "R",
+      "image": "assets/pets/pet_r03.png",
+      "description": "身體纏繞雷電紋路的飛行蛇類，速度凌厲。",
+      "poolTags": [
+        "standard"
+      ]
+    },
+    {
+      "id": "pet_r04",
+      "name": "鋼骨鬣狗",
+      "rarity": "R",
+      "image": "assets/pets/pet_r04.png",
+      "description": "骨骼外化為金屬的兇猛鬣狗，咬合力驚人。",
+      "poolTags": [
+        "standard"
+      ]
+    },
+    {
+      "id": "pet_r05",
+      "name": "冰晶狐",
+      "rarity": "R",
+      "image": "assets/pets/pet_r05.png",
+      "description": "九尾尚未覺醒的冰霜狐狸，足跡所至結成薄冰。",
+      "poolTags": [
+        "standard"
+      ]
+    },
+    {
+      "id": "pet_r06",
+      "name": "影刃豹",
+      "rarity": "R",
+      "image": "assets/pets/pet_r06.png",
+      "description": "能在影子間穿梭的暗色豹獸，爪刃鋒利無比。",
+      "poolTags": [
+        "standard"
+      ]
+    },
+    {
+      "id": "pet_r07",
+      "name": "翠羽鸚鵡",
+      "rarity": "R",
+      "image": "assets/pets/pet_r07.png",
+      "description": "羽毛如寶石般絢麗的靈鳥，能模仿各種魔法咒語。",
+      "poolTags": [
+        "standard"
+      ]
+    },
+    {
+      "id": "pet_r08",
+      "name": "砂岩巨龜",
+      "rarity": "R",
+      "image": "assets/pets/pet_r08.png",
+      "description": "背甲上刻滿古代符文的沙漠巨龜，壽命逾千年。",
+      "poolTags": [
+        "standard"
+      ]
+    },
+    {
+      "id": "pet_sr01",
+      "name": "蒼雷翼龍",
+      "rarity": "SR",
+      "image": "assets/pets/pet_sr01.png",
+      "description": "盤旋於暴雲之上的雷電翼龍，振翅時引發雷鳴。",
+      "poolTags": [
+        "standard"
+      ]
+    },
+    {
+      "id": "pet_sr02",
+      "name": "熔岩鎧獅",
+      "rarity": "SR",
+      "image": "assets/pets/pet_sr02.png",
+      "description": "體表覆蓋流動熔岩鎧甲的戰獅，所過之處留下焦痕。",
+      "poolTags": [
+        "standard"
+      ]
+    },
+    {
+      "id": "pet_sr03",
+      "name": "幽冥嘯天狼",
+      "rarity": "SR",
+      "image": "assets/pets/pet_sr03.png",
+      "description": "來自冥界的嘯天狼，嚎叫聲能撕裂靈魂邊界。",
+      "poolTags": [
+        "standard"
+      ]
+    },
+    {
+      "id": "pet_sr04",
+      "name": "機械獵犬X",
+      "rarity": "SR",
+      "image": "assets/pets/pet_sr04.png",
+      "description": "古代文明遺留的機械獵犬，搭載自動追蹤系統。",
+      "poolTags": [
+        "standard"
+      ]
+    },
+    {
+      "id": "pet_sr05",
+      "name": "玄冰晶龍",
+      "rarity": "SR",
+      "image": "assets/pets/pet_sr05.png",
+      "description": "由極地玄冰凝聚而成的晶龍，呼吸間凍結一切。",
+      "poolTags": [
+        "standard"
+      ]
+    },
+    {
+      "id": "pet_sr06",
+      "name": "聖光獨角獸",
+      "rarity": "SR",
+      "image": "assets/pets/pet_sr06.png",
+      "description": "額角散發聖潔光芒的幻獸，能淨化黑暗腐化。",
+      "poolTags": [
+        "standard"
+      ]
+    },
+    {
+      "id": "pet_ssr01",
+      "name": "天火鳳凰",
+      "rarity": "SSR",
+      "image": "assets/pets/pet_ssr01.png",
+      "description": "浴火重生的神話鳳凰，羽翼燃燒著不滅的天火。",
+      "poolTags": [
+        "standard"
+      ]
+    },
+    {
+      "id": "pet_ssr02",
+      "name": "深淵魔狼",
+      "rarity": "SSR",
+      "image": "assets/pets/pet_ssr02.png",
+      "description": "守衛深淵入口的遠古魔狼，雙眸映照無盡虛空。",
+      "poolTags": [
+        "standard"
+      ]
+    },
+    {
+      "id": "pet_ssr03",
+      "name": "泰坦機神獸",
+      "rarity": "SSR",
+      "image": "assets/pets/pet_ssr03.png",
+      "description": "以隕星核心驅動的泰坦機甲獸，一擊可撼動大地。",
+      "poolTags": [
+        "standard"
+      ]
+    },
+    {
+      "id": "pet_ssr04",
+      "name": "九霄應龍",
+      "rarity": "SSR",
+      "image": "assets/pets/pet_ssr04.png",
+      "description": "翱翔九霄的應龍，掌控風雨雷電，為雨師之祖。",
+      "poolTags": [
+        "standard"
+      ]
+    },
+    {
+      "id": "pet_ur01",
+      "name": "創世星龍",
+      "rarity": "UR",
+      "image": "assets/pets/pet_ur01.png",
+      "description": "誕生於宇宙初開的星龍，鱗片中嵌入整片星河。",
+      "poolTags": [
+        "standard"
+      ]
+    },
+    {
+      "id": "pet_ur02",
+      "name": "滅世黑麒麟",
+      "rarity": "UR",
+      "image": "assets/pets/pet_ur02.png",
+      "description": "行走於毀滅與重生邊界的黑麒麟，蹄下踏碎命運。",
+      "poolTags": [
+        "standard"
+      ]
+    },
+    {
+      "id": "pet_ur03",
+      "name": "永恆機械龍神",
+      "rarity": "UR",
+      "image": "assets/pets/pet_ur03.png",
+      "description": "超越時間的機械龍神，擁有自我進化的終極形態。",
+      "poolTags": [
+        "standard"
+      ]
+    },
+    {
+      "id": "pet_ur04",
+      "name": "太初聖凰",
+      "rarity": "UR",
+      "image": "assets/pets/pet_ur04.png",
+      "description": "太初之時便存在的聖凰，一羽可化萬界、一啼可創生。",
+      "poolTags": [
+        "standard"
+      ]
+    },
+    {
+      "id": "pet_sp01",
+      "name": "碗糕貓",
+      "rarity": "SR",
+      "image": "assets/pets/pet_sp01.png",
+      "description": "由清晨蒸氣與米香凝聚而成的貓型靈獸。牠總是在主人疲累時安靜靠近，用溫熱的氣息提醒你：慢慢來，也是一種前進。",
+      "poolTags": [
+        "standard",
+        "daily_spirit"
+      ],
+      "speciesType": "cat",
+      "element": "steam_rice",
+      "visualTheme": "warm_daily_companion"
+    },
+    {
+      "id": "pet_sp02",
+      "name": "鳥哥",
+      "rarity": "SSR",
+      "image": "assets/pets/pet_sp02.png",
+      "description": "總是站在最高處觀察局勢的風系靈鳥。牠嘴巴很壞，卻從不會讓夥伴迷路。據說只要鳥哥拍一下翅膀，散亂的任務就會被重新排好順序。",
+      "poolTags": [
+        "standard",
+        "daily_spirit"
+      ],
+      "speciesType": "bird",
+      "element": "wind_command",
+      "visualTheme": "cool_boss_bird"
+    },
+    {
+      "id": "pet_sp03",
+      "name": "柴仔",
+      "rarity": "SR",
+      "image": "assets/pets/pet_sp03.png",
+      "description": "擁有旺盛行動力的柴犬靈獸。牠不擅長複雜計畫，但非常擅長陪你開始第一步。只要柴仔在旁邊，再困難的任務也會變得比較想動手。",
+      "poolTags": [
+        "standard",
+        "daily_spirit"
+      ],
+      "speciesType": "dog",
+      "element": "fire_motivation",
+      "visualTheme": "warm_action_partner"
+    },
+    {
+      "id": "pet_sp04",
+      "name": "極光白熊",
+      "rarity": "SSR",
+      "image": "assets/pets/pet_sp04.png",
+      "description": "棲息於極地靈域的白熊靈獸，毛髮中流動著極光與冰晶之力。牠外表溫和沉穩，卻擁有守護夥伴的強大意志，總能在寒冷與迷惘中帶來安心感。",
+      "poolTags": [
+        "standard",
+        "frost_spirit"
+      ],
+      "speciesType": "bear",
+      "element": "ice_aurora",
+      "visualTheme": "majestic_frost_guardian"
+    },
+    {
+      "id": "pet_sp05",
+      "name": "天穹靈駒",
+      "rarity": "SSR",
+      "image": "assets/pets/pet_sp05.png",
+      "description": "由高空風流與雲海靈氣孕育而生的神駒，擁有如流光般飄逸的鬃毛與高貴姿態。據說牠會帶領主人穿越混亂與障礙，朝更清晰的目標前進。",
+      "poolTags": [
+        "standard",
+        "sky_spirit"
+      ],
+      "speciesType": "horse",
+      "element": "wind_aether",
+      "visualTheme": "celestial_wind_steed"
+    },
+    {
+      "id": "pet_sp06",
+      "name": "伊芙星靈",
+      "rarity": "SR",
+      "image": "assets/pets/pet_sp06.png",
+      "description": "以純白機體與星光核心構成的浮空靈械，外型小巧卻散發安定柔和的未來感。牠擅長靜靜陪伴與指引，是兼具科技感與治癒氣息的星域夥伴。",
+      "poolTags": [
+        "standard",
+        "mecha_spirit"
+      ],
+      "speciesType": "robot",
+      "element": "light_core",
+      "visualTheme": "cute_future_companion"
+    },
+    {
+      "id": "pet_sp08",
+      "name": "北海霸主",
+      "rarity": "UR",
+      "image": "assets/pets/pet_sp08.png",
+      "description": "稱霸極北海域的遠古海獸，擁有如鋼鐵般厚重的冰晶裝甲與吞噬風暴的壓迫感。牠不是龍，而是深海與寒潮共同孕育出的海域王者，只要牠浮上海面，整片北海都會為之震動。",
+      "poolTags": [
+        "standard",
+        "frost_spirit",
+        "ocean_spirit"
+      ],
+      "speciesType": "sea_beast",
+      "element": "ice_ocean",
+      "visualTheme": "arctic_ocean_overlord"
+    },
+    {
+      "id": "pet_sp09",
+      "name": "維京戰魂",
+      "rarity": "SSR",
+      "image": "assets/pets/pet_sp09.png",
+      "description": "來自極北冰岸的戰士型靈獸，身披厚重毛皮與維京戰甲，背負盾牌與遠征行囊。牠性格沉穩勇敢，總是像可靠的戰友一樣守在主人身旁，提醒你即使風雪再大，也要一步一步向前。",
+      "poolTags": [
+        "standard",
+        "nordic_spirit"
+      ],
+      "speciesType": "wolf_bear",
+      "element": "ice_warrior",
+      "visualTheme": "viking_arctic_guardian"
+    },
+    {
+      "id": "pet_sp10",
+      "name": "星糖萌皇",
+      "rarity": "UR",
+      "image": "assets/pets/pet_sp10.png",
+      "description": "誕生於星光與甜夢之中的超稀有靈獸，外表柔軟可愛，眼中閃爍著星辰般的光芒。牠總能用單純的笑容驅散疲憊，是最擅長療癒與陪伴的夢幻夥伴。",
+      "poolTags": [
+        "standard",
+        "special_ur",
+        "cute_spirit"
+      ],
+      "speciesType": "fluffy_spirit",
+      "element": "star_sweet",
+      "visualTheme": "ultra_cute_star_companion"
+    },
+    {
+      "id": "pet_sp11",
+      "name": "邪冥夜皇",
+      "rarity": "UR",
+      "image": "assets/pets/pet_sp11.png",
+      "description": "自深淵儀式中甦醒的邪性靈獸，擁有猩紅魔晶與黑紫暗翼般的能量外衣。牠冷靜、傲慢且危險，彷彿能看穿所有動搖，是黑暗系靈獸中的絕對支配者。",
+      "poolTags": [
+        "standard",
+        "special_ur",
+        "dark_spirit"
+      ],
+      "speciesType": "shadow_feline",
+      "element": "abyss_crimson",
+      "visualTheme": "evil_abyss_overlord"
+    },
+    {
+      "id": "pet_sp12",
+      "name": "稻穗守望者",
+      "rarity": "UR",
+      "image": "assets/pets/pet_sp12.png",
+      "description": "守護田野與村落的純樸靈獸，戴著草帽，身上帶著稻穗與手作護符。牠沒有張揚的力量，卻擁有最踏實的守護意志，象徵穩定、耐心與一步一步累積的成果。",
+      "poolTags": [
+        "standard",
+        "special_ur",
+        "rustic_spirit"
+      ],
+      "speciesType": "pastoral_guardian",
+      "element": "harvest_light",
+      "visualTheme": "pure_rustic_field_guardian"
+    },
+    {
+      "id": "pet_sp13",
+      "name": "星曜智狐",
+      "rarity": "UR",
+      "image": "assets/pets/pet_sp13.png",
+      "description": "掌握星象與古代知識的智慧型靈獸，擁有冷靜銳利的雙眼與精緻的學者飾物。牠總能在混亂的任務中找出最合理的順序，是擅長分析、規劃與指引的智者夥伴。",
+      "poolTags": [
+        "standard",
+        "special_ur",
+        "wisdom_spirit"
+      ],
+      "speciesType": "arcane_fox",
+      "element": "star_mind",
+      "visualTheme": "intelligent_arcane_strategist"
+    },
+    {
+      "id": "pet_n11",
+      "name": "紙燈小狐",
+      "rarity": "N",
+      "image": "assets/pets/pet_n11.png",
+      "description": "尾巴像紙燈籠般發出柔光的小狐靈，常在夜晚替迷路的人照亮腳邊。雖然膽子不大，卻總會努力跟上主人的步伐。",
+      "poolTags": [
+        "standard"
+      ],
+      "speciesType": "fox",
+      "element": "lantern_light",
+      "visualTheme": "gentle_paper_lantern_fox"
+    },
+    {
+      "id": "pet_n12",
+      "name": "布包倉鼠",
+      "rarity": "N",
+      "image": "assets/pets/pet_n12.png",
+      "description": "喜歡把小物塞進布包裡的倉鼠靈獸，總是背著比自己還大的行囊。牠動作慢吞吞，但非常擅長整理瑣碎的小任務。",
+      "poolTags": [
+        "standard"
+      ],
+      "speciesType": "hamster",
+      "element": "storage_earth",
+      "visualTheme": "tiny_bag_carrier_companion"
+    },
+    {
+      "id": "pet_n13",
+      "name": "鈴芽麻雀",
+      "rarity": "N",
+      "image": "assets/pets/pet_n13.png",
+      "description": "胸前掛著小鈴鐺的麻雀靈獸，飛行時會發出清脆聲響。牠會在主人分心時輕輕提醒，是非常勤快的小型夥伴。",
+      "poolTags": [
+        "standard"
+      ],
+      "speciesType": "sparrow",
+      "element": "bell_wind",
+      "visualTheme": "small_bell_sparrow"
+    },
+    {
+      "id": "pet_n14",
+      "name": "棉雲羊",
+      "rarity": "N",
+      "image": "assets/pets/pet_n14.png",
+      "description": "身上覆滿雲朵般蓬鬆毛絮的羊型靈獸，個性溫馴又有點迷糊。牠會把緊張的心情慢慢吸走，適合陪伴長時間工作。",
+      "poolTags": [
+        "standard"
+      ],
+      "speciesType": "sheep",
+      "element": "cloud_softness",
+      "visualTheme": "fluffy_cloud_sheep"
+    },
+    {
+      "id": "pet_n15",
+      "name": "墨殼蝸牛",
+      "rarity": "N",
+      "image": "assets/pets/pet_n15.png",
+      "description": "背著墨色螺旋殼的蝸牛靈獸，行動緩慢卻從不偏離方向。牠爬過的地方會留下淡淡墨痕，像是在記錄旅程。",
+      "poolTags": [
+        "standard"
+      ],
+      "speciesType": "snail",
+      "element": "ink_trail",
+      "visualTheme": "slow_ink_shell_snail"
+    },
+    {
+      "id": "pet_n16",
+      "name": "豆芽鹿",
+      "rarity": "N",
+      "image": "assets/pets/pet_n16.png",
+      "description": "頭上長著兩株嫩芽角的小鹿靈獸，對陽光與水氣特別敏感。牠象徵剛開始萌芽的計畫，雖然弱小，卻充滿成長潛力。",
+      "poolTags": [
+        "standard"
+      ],
+      "speciesType": "deer",
+      "element": "sprout_nature",
+      "visualTheme": "young_sprout_deer"
+    },
+    {
+      "id": "pet_r09",
+      "name": "墨羽夜貓",
+      "rarity": "R",
+      "image": "assets/pets/pet_r09.png",
+      "description": "擁有黑色羽狀耳毛的夜行貓靈獸，能安靜穿越屋簷與陰影。牠外表冷淡，其實會默默守在主人身邊觀察狀況。",
+      "poolTags": [
+        "standard"
+      ],
+      "speciesType": "cat",
+      "element": "night_shadow",
+      "visualTheme": "stealthy_ink_feather_cat"
+    },
+    {
+      "id": "pet_r10",
+      "name": "琥珀甲蟲",
+      "rarity": "R",
+      "image": "assets/pets/pet_r10.png",
+      "description": "甲殼如琥珀般透明發亮的昆蟲靈獸，體內封存著古老森林的微光。牠防禦力不弱，遇到危險時會縮成閃耀的金色圓盾。",
+      "poolTags": [
+        "standard"
+      ],
+      "speciesType": "beetle",
+      "element": "amber_wood",
+      "visualTheme": "golden_amber_beetle"
+    },
+    {
+      "id": "pet_r11",
+      "name": "潮汐水獺",
+      "rarity": "R",
+      "image": "assets/pets/pet_r11.png",
+      "description": "掌握小型潮汐之力的水獺靈獸，喜歡把水珠揉成漂浮的小球。牠個性機靈，常用輕快的動作替主人帶來好心情。",
+      "poolTags": [
+        "standard"
+      ],
+      "speciesType": "otter",
+      "element": "tide_water",
+      "visualTheme": "playful_tide_otter"
+    },
+    {
+      "id": "pet_r12",
+      "name": "炭角山羊",
+      "rarity": "R",
+      "image": "assets/pets/pet_r12.png",
+      "description": "棲息於火山坡地的山羊靈獸，彎角末端帶著炭火般的暗紅光。牠固執卻可靠，最擅長在艱難地形中穩穩前進。",
+      "poolTags": [
+        "standard"
+      ],
+      "speciesType": "goat",
+      "element": "ember_stone",
+      "visualTheme": "volcanic_horned_goat"
+    },
+    {
+      "id": "pet_sr07",
+      "name": "月珀靈豹",
+      "rarity": "SR",
+      "image": "assets/pets/pet_sr07.png",
+      "description": "毛色如月光與琥珀交織的豹型靈獸，行動時身影會分裂成短暫殘光。牠優雅、敏銳，擅長在混亂中找出最短路徑。",
+      "poolTags": [
+        "standard"
+      ],
+      "speciesType": "leopard",
+      "element": "moon_amber",
+      "visualTheme": "elegant_lunar_amber_leopard"
+    },
+    {
+      "id": "pet_sr08",
+      "name": "鐘塔機梟",
+      "rarity": "SR",
+      "image": "assets/pets/pet_sr08.png",
+      "description": "由古老鐘塔核心驅動的機械貓頭鷹，翅膀中藏有細密齒輪與時間刻紋。牠能精準感知節奏，是提醒期限與規劃順序的可靠夥伴。",
+      "poolTags": [
+        "standard"
+      ],
+      "speciesType": "mechanical_owl",
+      "element": "clockwork_time",
+      "visualTheme": "arcane_clocktower_owl"
+    },
+    {
+      "id": "pet_n17",
+      "name": "花眠蜜鼯",
+      "rarity": "N",
+      "image": "assets/pets/pet_n17.png",
+      "description": "牠披著灰白柔毛與半透明滑翔膜，穿梭在永眠花海外圍的夜花枝冠間。牠靈巧又熱心，總把散落夢塵送到仍未綻放的花苞旁。",
+      "poolTags": [
+        "eternal_slumber_bloom"
+      ],
+      "seriesId": "eternal_slumber_bloom",
+      "speciesType": "sugar_glider",
+      "element": "dream_dust",
+      "visualTheme": "moonlit_dreamdust_glider"
+    },
+    {
+      "id": "pet_n18",
+      "name": "苞燈蕈靈",
+      "rarity": "N",
+      "image": "assets/pets/pet_n18.png",
+      "description": "牠有一頂散發柔光的花苞蕈帽，常躲在潮濕菌絲與苔蘚小徑之間。牠雖然怯生，仍會守著微弱燈火，替晚歸的花海居民照路。",
+      "poolTags": [
+        "eternal_slumber_bloom"
+      ],
+      "seriesId": "eternal_slumber_bloom",
+      "speciesType": "mushroom_spirit",
+      "element": "spore_light",
+      "visualTheme": "bud_lantern_fungal_spirit"
+    },
+    {
+      "id": "pet_n19",
+      "name": "霧絮海蛞",
+      "rarity": "N",
+      "image": "assets/pets/pet_n19.png",
+      "description": "牠有月白色的柔軟身軀與霧狀背褶，緩慢滑行於潮濕花徑和低窪草叢。牠不在意速度，只會安靜地把夢霧帶往每一處乾燥花叢。",
+      "poolTags": [
+        "eternal_slumber_bloom"
+      ],
+      "seriesId": "eternal_slumber_bloom",
+      "speciesType": "nudibranch",
+      "element": "mist_aether",
+      "visualTheme": "mistfrill_garden_slug"
+    },
+    {
+      "id": "pet_r13",
+      "name": "鏡池浮水母",
+      "rarity": "R",
+      "image": "assets/pets/pet_r13.png",
+      "description": "牠以半透明花瓣般的傘體漂浮在鏡池上方，纖細觸鬚托著晶瑩的記憶水珠。牠好奇而細膩，從不輕易放棄任何即將消散的碎夢。",
+      "poolTags": [
+        "eternal_slumber_bloom"
+      ],
+      "seriesId": "eternal_slumber_bloom",
+      "speciesType": "jellyfish",
+      "element": "memory_water",
+      "visualTheme": "mirrorpool_memory_jelly"
+    },
+    {
+      "id": "pet_r14",
+      "name": "夢壤穿山甲",
+      "rarity": "R",
+      "image": "assets/pets/pet_r14.png",
+      "description": "牠覆著月白與霧紫交疊的花瓣狀鱗甲，終年穿行於花庭根系下方。牠沉穩而專注，會整理鬆動夢土並挖出安全可靠的地下通道。",
+      "poolTags": [
+        "eternal_slumber_bloom"
+      ],
+      "seriesId": "eternal_slumber_bloom",
+      "speciesType": "pangolin",
+      "element": "dream_earth",
+      "visualTheme": "moonpetal_burrow_keeper"
+    },
+    {
+      "id": "pet_r15",
+      "name": "鈴蕊果子狸",
+      "rarity": "R",
+      "image": "assets/pets/pet_r15.png",
+      "description": "牠有細緻的深淺面紋與修長環尾，背著裝滿發光夢果的小型編織籃。牠機敏又親切，常將最明亮的果實留在岔路旁引導迷途者。",
+      "poolTags": [
+        "eternal_slumber_bloom"
+      ],
+      "seriesId": "eternal_slumber_bloom",
+      "speciesType": "masked_palm_civet",
+      "element": "dream_fruit",
+      "visualTheme": "bellflower_fruit_guide"
+    },
+    {
+      "id": "pet_sr09",
+      "name": "霧紗夢蛛",
+      "rarity": "SR",
+      "image": "assets/pets/pet_sr09.png",
+      "description": "牠棲息在花庭高架遺跡之間，以月白細絲編織出精密而明亮的圓網。牠嚴謹寡言，專門修補夢境裂口並留下可安全通行的銀絲路徑。",
+      "poolTags": [
+        "eternal_slumber_bloom"
+      ],
+      "seriesId": "eternal_slumber_bloom",
+      "speciesType": "orb_weaver_spider",
+      "element": "dream_silk",
+      "visualTheme": "moonveil_dream_mender"
+    },
+    {
+      "id": "pet_sr10",
+      "name": "花庭旋角羚",
+      "rarity": "SR",
+      "image": "assets/pets/pet_sr10.png",
+      "description": "牠有纖長身形與一對纏繞細花的深色旋角，行走時足下會短暫亮起光徑。牠克制而可靠，從不替旅人決定方向，卻不會拋下跟隨者。",
+      "poolTags": [
+        "eternal_slumber_bloom"
+      ],
+      "seriesId": "eternal_slumber_bloom",
+      "speciesType": "spiral_horn_antelope",
+      "element": "path_light",
+      "visualTheme": "moonlit_garden_guide"
+    },
+    {
+      "id": "pet_sr11",
+      "name": "琉夢花螈",
+      "rarity": "SR",
+      "image": "assets/pets/pet_sr11.png",
+      "description": "牠有淡琉璃色的柔軟身軀與半透明花瓣外鰓，長眠於花海深處的靜水潭。牠溫和而耐心，會保存尚未完成的夢，等待適合甦醒的時刻。",
+      "poolTags": [
+        "eternal_slumber_bloom"
+      ],
+      "seriesId": "eternal_slumber_bloom",
+      "speciesType": "salamander",
+      "element": "slumber_water",
+      "visualTheme": "pastel_dreampond_keeper"
+    },
+    {
+      "id": "pet_ssr05",
+      "name": "寂繭眠蛾",
+      "rarity": "SSR",
+      "image": "assets/pets/pet_ssr05.png",
+      "description": "牠展開月白與淡紫交織的巨大絲翼，終夜飛行在永眠花海的高空。牠疏離而沉靜，以眠絲編織夢幕，隔開互相干擾的沉睡夢境。",
+      "poolTags": [
+        "eternal_slumber_bloom"
+      ],
+      "seriesId": "eternal_slumber_bloom",
+      "speciesType": "silk_moth",
+      "element": "dream_veil",
+      "visualTheme": "faceless_cocoon_weaver"
+    },
+    {
+      "id": "pet_ssr06",
+      "name": "鏡夢花貘",
+      "rarity": "SSR",
+      "image": "assets/pets/pet_ssr06.png",
+      "description": "牠擁有前月白、後深藍的厚重身軀，長鼻能從鏡池水面吸收黑色惡夢。牠沉著而勇毅，會默默承受恐懼，再將其化成滋養夜花的夢水。",
+      "poolTags": [
+        "eternal_slumber_bloom"
+      ],
+      "seriesId": "eternal_slumber_bloom",
+      "speciesType": "tapir",
+      "element": "nightmare_water",
+      "visualTheme": "mirrorpool_nightmare_purifier"
+    },
+    {
+      "id": "pet_ur05",
+      "name": "永眠花皇兔",
+      "rarity": "UR",
+      "image": "assets/pets/pet_ur05.png",
+      "description": "牠以深霧紫長毛、巨大垂耳與月白花環端坐於永眠花海核心的根系石台。牠威嚴而寬容，維持沉眠與甦醒的平衡，也允許疲憊者在身旁安睡。",
+      "poolTags": [
+        "eternal_slumber_bloom"
+      ],
+      "seriesId": "eternal_slumber_bloom",
+      "speciesType": "lop_rabbit",
+      "element": "dream_flora",
+      "visualTheme": "moonlit_flower_sovereign"
+    },
+    {
+      "id": "pet_r16",
+      "name": "曉露花蝟",
+      "rarity": "R",
+      "image": "assets/pets/pet_r16.png",
+      "description": "暖月白的曉露花蝟背負淡粉花苞與晶亮晨露，快步穿過濕潤花徑。牠勤快樂觀，沿途喚回地面溫度，讓第一批晨花依序綻放。",
+      "poolTags": [
+        "eternal_slumber_bloom_awakened"
+      ],
+      "seriesId": "eternal_slumber_bloom",
+      "speciesType": "hedgehog",
+      "element": "dawn_dew",
+      "visualTheme": "dawn_dew_flower_awakener"
+    },
+    {
+      "id": "pet_sr12",
+      "name": "晨鈴花雀",
+      "rarity": "SR",
+      "image": "assets/pets/pet_sr12.png",
+      "description": "暖月白與玫瑰粉的晨鈴花雀停在高處枝冠，張喙唱出如金色波紋般的晨歌。牠敏銳而開朗，只喚醒已準備好的感官，讓花苞與意識依序舒展。",
+      "poolTags": [
+        "eternal_slumber_bloom_awakened"
+      ],
+      "seriesId": "eternal_slumber_bloom",
+      "speciesType": "songbird",
+      "element": "dawn_song",
+      "visualTheme": "dawn_bell_canopy_songbird"
+    },
+    {
+      "id": "pet_ssr07",
+      "name": "曦幕雲鶴",
+      "rarity": "SSR",
+      "image": "assets/pets/pet_ssr07.png",
+      "description": "暖月白的曦幕雲鶴展開染有玫瑰與珊瑚色翼緣的雙翼，飛越夜晨交界的天空。牠沉著克制，沿著眠絲開啟夢幕，讓晨光與外部世界重返花庭。",
+      "poolTags": [
+        "eternal_slumber_bloom_awakened"
+      ],
+      "seriesId": "eternal_slumber_bloom",
+      "speciesType": "crane",
+      "element": "dawn_light",
+      "visualTheme": "dawnveil_crane"
+    },
+    {
+      "id": "pet_ur06",
+      "name": "曙綻花后兔",
+      "rarity": "UR",
+      "image": "assets/pets/pet_ur06.png",
+      "description": "大型暖月白與成熟玫瑰色垂耳兔端坐於晨醒花庭，完整花環與胸前晨露花束映著初曦。她果決而寬和，判斷生命何時真正準備醒來，並將選擇重新交還給對方。",
+      "poolTags": [
+        "eternal_slumber_bloom_awakened"
+      ],
+      "seriesId": "eternal_slumber_bloom",
+      "speciesType": "lop_rabbit",
+      "element": "dawn_flora",
+      "visualTheme": "dawn_bloom_flower_sovereign"
+    }
+  ]
+}

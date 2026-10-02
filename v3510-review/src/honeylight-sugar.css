@@ -1,0 +1,85 @@
+/* Local sugar theatre, scoped to the registered template in every app theme. */
+.sugar-scene { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.sugar-scene__sky { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 54%, #a76573 0, #52334e 48%, #231e32 100%); }
+.sugar-scene__garden { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .8; }
+.sugar-scene__gate { transform-box: fill-box; transition: transform 1.4s ease, opacity 1.4s ease; }
+.sugar-scene__gate--left { transform-origin: left center; }
+.sugar-scene__gate--right { transform-origin: right center; }
+.sugar-scene__light { position: absolute; inset: 17% 10% 8%; background: radial-gradient(ellipse, #ffe5b280, transparent 65%); opacity: .2; transition: opacity 1s ease; }
+.sugar-scene__vignette { position: absolute; inset: 0; background: linear-gradient(transparent 45%, #241e3299); }
+.sugar-scene__crystals { position: absolute; inset: 0; }
+.sugar-scene__crystals i { position: absolute; left: var(--x); top: var(--y); width: 12px; height: 18px; border: 1px solid #ffecbd; background: linear-gradient(135deg, #fff2d999, #eea4c666); transform: rotate(35deg); opacity: .3; }
+.sugar-scene__candy { position: absolute; left: 50%; top: 44%; display: flex; align-items: center; transform: translate(-50%, -50%) scale(.4); opacity: 0; transition: opacity .6s ease, transform .9s ease; }
+.sugar-scene__candy b { display: block; width: 80px; height: 80px; border-radius: 25px; border: 2px solid #ffe4b3; background: repeating-linear-gradient(45deg, #f2b7ca 0 16px, #fff2d8 16px 30px); box-shadow: 0 0 60px #ffda9799; }
+.sugar-scene__candy i { width: 38px; height: 52px; background: #f2b7ca; clip-path: polygon(0 0, 100% 25%, 100% 75%, 0 100%, 20% 50%); }
+.sugar-scene__candy i:last-child { transform: scaleX(-1); }
+.sugar-scene__cream { position: absolute; width: 240px; height: 240px; left: 50%; top: 45%; transform: translate(-50%, -50%) scale(.4); opacity: 0; transition: opacity .7s ease, transform 1.1s ease; }
+.sugar-scene__cream i { position: absolute; width: 100px; height: 135px; left: 70px; top: 10px; transform-origin: 50% 110px; transform: rotate(calc(var(--i) * 51.4deg)); border-radius: 70% 30% 65% 35%; border: 1px solid #fff2d3; background: linear-gradient(135deg, #fff8e8, #e9bbd2); box-shadow: inset -12px -5px 22px #d7a3bd66; }
+.sugar-scene__cream b { position: absolute; inset: 85px; border-radius: 50%; background: #ffdfa0; box-shadow: 0 0 45px #ffeab3; }
+[data-animation="honeylight_sugar"].dream-bloom-overlay,
+[data-animation="honeylight_sugar"].dream-debut-overlay { background: #231e32; color: #fff4df; }
+[data-animation="honeylight_sugar"] .dream-bloom-stage { z-index: 2; }
+[data-animation="honeylight_sugar"] .dream-bloom-omen { border-color: #ffe8bb; background: radial-gradient(circle, #ffe4ab44, transparent 65%); }
+[data-animation="honeylight_sugar"] .dream-bloom-seal { background: linear-gradient(145deg, #55354df5, #292437f5); border-color: #ecc99b; box-shadow: 0 0 50px #f5c78933; }
+[data-animation="honeylight_sugar"] .dream-bloom-seal__petal,
+[data-animation="honeylight_sugar"] .dream-bloom-seal__reflect { display: none; }
+[data-animation="honeylight_sugar"] .dream-bloom-summary { background: #302338dd; border-radius: 24px; padding: 18px; }
+[data-animation="honeylight_sugar"] .dream-bloom-mini-seal { background: #50384ddd; border-color: #edd0aa88; }
+[data-animation="honeylight_sugar"] .dream-bloom-btn { background: #49334e; color: #fff4df; border-color: #e8c89d; }
+[data-animation="honeylight_sugar"] .dream-bloom-btn--primary { background: #ffddb0; color: #3b263d; }
+[data-animation="honeylight_sugar"] .dream-debut-line { color: #fff1d7; text-shadow: 0 2px 18px #301e39; }
+[data-animation="honeylight_sugar"] .dream-debut-copy { z-index: 3; }
+[data-animation="honeylight_sugar"]:is([data-state="mirrorRipple"], [data-state="rarityOmen"], [data-state="bloom"], [data-state="summary"], .is-phase-pool) .sugar-scene__gate--left { transform: scaleX(.08); opacity: .2; }
+[data-animation="honeylight_sugar"]:is([data-state="mirrorRipple"], [data-state="rarityOmen"], [data-state="bloom"], [data-state="summary"], .is-phase-pool) .sugar-scene__gate--right { transform: scaleX(.08); opacity: .2; }
+[data-animation="honeylight_sugar"]:is([data-state="dreamDust"], [data-state="mirrorRipple"], [data-state="rarityOmen"], [data-state="bloom"], .is-phase-pool) .sugar-scene__crystals i { animation: sugar-crystal 2s ease-in-out calc(var(--i) * 65ms) infinite alternate; }
+[data-animation="honeylight_sugar"]:is([data-state="mirrorRipple"], [data-state="rarityOmen"]) .sugar-scene__candy { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(12deg); }
+[data-animation="honeylight_sugar"]:is([data-state="bloom"], .is-phase-bloom) .sugar-scene__cream { opacity: .95; transform: translate(-50%, -50%) scale(1); }
+[data-animation="honeylight_sugar"]:is([data-state="bloom"], [data-state="summary"], .is-phase-bloom) .sugar-scene__light { opacity: .9; }
+[data-animation="honeylight_sugar"][data-state="summary"] .sugar-scene__cream { opacity: .12; }
+[data-animation="honeylight_sugar"].is-short .sugar-scene * { transition-duration: .35s; }
+@keyframes sugar-crystal { to { opacity: .85; transform: translateY(-14px) rotate(65deg); } }
+
+/* Card-pool page uses the same palette without perpetual decorative motion. */
+[data-pool-theme="honeylight_sugar"] .gacha-theme-stage { background: radial-gradient(ellipse at 50% 35%, #b47083, #4d354e 65%, #2a2438); border-color: #e9c89e; color: #fff4df; }
+[data-pool-theme="honeylight_sugar"] .gacha-theme-stage :is(h2, h3, p) { color: #fff1de; }
+[data-pool-theme="honeylight_sugar"] .gacha-theme-stage__atmosphere { opacity: .25; }
+[data-pool-theme="honeylight_sugar"] :is(.gacha-theme-stage__moon, .gacha-theme-stage__petals) { display: none; }
+
+/* SSR and both UR reveals use committed results, never generic mascot images. */
+.summon-reveal-overlay.is-sugar-reveal .summon-reveal-bg,
+.summon-reveal-overlay:is(.is-caramel-ur, .is-cream-ur) .summon-reveal-bg { background: radial-gradient(ellipse at 50% 45%, #8e5965, #2f253d 68%, #211c2e); }
+.summon-reveal-overlay.is-caramel-ur .summon-reveal-bg { background: radial-gradient(ellipse at 50% 45%, #98603a, #443044 66%, #241d30); }
+.summon-reveal-overlay.is-cream-ur .summon-reveal-bg { background: radial-gradient(ellipse at 50% 45%, #b589a6, #51405e 64%, #292236); }
+.is-sugar-reveal .summon-reveal-ring { border-color: #f9d69b; }
+.is-sugar-reveal .summon-reveal-particle { border-radius: 2px; background: #ffe3b8; }
+.summon-reveal-overlay.is-sugar-reveal .summon-reveal-aura,
+.summon-reveal-overlay:is(.is-caramel-ur, .is-cream-ur) .summon-reveal-aura { background: radial-gradient(circle, #ffdda080, #f1bdd16b 40%, transparent 74%); }
+.summon-reveal-overlay.is-sugar-reveal.is-ur .summon-reveal-particle { background: #ffe3b8; box-shadow: 0 0 6px #ffd5a4; }
+.summon-reveal-overlay.is-sugar-reveal.is-ur::after { background: #ffeed7; }
+.sugar-reveal-ornament { position: absolute; inset: 0; pointer-events: none; }
+.sugar-reveal-ornament--caramel b { position: absolute; width: min(75vw, 340px); aspect-ratio: 1; top: 10%; left: 50%; border: 2px solid #ffe5a1; border-radius: 50%; transform: translateX(-50%); background: conic-gradient(from 20deg, transparent 0 29%, #ffd19577 29% 30%, transparent 30% 61%, #ffd19566 61% 62%, transparent 62% 84%, #ffd19588 84% 85%, transparent 85%); animation: sugar-shell 1.7s ease both; }
+.sugar-reveal-ornament--caramel i { position: absolute; left: 50%; top: 36%; width: 24px; height: 40px; border: 1px solid #ffdda0; background: #d8994777; clip-path: polygon(10% 0, 100% 15%, 65% 100%, 0 70%); animation: sugar-shard 1.7s ease calc(var(--i) * 35ms) both; }
+.is-caramel-ur .summon-reveal-ring { border-color: #ffc875; box-shadow: 0 0 32px #ffbd6f66; }
+.sugar-reveal-ornament--cream i { position: absolute; left: calc(8% + var(--i) * 11%); top: 8%; width: 25px; height: 65px; border-radius: 90% 10% 85% 15%; background: linear-gradient(135deg, #fffaf0ee, #f2d4e3aa); animation: sugar-feather 2.5s ease calc(var(--i) * 70ms) both; }
+.sugar-reveal-ornament--cream b { position: absolute; width: min(85vw, 390px); height: 100px; left: 50%; top: 40%; border: 2px solid #fff0d5; border-radius: 50%; box-shadow: 0 12px 0 #edc9dc77, 0 24px 0 #ffefda66, 0 36px 0 #e8bad355; transform: translateX(-50%); animation: sugar-layers 1.8s ease both; }
+.is-cream-ur .summon-reveal-ring { border-color: #fff1db; box-shadow: 0 0 32px #ffd4e266; }
+.is-cream-ur.is-active .summon-reveal-pet-image { animation: sugar-cute-arrival 2.8s ease both; }
+@keyframes sugar-shell { 0% { opacity: 0; transform: translateX(-50%) scale(.6); } 40% { opacity: .8; } 100% { opacity: .15; transform: translateX(-50%) scale(1.3); } }
+@keyframes sugar-shard { 0%, 30% { opacity: 0; transform: rotate(calc(var(--i) * 45deg)) translateY(0); } 60% { opacity: .85; } 100% { opacity: .12; transform: rotate(calc(var(--i) * 45deg)) translateY(-180px); } }
+@keyframes sugar-feather { 0% { opacity: 0; transform: translateY(-20px) rotate(-20deg); } 35% { opacity: .8; } 100% { opacity: .12; transform: translateY(200px) rotate(20deg); } }
+@keyframes sugar-layers { from { opacity: 0; transform: translateX(-50%) scale(.6); } to { opacity: .5; transform: translateX(-50%) scale(1); } }
+@keyframes sugar-cute-arrival { 0% { opacity: 0; transform: translateY(16px) scale(.95); } 35% { opacity: 1; transform: translateY(-5px) scale(1); } 70% { opacity: 1; transform: translateY(3px); } 100% { opacity: 1; transform: none; } }
+
+/* No movement under either reduced-motion preference. Static final scenery is kept. */
+[data-animation="honeylight_sugar"].is-reduced .sugar-scene *,
+.summon-reveal-overlay.is-reduced .sugar-reveal-ornament *,
+.summon-reveal-overlay.is-reduced:is(.is-caramel-ur, .is-cream-ur) .summon-reveal-pet-image,
+body.reduce-motion .sugar-scene *, body.reduce-motion .sugar-reveal-ornament * { animation: none !important; transition: none !important; }
+[data-animation="honeylight_sugar"].is-reduced .sugar-scene__crystals,
+[data-animation="honeylight_sugar"].is-reduced .sugar-scene__candy,
+.summon-reveal-overlay.is-reduced .sugar-reveal-ornament { display: none; }
+[data-animation="honeylight_sugar"].is-reduced .sugar-scene__cream { opacity: .3; transform: translate(-50%, -50%); }
+@media (prefers-reduced-motion: reduce) {
+  .sugar-scene *, .sugar-reveal-ornament *, .is-cream-ur .summon-reveal-pet-image { animation: none !important; transition: none !important; }
+  .sugar-scene__crystals, .sugar-scene__candy, .sugar-reveal-ornament { display: none; }
+}

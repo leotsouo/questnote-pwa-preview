@@ -1,0 +1,63 @@
+[
+  {
+    "id": "wheel_stardust_30",
+    "label": "星塵 +30",
+    "type": "stardust",
+    "amount": 30,
+    "weight": 25
+  },
+  {
+    "id": "wheel_stardust_50",
+    "label": "星塵 +50",
+    "type": "stardust",
+    "amount": 50,
+    "weight": 20
+  },
+  {
+    "id": "wheel_energy_2",
+    "label": "冒險能量 +2",
+    "type": "adventureEnergy",
+    "amount": 2,
+    "weight": 18
+  },
+  {
+    "id": "wheel_forest_leaf",
+    "label": "森林嫩葉 +3",
+    "type": "material",
+    "materialId": "forest_leaf",
+    "amount": 3,
+    "weight": 15
+  },
+  {
+    "id": "wheel_lava_core",
+    "label": "熔岩核心 +1",
+    "type": "material",
+    "materialId": "lava_core",
+    "amount": 1,
+    "weight": 8
+  },
+  {
+    "id": "wheel_machine_part",
+    "label": "古代齒輪 +1",
+    "type": "material",
+    "materialId": "machine_part",
+    "amount": 1,
+    "weight": 8
+  },
+  {
+    "id": "wheel_spirit_food",
+    "label": "小份靈食 +1",
+    "type": "item",
+    "itemId": "item_small_spirit_food",
+    "amount": 1,
+    "weight": 4
+  },
+  {
+    "id": "wheel_star_shard",
+    "label": "星界碎片 +1",
+    "type": "material",
+    "materialId": "star_shard",
+    "amount": 1,
+    "weight": 2
+  }
+]
