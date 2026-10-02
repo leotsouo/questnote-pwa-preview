@@ -39,7 +39,7 @@
   <link rel="stylesheet" href="src/reminder-settings.css" />
   <link rel="stylesheet" href="src/font-size-settings.css" />
   <link rel="stylesheet" href="src/bond-journey.css" />
-  <meta name="questnote-artifact" content="dd1896c0b4d6b5256313acdb060652c7b0690bf2ebf579c0a258827fd02129a7">
+  <meta name="questnote-artifact" content="0088d32ea80e8a6e224c1ca1fa141e8d221a6d1c82b9a9018c2cbc585cfe3cb4">
 </head>
 <body data-theme="default">
   <div id="app-loader" class="app-loader">
@@ -248,8 +248,12 @@
           <p class="gacha-theme-stage__meta" id="gacha-theme-meta"></p>
           <div id="gacha-theme-dual-hero" class="gacha-theme-dual" hidden></div>
         </div>
-          <button type="button" class="gacha-theme-details-btn" id="gacha-theme-details-btn" aria-expanded="false" aria-controls="gacha-theme-details">卡池詳情</button>
+          <div class="gacha-info-actions">
+            <button type="button" class="gacha-theme-details-btn" id="gacha-theme-details-btn" aria-expanded="false" aria-controls="gacha-theme-details">卡池詳情</button>
+            <button type="button" class="gacha-pet-awakening-btn" id="gacha-pet-awakening-toggle" data-action="toggle-awakening-guide" aria-expanded="false" aria-controls="gacha-pet-awakening-guide" hidden><span class="gacha-pet-awakening-btn__icon" aria-hidden="true">✦</span><span>羈絆覺醒</span><span class="gacha-pet-awakening-btn__chevron" aria-hidden="true">⌄</span></button>
+          </div>
           <div class="gacha-theme-details" id="gacha-theme-details" hidden></div>
+          <section id="gacha-pet-awakening-guide" class="awakening-panel gacha-pet-awakening-guide" aria-label="劍隱山河覺醒教學" hidden></section>
         </div>
       </section>
 
@@ -513,6 +517,7 @@
         <div id="guide-chapters" class="guide-chapters"></div>
       </section>
 
+      <section id="guide-pet-awakening" class="awakening-panel card" aria-label="羈絆覺醒教學" tabindex="-1"></section>
       <section class="guide-more card" aria-labelledby="guide-more-title">
         <h2 id="guide-more-title">日常功能速查</h2>
         <details><summary>每日祝福與幸運轉盤</summary><p>入口：任務首頁的「每日祝福」。每天可簽到、查看獎勵，再依頁面狀態轉動幸運轉盤；已領取的項目會顯示今日狀態。每天開始安排任務時，可以順手查看。</p><button type="button" class="btn btn--ghost btn--sm" data-onboarding-action="quick:blessing">查看每日祝福</button></details>

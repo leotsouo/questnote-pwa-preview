@@ -1,13 +1,32 @@
 const escape = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+// Presentation only: the draw catalog and persisted ownership remain canonical.
+export function initialAwakeningPortrait(pet, catalog) {
+  const entry = catalog?.pets?.find((p) => p.petId === pet?.id);
+  if (!entry?.initialImage) return pet;
+  return { ...pet, image: entry.initialImage.original,
+    imageVariants: { card: entry.initialImage.card, stage: entry.initialImage.stage },
+    fallbackImage: entry.initialImage.original };
+}
 export function awakeningPortrait(pet, state, catalog) {
   const progress = state?.byPet?.[pet?.id];
   const entry = catalog?.pets?.find((p) => p.petId === pet?.id);
-  if (!progress?.awakenedAt || !entry || pet.owned === false) return pet;
+  if (!entry) return pet;
+  if (!progress?.awakenedAt || pet.owned === false) return initialAwakeningPortrait(pet, catalog);
   const base = { ...pet, awakeningDialogue: entry.dialogue, awakenedAt: progress.awakenedAt };
   const image = progress.form === 'initial' ? entry.initialImage : entry.awakenedImage;
   return image ? { ...base, image: image.original,
     imageVariants: { card: image.card, stage: image.stage }, fallbackImage: pet.image,
     fallbackImageVariants: pet.imageVariants } : base;
+}
+export function renderAwakeningGuide({ compact = false } = {}) {
+  const title = compact ? '初遇只是開始 · 二十位夥伴都可覺醒' : '劍隱山河 · 羈絆覺醒教學';
+  return `<h2>${title}</h2><p>卡池預覽與召喚結果呈現「初遇相」。培養羈絆、完成覺醒後，才會揭曉新的造型與專屬演出。</p>
+    <ol><li><strong>培養羈絆</strong>：擁有角色，親密度達 Lv.5，並領取該角色 Lv.5 同行故事獎勵。</li>
+    <li><strong>接下守諾試煉</strong>：到「圖鑑 → 角色詳情 → 羈絆覺醒」。接下後完成三筆任務／習慣，並讓牠參加一次接下後出發的雲棧古道派遣，再領取派遣獎勵。</li>
+    <li><strong>完成覺醒儀式</strong>：試煉保證取得專屬信物；使用信物一枚與松香行旅糰一份，開放初遇／覺醒雙形態、覺醒篇章、稱號與陪伴回應。</li></ol>
+    ${compact ? '' : '<p>一次進行一隻試煉，可暫停、換角再恢復，進度保留；暫停期間不計入新事件。既有日常紀錄與先前出發的派遣不計入，原本同行約定可同時進行。材料不足時，完成的試煉會保留，可到工坊製作松香行旅糰。</p><p>覺醒後可在角色詳情切換形態、重播演出；稱號到稱號管理自行裝備。已覺醒夥伴會保留你的形態選擇。</p>'}
+    <p>覺醒是可選的成長旅程，各稀有度成本相同；不扣親密度、星塵或碎片，也不改變稀有度、抽卡機率或派遣收益。</p>
+    ${compact ? '<button type="button" class="btn btn--secondary" data-action="show-awakening-guide">查看完整覺醒教學</button>' : '<div class="awakening-panel__actions"><button type="button" class="btn btn--secondary" data-goto="collection">前往圖鑑</button><button type="button" class="btn btn--ghost" data-goto="workshop">前往工坊</button></div>'}`;
 }
 export function renderAwakeningDetail(pet, state) {
   const entry = state.awakeningCatalog?.pets.find((p) => p.petId === pet.id);

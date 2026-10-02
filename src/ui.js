@@ -78,7 +78,7 @@ import { THEME_DIRECTIONS } from './themeRegistry.js';
 import { twilightIcon, getCompanionScene, initTwilightChrome, syncTwilightHome, syncTwilightGacha, setTwilightCompanionLine, reactTwilightCompanion } from './twilightPresentation.js';
 import { createBondJourneyController } from './bondJourneyController.js';
 import { createAwakeningController } from './petAwakeningController.js';
-import { renderAwakeningDetail, renderAwakeningHome } from './petAwakeningView.js';
+import { renderAwakeningDetail, renderAwakeningHome, renderAwakeningGuide, initialAwakeningPortrait } from './petAwakeningView.js';
 import { renderBondHome, renderBondDetail, renderBondKeepsake } from './bondJourneyView.js';
 import {
   pickStatusLine,
@@ -284,6 +284,8 @@ let onAchievementCheck = null;
 let uiInitialized = false;
 /** 抽卡請求／演出進行中（比 dataset.pulling 更可靠，避免殘留鎖定） */
 let gachaPullInProgress = false;
+let awakeningGuideExpanded = false;
+let awakeningGuidePoolId = null;
 /** Data is refreshed after a pull, but the hidden collection DOM can wait until entry. */
 const collectionRenderGate = createDeferredRenderGate();
 
@@ -947,7 +949,19 @@ function bindDelegatedEvents() {
     const target = e.target.closest('[data-action]');
     if (!target) return;
     const action = target.dataset.action;
-    if (action === 'go-home-daily-blessing') {
+    if (action === 'toggle-awakening-guide') {
+      awakeningGuideExpanded = !awakeningGuideExpanded;
+      target.setAttribute('aria-expanded', String(awakeningGuideExpanded));
+      const guide = document.getElementById('gacha-pet-awakening-guide');
+      if (guide) guide.hidden = !awakeningGuideExpanded;
+    } else if (action === 'show-awakening-guide') {
+      switchView('guide');
+      requestAnimationFrame(() => {
+        const guide = document.getElementById('guide-pet-awakening');
+        guide?.scrollIntoView({ behavior: preferredScrollBehavior(), block: 'start' });
+        guide?.focus({ preventScroll: true });
+      });
+    } else if (action === 'go-home-daily-blessing') {
       homeHubActive = 'blessing';
       dailyBlessingCollapsed = false;
       switchView('tasks');
@@ -1341,7 +1355,11 @@ export function switchView(viewName) {
   const nav = document.querySelector(`.nav-item[data-view="${navView}"]`);
   if (view) view.classList.add('active');
   if (nav) { nav.classList.add('active'); nav.setAttribute('aria-current', 'page'); }
-  if (viewName === 'guide') window.scrollTo(0, 0);
+  if (viewName === 'guide') {
+    const awakeningGuide = document.getElementById('guide-pet-awakening');
+    if (awakeningGuide) awakeningGuide.innerHTML = renderAwakeningGuide();
+    window.scrollTo(0, 0);
+  }
 
   trackUserActivity();
 
@@ -1825,6 +1843,7 @@ export function renderView(viewName) {
       renderHandbookView();
       break;
     case 'guide':
+      if (document.getElementById('guide-pet-awakening')) document.getElementById('guide-pet-awakening').innerHTML = renderAwakeningGuide();
       refreshOnboarding();
       break;
     case 'share':
@@ -4887,7 +4906,7 @@ function getAvailablePullsForSelectedPool() {
 }
 
 function renderGachaUnavailable() {
-  for (const id of ['gacha-pool-content', 'gacha-theme-stage', 'gacha-awakening-panel', 'gacha-theme-details', 'gacha-theme-details-btn']) {
+  for (const id of ['gacha-pool-content', 'gacha-theme-stage', 'gacha-awakening-panel', 'gacha-theme-details', 'gacha-theme-details-btn', 'gacha-pet-awakening-guide', 'gacha-pet-awakening-toggle']) {
     const element = document.getElementById(id);
     if (element) element.hidden = true;
   }
@@ -4945,6 +4964,21 @@ function renderGachaView() {
 
   renderGachaPoolSwitcher();
   renderGachaThemeStage(pool);
+  const awakeningGuide = document.getElementById('gacha-pet-awakening-guide');
+  const awakeningToggle = document.getElementById('gacha-pet-awakening-toggle');
+  const hasPetAwakening = normalizePoolPresentation(pool)?.animationKey === 'swordwild_shanhe';
+  if (awakeningGuidePoolId !== pool.id) {
+    awakeningGuidePoolId = pool.id;
+    awakeningGuideExpanded = false;
+  }
+  if (awakeningToggle) {
+    awakeningToggle.hidden = !hasPetAwakening;
+    awakeningToggle.setAttribute('aria-expanded', String(hasPetAwakening && awakeningGuideExpanded));
+  }
+  if (awakeningGuide) {
+    awakeningGuide.hidden = !hasPetAwakening || !awakeningGuideExpanded;
+    if (hasPetAwakening) awakeningGuide.innerHTML = renderAwakeningGuide({ compact: true });
+  }
   setText('gacha-pool-name', pool.name);
   setText('gacha-stardust', stardust);
   setText('gacha-cost', singleCost);
@@ -5112,7 +5146,8 @@ function renderGachaThemeStage(pool) {
   const stage = document.getElementById('gacha-theme-stage');
   const poolNameEl = document.getElementById('gacha-pool-name');
   const unlockEntry = getUnlockEntryForPool(pool?.id);
-  const model = resolvePoolPresentationModel(pool, state.allPets, unlockEntry, { visualLocked: !shouldShowAwakenedPresentation(unlockEntry) });
+  const previewPets = state.allPets.map((pet) => initialAwakeningPortrait(pet, state.awakeningCatalog));
+  const model = resolvePoolPresentationModel(pool, previewPets, unlockEntry, { visualLocked: !shouldShowAwakenedPresentation(unlockEntry) });
   const presentation = model.presentation;
   const themeAttr = model.cssTheme;
   const expansion = model.unlock?.expansion;
@@ -5526,7 +5561,8 @@ async function handlePull() {
   if (poolSelect) poolSelect.disabled = true;
 
   try {
-    const result = await pullOnce(state.allPets, state.poolsData, pool?.id);
+    const drawn = await pullOnce(state.allPets, state.poolsData, pool?.id);
+    const result = { ...drawn, pet: initialAwakeningPortrait(drawn.pet, state.awakeningCatalog) };
     if (result.unlockProgress?.entry) {
       state.poolUnlockState = {
         ...(state.poolUnlockState || { key: 'poolUnlockState', schemaVersion: 1, byPool: {} }),
@@ -5603,7 +5639,8 @@ async function handleTenPull() {
   if (poolSelect) poolSelect.disabled = true;
 
   try {
-    const result = await performTenPull(state.allPets, state.poolsData, pool?.id);
+    const drawn = await performTenPull(state.allPets, state.poolsData, pool?.id);
+    const result = { ...drawn, results: drawn.results?.map((r) => ({ ...r, pet: initialAwakeningPortrait(r.pet, state.awakeningCatalog) })) };
     if (!result.success) {
       clearPendingAwakening();
       showToast(result.error || '10 連抽失敗', 'warning');
