@@ -69,16 +69,6 @@ export function getHighestBondLevel(enrichedCollection = []) {
   return max;
 }
 
-/** 取得已擁有寵物中的最高星級（0 表示尚無寵物） */
-export function getHighestStar(enrichedCollection = []) {
-  let max = 0;
-  for (const pet of enrichedCollection) {
-    if (pet?.owned && Number.isFinite(pet.stars)) {
-      max = Math.max(max, pet.stars);
-    }
-  }
-  return max;
-}
 
 /** 找出羈絆最高的已擁有寵物 */
 export function getHighestBondPet(enrichedCollection = []) {
@@ -497,7 +487,6 @@ export function buildCollectionSummary(ctx) {
     : [];
 
   const maxBond = getHighestBondLevel(ctx.enrichedCollection);
-  const maxStar = getHighestStar(ctx.enrichedCollection);
   const bondLiberated = context ? toInt(context.bondLiberatedCount) : null;
 
   const companion = ctx.companion || null;
@@ -518,7 +507,6 @@ export function buildCollectionSummary(ctx) {
     milestonesClaimed: ms
       ? stat(true, { claimed: toInt(ms.claimedCount), total: toInt(ms.total) })
       : stat(false),
-    maxStar: maxStar >= 1 ? stat(true, { value: maxStar }) : stat(false),
     maxBond: maxBond >= 1 ? stat(true, { value: maxBond }) : stat(false),
     bondLiberated: bondLiberated != null ? stat(true, { value: bondLiberated }) : stat(false),
     companion,

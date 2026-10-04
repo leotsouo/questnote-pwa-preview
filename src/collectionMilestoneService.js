@@ -123,7 +123,7 @@ export function resolveCollectionMilestoneDefinitions(allPets = []) {
   for (const pet of Array.isArray(allPets) ? allPets : []) {
     if (COLLECTION_RARITY_ORDER.includes(pet?.rarity)) rarityTotals[pet.rarity] += 1;
   }
-  return COLLECTION_MILESTONE_DEFINITIONS.map((definition) => {
+  return COLLECTION_MILESTONE_DEFINITIONS.filter((definition) => definition.category !== 'star').map((definition) => {
     if (definition.conditionType === 'all_pets') {
       return { ...definition, target: allPets.length };
     }
@@ -194,7 +194,7 @@ export function buildCollectionMilestoneSummary(allPets, collection, milestoneSt
       ? Math.min(100, Math.round((context.ownedCount / context.totalPets) * 100))
       : 0,
     nextMilestone,
-    unlockedBadges: items.filter((item) => item.claimed).map((item) => item.badge),
+    unlockedBadges: [...items.filter((item) => item.claimed).map((item) => item.badge), ...COLLECTION_MILESTONE_DEFINITIONS.filter((item) => item.category === 'star' && claimed.has(item.id)).map((item) => ({ ...item.badge, description:'過去旅程留下的紀念' }))],
   };
 }
 

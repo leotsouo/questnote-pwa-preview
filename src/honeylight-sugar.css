@@ -36,7 +36,6 @@
 [data-animation="honeylight_sugar"]:is([data-state="bloom"], .is-phase-bloom) .sugar-scene__cream { opacity: .95; transform: translate(-50%, -50%) scale(1); }
 [data-animation="honeylight_sugar"]:is([data-state="bloom"], [data-state="summary"], .is-phase-bloom) .sugar-scene__light { opacity: .9; }
 [data-animation="honeylight_sugar"][data-state="summary"] .sugar-scene__cream { opacity: .12; }
-[data-animation="honeylight_sugar"].is-short .sugar-scene * { transition-duration: .35s; }
 @keyframes sugar-crystal { to { opacity: .85; transform: translateY(-14px) rotate(65deg); } }
 
 /* Card-pool page uses the same palette without perpetual decorative motion. */

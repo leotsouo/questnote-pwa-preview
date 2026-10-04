@@ -9,7 +9,7 @@ function visible(element) {
 }
 
 function controls(root) {
-  return [...root.querySelectorAll('button, a[href], input, select, textarea, [tabindex]')]
+  return [...root.querySelectorAll('button, a[href], input, select, textarea, summary, [tabindex]')]
     .filter((element) => element.tabIndex >= 0 && !element.matches(':disabled') && visible(element));
 }
 
@@ -110,7 +110,7 @@ export function bindDialogFocus() {
   const body = document.getElementById('modal-body');
   if (overlay && body) {
     const nameDialog = () => {
-      overlay.setAttribute('aria-label', body.querySelector('h1, h2, [role="heading"]')?.textContent.trim() || 'QuestNote 視窗');
+      overlay.setAttribute('aria-label', (body.querySelector('.modal-title') || body.querySelector('h1, h2, [role="heading"]'))?.textContent.trim() || 'QuestNote 視窗');
     };
     new MutationObserver(nameDialog).observe(body, { childList: true, subtree: true, characterData: true });
     nameDialog();

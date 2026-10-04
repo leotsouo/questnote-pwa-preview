@@ -314,6 +314,7 @@ export async function replaceAllStores(payload) {
       }
 
       const metaStore = tx.objectStore(STORES.META);
+      if (payload.encounterEconomy) metaStore.put(payload.encounterEconomy);
       if (payload.wallet) metaStore.put(payload.wallet);
       if (payload.gachaStats) metaStore.put(payload.gachaStats);
       if (payload.achievements) metaStore.put(payload.achievements);

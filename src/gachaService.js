@@ -29,15 +29,16 @@ export async function getPoolPetsAsync(allPets, pool) {
 
 function executeDraw(allPets, poolsData, selectedPoolId, count) {
   return dbMutateRecords([
+    { store:STORES.META, key:'encounterEconomy' },
     { store: STORES.META, key: 'wallet' },
     { store: STORES.META, key: GACHA_STATS_KEY },
     { store: STORES.META, key: 'poolUnlockState' },
     { store: STORES.META, key: 'idempotentGrants' },
     { store: STORES.COLLECTION, all: true },
-  ], ([wallet, stats, unlockState, grants, collection]) => {
+  ], ([encounterEconomy, wallet, stats, unlockState, grants, collection]) => {
     const plan = planGachaTransaction({ allPets, poolsData, selectedPoolId, count,
-      wallet, stats, unlockState, grants, collection });
-    return { puts: [plan.wallet, plan.stats, plan.unlockState, plan.grants]
+      wallet, stats, unlockState, grants, collection, encounterEconomy });
+    return { puts: [plan.wallet, plan.stats, plan.unlockState, plan.grants, plan.encounterEconomy]
       .map((value) => ({ store: STORES.META, value }))
       .concat(plan.changedCollection.map((value) => ({ store: STORES.COLLECTION, value }))), result: plan.result };
   });

@@ -64,6 +64,7 @@ export function buildTwilightHome(companion, hasOwnedPets = false, theme = 'twil
       <div class="twilight-greeting"><p class="twilight-eyebrow" id="twilight-date"></p><h1>${greeting}</h1><p>每一件小事，都有人陪你完成。</p></div>
       <div class="twilight-companion-caption"><p class="twilight-eyebrow">${companion ? '今日同行' : '冒險的起點'}</p>
         <button type="button" class="twilight-pet-name" data-action="${companion ? 'companion-view-detail' : emptyAction}" ${companion ? `data-pet-id="${escapeHtml(companion.id)}"` : ''}><span class="twilight-pet-name__text">${escapeHtml(name)}</span>${companion ? `<span class="twilight-rarity">${escapeHtml(companion.rarity)}</span>` : ''}${twilightIcon('arrow')}</button>
+        ${companion?.nickname ? `<p class="twilight-original-name">原名：${escapeHtml(companion.originalName || companion.name)}</p>` : ''}
         <p>${escapeHtml(companion?.title || emptyHint)}</p>
         ${companion ? `<button type="button" class="qn-companion-feed" data-action="companion-feed" aria-label="餵食 ${escapeHtml(name)}">${twilightIcon('gift')}<span>餵食</span></button>` : ''}
       </div>

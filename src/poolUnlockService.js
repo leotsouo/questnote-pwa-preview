@@ -1,3 +1,4 @@
+import { planEncounterMigration } from './encounterEconomyCore.js';
 /** Atomic pool unlock persistence. Draws use the same pure transitions in their transaction. */
 import { dbGet, dbPut, dbUpdateRecord, dbMutateRecords, STORES } from './db.js';
 import { normalizeEntry } from './collectionService.js';
@@ -88,15 +89,18 @@ function mutateUnlockAndCollection(poolId, expansion, allPets, operation) {
   return dbMutateRecords([
     { store: STORES.META, key: POOL_UNLOCK_META_KEY },
     { store: STORES.META, key: IDEMPOTENT_GRANTS_META_KEY },
+    { store:STORES.META, key:'encounterEconomy' },
     { store: STORES.COLLECTION, all: true },
-  ], ([rawState, rawGrants, items]) => {
+  ], ([rawState, rawGrants, rawEconomy, items]) => {
     const state = normalizePoolUnlockState(rawState);
     const grants = normalizeIdempotentGrants(rawGrants);
-    const collection = new Map(items.map((entry) => [entry.petId, normalizeEntry(entry)]));
-    const changed = new Set();
+    const migration = planEncounterMigration({ economy:rawEconomy, collection:items });
+    const encounterEconomy = migration.economy;
+    const collection = new Map(migration.collection.map((entry) => [entry.petId, normalizeEntry(entry)]));
+    const changed = new Set(migration.changedCollection.map((entry) => entry.petId));
     const result = operation({ state, grants, collection, changed, poolId, expansion,
-      allPets, now: new Date().toISOString() });
-    return { puts: [{ store: STORES.META, value: state }, { store: STORES.META, value: grants },
+      allPets, encounterEconomy, now: new Date().toISOString() });
+    return { puts: [{ store:STORES.META, value:encounterEconomy }, { store: STORES.META, value: state }, { store: STORES.META, value: grants },
       ...[...changed].map((id) => ({ store: STORES.COLLECTION, value: collection.get(id) }))], result };
   });
 }

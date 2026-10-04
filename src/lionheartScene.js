@@ -1,6 +1,8 @@
 /** Original city / natural wind / inverse machinery scenery. Presentation only. */
+import { summonPreludeDurations } from './summonTiming.js';
+
 export function lionheartPreludeDurations(reduced) {
-  return reduced ? [100, 100, 150, 150] : [650, 750, 900, 700];
+  return summonPreludeDurations(reduced);
 }
 
 export function createLionheartScene(motif = 'summon') {

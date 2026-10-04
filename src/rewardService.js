@@ -1,7 +1,7 @@
 /**
  * 星塵獎勵計算與發放
  */
-import { openDB, dbGet, dbPut, dbUpdateRecord, STORES } from './db.js';
+import { openDB, dbGet, dbPut, dbUpdateRecord, dbMutateRecords, STORES } from './db.js';
 import { updateTask } from './taskService.js';
 import { addBondExpToCompanion } from './collectionService.js';
 
@@ -256,12 +256,41 @@ export async function applyRewardBundle(bundle) {
 }
 
 /**
- * 以單一 IndexedDB transaction 發放星塵並更新同一個 meta 狀態。
- * updateState 回傳 null 代表狀態已處理，transaction 不寫入也不發獎。
- * 適用於需要防止跨頁／快速連點重複領取的里程碑。
- * @param {{ stardust: number, stateKey: string, updateState: (rawState: object|null) => object|null }} options
- * @returns {Promise<object|null>}
+ * Commit a reward bundle and its claim marker together using fresh records.
+ * The synchronous reducer can return only a result to reject a duplicate claim.
  */
+export async function applyRewardBundleAndUpdateMeta(stateKey, updateState) {
+  return dbMutateRecords([
+    { store: STORES.META, key: stateKey },
+    { store: STORES.META, key: WALLET_KEY },
+    { store: STORES.META, key: INVENTORY_KEY },
+  ], ([rawState, rawWallet, rawInventory]) => {
+    const update = updateState(rawState);
+    if (!update.state) return { puts: [], result: update.result };
+    const reward = update.reward || {};
+    const wallet = normalizeWallet(rawWallet);
+    const inventory = { ...rawInventory, key: INVENTORY_KEY,
+      items: { ...(rawInventory?.items || {}) }, itemUsageLogs: { ...(rawInventory?.itemUsageLogs || {}) } };
+    const add = (current = 0, amount = 0) => {
+      const value = current + amount;
+      if (!Number.isSafeInteger(amount) || amount < 0 || !Number.isSafeInteger(value) || value < 0) {
+        throw new Error('獎勵數值需要檢查，原始紀錄已保留。');
+      }
+      return value;
+    };
+    wallet.stardust = add(wallet.stardust, reward.stardust);
+    wallet.adventureEnergy = add(wallet.adventureEnergy, reward.adventureEnergy);
+    for (const [id, amount] of Object.entries(reward.materials || {})) wallet.materials[id] = add(wallet.materials[id], amount);
+    for (const [id, amount] of Object.entries(reward.items || {})) inventory.items[id] = add(inventory.items[id], amount);
+    return { puts: [
+      { store: STORES.META, value: update.state },
+      { store: STORES.META, value: wallet },
+      ...(Object.keys(reward.items || {}).length ? [{ store: STORES.META, value: inventory }] : []),
+    ], result: update.result };
+  });
+}
+
+/** Commit a stardust-only milestone; a null update skips both writes. */
 export async function applyStardustRewardAndUpdateMeta(options) {
   const amount = Math.max(0, Number(options?.stardust) || 0);
   const stateKey = options?.stateKey;

@@ -168,10 +168,14 @@ function parsePool(raw, path, errors) {
     if (!positiveInteger(pity[key])) errors.push(issue('POOL_PITY_INVALID', 'Expected a positive safe integer', `${path}.pity.${key}`));
   }
   if (!(rates.SSR + rates.UR > 0)) errors.push(issue('POOL_SSR_PITY_RATE', 'SSR pity requires a positive SSR + UR rate', `${path}.rates`));
+  if (raw.tenPullGuarantee !== undefined && raw.tenPullGuarantee !== 'SR') {
+    errors.push(issue('POOL_TEN_GUARANTEE_INVALID', 'Ten-pull guarantee must be SR when configured', `${path}.tenPullGuarantee`));
+  }
   return {
     id: raw.id,
     name: checkText(raw.name, `${path}.name`, errors, { required: true }),
     active: raw.active, cost: raw.cost, rates, pity,
+    ...(raw.tenPullGuarantee === 'SR' ? { tenPullGuarantee:'SR' } : {}),
     petFilter: { poolTags: checkList(raw.petFilter?.poolTags, `${path}.petFilter.poolTags`, errors, token, { required: true }) },
     presentation: normalizePresentation(raw.presentation, raw.id, errors, `${path}.presentation`),
     unlockExpansion: normalizeExpansion(raw.unlockExpansion, raw.id, errors, `${path}.unlockExpansion`),
@@ -266,7 +270,7 @@ function checkReferences(pool, pets, errors, path) {
   for (const [phase, candidates] of [['locked', locked], ['unlocked', unlocked]]) {
     if (!candidates.length) errors.push(issue('POOL_EMPTY', 'Pool has no candidates', `${path}.${phase}`));
     for (const rarity of POOL_RARITIES) {
-      if ((pool.rates[rarity] > 0 || rarity === 'UR') && !candidates.some((pet) => pet.rarity === rarity)) {
+      if ((pool.rates[rarity] > 0 || rarity === 'UR' || (rarity === 'SR' && pool.tenPullGuarantee === 'SR')) && !candidates.some((pet) => pet.rarity === rarity)) {
         errors.push(issue('POOL_EMPTY_RARITY', `No ${rarity} candidate for rates or pity`, `${path}.${phase}.${rarity}`));
       }
     }
@@ -395,7 +399,7 @@ export function resolvePoolPresentationModel(rawPool, allPets, unlockEntry = {},
       rewardSource: resolveUnlockRewardSource(pool.id, expansion),
       progress: { draws, threshold: expansion.threshold, percent: Math.min(100, Math.round(draws / expansion.threshold * 100)) },
       progressText: awakened ? `${expansion.title}已解鎖` : `${expansion.presentation.progressLabel} ${draws}／${expansion.threshold}`,
-      description: awakened ? expansion.unlockMessage : `完成 ${expansion.threshold} 次${pool.name}，解鎖 ${added.length} 位${expansion.presentation.candidateLabel}，並固定獲得${rewardPet.name}。`,
+      description: awakened ? expansion.unlockMessage : `在「${pool.name}」完成 ${expansion.threshold} 次召喚，解鎖 ${added.length} 位${expansion.presentation.candidateLabel}，並固定獲得${rewardPet.name}。`,
       countsText: awakened ? `候選角色：${counts.effective}` : `目前候選：${counts.locked}　解鎖後候選：${counts.unlocked}`,
     } : null,
   };

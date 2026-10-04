@@ -233,7 +233,7 @@ body[data-theme] #app :is(.habit-card__description, .habit-card__meta, .achievem
 body[data-theme] #app .achievement-summary__value--claimable { color: var(--tw-green); }
 body[data-theme] #app .habit-stat-card__value--streak { color: var(--tw-paper-gold); }
 body[data-theme] #app :is(.habit-check, .habit-complete-btn, .achievement-claim-button) { min-width: 44px; min-height: 44px; box-shadow: none; }
-body[data-theme] #app :is(.habit-summary, .habit-stats, .workshop-summary, .achievement-summary, .handbook-hero) { background: var(--color-bg-card-soft); color: var(--tw-ink); border-color: var(--color-border); box-shadow: none; }
+body[data-theme] #app :is(.habit-summary, .workshop-summary, .achievement-summary, .handbook-hero) { background: var(--color-bg-card-soft); color: var(--tw-ink); border-color: var(--color-border); box-shadow: none; }
 body[data-theme] #app :is(.workshop-tag, .habit-streak, .handbook-chip, .achievement-reward-chip) { background: var(--color-bg-card-soft); color: var(--tw-paper-gold); border-color: var(--color-border); }
 body[data-theme] #app .more-menu { background: transparent; border: 0; padding: 0; }
 body[data-theme] #app .more-menu-item { min-height: 82px; padding: 18px 0; background: transparent; border-bottom: 1px solid var(--tw-line); border-radius: 0; }
@@ -342,3 +342,5 @@ body[data-theme] .twilight-is-reacting .twilight-companion-art { animation: twil
   body[data-theme] *, body[data-theme] *::before, body[data-theme] *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
 body[data-theme].reduce-motion *, body[data-theme].reduce-motion *::before, body[data-theme].reduce-motion *::after { animation: none !important; transition: none !important; }
+
+body[data-theme] .twilight-original-name { font-size: .75rem; color: var(--qn-scene-muted); line-height: 1.5; overflow-wrap: anywhere; }

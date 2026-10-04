@@ -17,9 +17,9 @@
 .dream-debut-overlay[data-animation=swordwild_shanhe],.dream-bloom-overlay[data-animation=swordwild_shanhe]{background:#08261e}
 .dream-debut-overlay[data-animation=swordwild_shanhe] .shanhe-scroll{opacity:1;transform:scaleX(1)}
 .dream-debut-overlay[data-animation=swordwild_shanhe] .shanhe-trail-line{animation:shanhe-trace 2s 200ms ease both}
-.dream-debut-overlay[data-animation=swordwild_shanhe] .shanhe-cloud--left{animation:shanhe-cloud-left 3.4s ease both}
-.dream-debut-overlay[data-animation=swordwild_shanhe] .shanhe-cloud--right{animation:shanhe-cloud-right 3.4s ease both}
-.dream-debut-overlay[data-animation=swordwild_shanhe] .shanhe-landscape{animation:shanhe-arrive 3.4s ease both}
+.dream-debut-overlay[data-animation=swordwild_shanhe] .shanhe-cloud--left{animation:shanhe-cloud-left var(--pool-scene-duration,3.4s) ease both}
+.dream-debut-overlay[data-animation=swordwild_shanhe] .shanhe-cloud--right{animation:shanhe-cloud-right var(--pool-scene-duration,3.4s) ease both}
+.dream-debut-overlay[data-animation=swordwild_shanhe] .shanhe-landscape{animation:shanhe-arrive var(--pool-scene-duration,3.4s) ease both}
 .dream-debut-overlay[data-animation=swordwild_shanhe] .shanhe-seals{animation:shanhe-seal-arrive 2.2s 500ms both}
 .dream-debut-overlay[data-animation=swordwild_shanhe] .dream-debut-copy{position:absolute;z-index:3;top:auto;bottom:19%;left:0;right:0;margin:0 auto;padding:0 18px}
 .dream-debut-overlay[data-animation=swordwild_shanhe] .dream-debut-line{color:#f4e4b9;text-shadow:0 2px 14px #000;font-family:'Noto Serif TC','PMingLiU',serif;letter-spacing:.2em}

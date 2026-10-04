@@ -33,9 +33,11 @@ export function getPetSpecialty(pet) {
   const explicitRole = Object.hasOwn(SPECIALTY_LABELS, pet.expeditionSpecialty) ? pet.expeditionSpecialty : null;
   const role = explicitRole || ELEMENT_ROLES.find((entry) => entry.words.some((word) => text.includes(word)))?.role
     || ['scout', 'gatherer', 'companion', 'scholar', 'guardian'][hashText(pet.id || '') % 5];
-  const stars = Math.max(1, Math.min(5, Number(pet.stars) || 1));
-  return { role, label: SPECIALTY_LABELS[role], stars, level: stars,
-    description: stars === 1 ? '已能發揮隊伍專長' : `升星強化專長 Lv.${stars}` };
+  const bondLevel = Math.max(1, Math.min(5, Number(pet.bondLevel) || 1));
+  const legacyFloor = Math.max(1, Math.min(5, Number(pet.legacySpecialtyFloor) || (pet.encounterMigrationVersion !== 1 ? Number(pet.stars) : 1) || 1));
+  const level = Math.max(bondLevel, legacyFloor);
+  return { role, label:SPECIALTY_LABELS[role], level,
+    description:`親密度培養專長 Lv.${level}` };
 }
 
 function hashText(text) {
@@ -81,20 +83,20 @@ export function planExpeditionResult(area, pets, objective = 'explore', random =
   const rolePower = specialties.filter((s) => s.role === matchingRole).reduce((sum, s) => sum + s.level, 0);
   const scholarPower = specialties.filter((s) => s.role === 'scholar').reduce((sum, s) => sum + s.level, 0);
   const guardianPower = specialties.filter((s) => s.role === 'guardian').reduce((sum, s) => sum + s.level, 0);
-  const starPower = specialties.reduce((sum, s) => sum + s.level - 1, 0);
+  const specialtyPower = specialties.reduce((sum, s) => sum + s.level - 1, 0);
   const variety = new Set(specialties.map((s) => s.role)).size;
   const roll = (min, max) => min + Math.floor(random() * (max - min + 1));
   const baseStardust = roll(area.rewards.stardust.min, area.rewards.stardust.max);
   const rarityBonus = Math.max(...pets.map((p) => RARITY_BONUS[p.rarity] ?? 0));
   const bondBonus = Math.min(0.08, pets.reduce((sum, p) => sum + Math.max(0, (p.bondLevel || 1) - 1) * 0.01, 0));
   const totalBonus = rarityBonus + bondBonus;
-  const bonusStardust = Math.floor(baseStardust * totalBonus) + guardianPower * 2 + starPower;
+  const bonusStardust = Math.floor(baseStardust * totalBonus) + guardianPower * 2 + specialtyPower;
   const material = area.rewards.material;
   const baseMaterial = roll(Math.max(1, material.min), Math.max(1, material.max));
   const extraMaterial = objective === 'gather' ? 1 + Math.ceil(rolePower / 2) : 0;
   const bondExp = area.rewards.bondExp + (objective === 'bond' ? 4 + rolePower * 2 : 0);
   const explorationBonus = (objective === 'explore' ? 2 + rolePower : Math.floor(scholarPower / 2));
-  const eventChance = Math.min(0.85, 0.18 + 0.07 * variety + 0.05 * rolePower + 0.03 * scholarPower + 0.01 * starPower);
+  const eventChance = Math.min(0.85, 0.18 + 0.07 * variety + 0.05 * rolePower + 0.03 * scholarPower + 0.01 * specialtyPower);
   const discovered = random() < eventChance;
   const event = discovered
     ? { id: `${area.id}_${objective}_${specialties[0].role}`, title: '隊伍的額外發現',

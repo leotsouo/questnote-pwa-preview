@@ -4,10 +4,7 @@
 import { dbGet, dbPut, STORES } from './db.js';
 import { getTodayDateString, daysBetween } from './taskFilterService.js';
 import {
-  addStardust,
-  addAdventureEnergy,
-  addMaterial,
-  applyRewardBundle,
+  applyRewardBundleAndUpdateMeta,
 } from './rewardService.js';
 
 const DAILY_CHECK_IN_KEY = 'dailyCheckIn';
@@ -240,41 +237,41 @@ export async function performDailyCheckIn() {
 
   try {
     const todayKey = getLocalDateKey();
-    const daily = await getDailyCheckIn();
+    return await applyRewardBundleAndUpdateMeta(DAILY_CHECK_IN_KEY, (raw) => {
+      const daily = normalizeDailyCheckIn(raw);
 
-    if (hasCheckedInToday(daily, todayKey)) {
-      return { success: false, error: '今天已經簽到過了' };
-    }
+      if (hasCheckedInToday(daily, todayKey)) {
+        return { result: { success: false, error: '今天已經簽到過了' } };
+      }
 
-    let newStreak = 1;
-    if (isYesterday(daily.lastCheckInDate, todayKey)) {
-      newStreak = (daily.streak ?? 0) + 1;
-    } else if (daily.lastCheckInDate === todayKey) {
-      return { success: false, error: '今天已經簽到過了' };
-    }
+      let newStreak = 1;
+      if (isYesterday(daily.lastCheckInDate, todayKey)) {
+        newStreak = (daily.streak ?? 0) + 1;
+      } else if (daily.lastCheckInDate === todayKey) {
+        return { result: { success: false, error: '今天已經簽到過了' } };
+      }
 
-    const rewards = calculateCheckInRewards(newStreak);
-    await applyRewardBundle(rewards);
+      const rewards = calculateCheckInRewards(newStreak);
 
-    const now = new Date().toISOString();
-    daily.lastCheckInDate = todayKey;
-    daily.lastCheckInAt = now;
-    daily.streak = newStreak;
-    daily.bestStreak = Math.max(daily.bestStreak ?? 0, newStreak);
-    daily.totalCheckIns = (daily.totalCheckIns ?? 0) + 1;
+      const now = new Date().toISOString();
+      daily.lastCheckInDate = todayKey;
+      daily.lastCheckInAt = now;
+      daily.streak = newStreak;
+      daily.bestStreak = Math.max(daily.bestStreak ?? 0, newStreak);
+      daily.totalCheckIns = (daily.totalCheckIns ?? 0) + 1;
 
-    upsertHistoryEntry(daily, todayKey, {
-      checkedInAt: now,
-      checkInReward: {
-        stardust: rewards.stardust,
-        adventureEnergy: rewards.adventureEnergy,
-        materials: { ...rewards.materials },
-        items: { ...rewards.items },
-      },
+      upsertHistoryEntry(daily, todayKey, {
+        checkedInAt: now,
+        checkInReward: {
+          stardust: rewards.stardust,
+          adventureEnergy: rewards.adventureEnergy,
+          materials: { ...rewards.materials },
+          items: { ...rewards.items },
+        },
+      });
+
+      return { state: daily, reward: rewards, result: { success: true, rewards, streak: newStreak, daily } };
     });
-
-    const saved = await saveDailyCheckIn(daily);
-    return { success: true, rewards, streak: newStreak, daily: saved };
   } catch (err) {
     console.error('[QuestNote] 簽到失敗:', err);
     return { success: false, error: err?.message || '簽到失敗' };
@@ -321,32 +318,32 @@ export async function prepareDailyWheelSpin() {
 export async function finalizeDailyWheelSpin(reward) {
   try {
     const todayKey = getLocalDateKey();
-    const daily = await getDailyCheckIn();
+    return await applyRewardBundleAndUpdateMeta(DAILY_CHECK_IN_KEY, (raw) => {
+      const daily = normalizeDailyCheckIn(raw);
 
-    if (hasSpunWheelToday(daily, todayKey)) {
-      return { success: false, error: '今天已經轉過幸運轉盤了' };
-    }
+      if (hasSpunWheelToday(daily, todayKey)) {
+        return { result: { success: false, error: '今天已經轉過幸運轉盤了' } };
+      }
 
-    const bundle = wheelRewardToBundle(reward);
-    await applyRewardBundle(bundle);
+      const bundle = wheelRewardToBundle(reward);
 
-    const now = new Date().toISOString();
-    daily.lastWheelSpinDate = todayKey;
-    daily.lastWheelSpinAt = now;
-    daily.totalWheelSpins = (daily.totalWheelSpins ?? 0) + 1;
+      const now = new Date().toISOString();
+      daily.lastWheelSpinDate = todayKey;
+      daily.lastWheelSpinAt = now;
+      daily.totalWheelSpins = (daily.totalWheelSpins ?? 0) + 1;
 
-    upsertHistoryEntry(daily, todayKey, {
-      wheelReward: {
-        type: reward.type,
-        amount: reward.amount,
-        materialId: reward.materialId,
-        itemId: reward.itemId,
-        label: reward.label,
-      },
+      upsertHistoryEntry(daily, todayKey, {
+        wheelReward: {
+          type: reward.type,
+          amount: reward.amount,
+          materialId: reward.materialId,
+          itemId: reward.itemId,
+          label: reward.label,
+        },
+      });
+
+      return { state: daily, reward: bundle, result: { success: true, reward, daily } };
     });
-
-    const saved = await saveDailyCheckIn(daily);
-    return { success: true, reward, daily: saved };
   } catch (err) {
     console.error('[QuestNote] 轉盤結算失敗:', err);
     return { success: false, error: err?.message || '轉盤結算失敗' };

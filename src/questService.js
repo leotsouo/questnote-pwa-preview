@@ -7,7 +7,7 @@
  * 重要：本系統為「額外」獎勵層，不改動任何原本任務／習慣／探險／工坊／簽到的收益。
  */
 import { dbGet, dbPut, STORES } from './db.js';
-import { applyRewardBundle } from './rewardService.js';
+import { applyRewardBundleAndUpdateMeta } from './rewardService.js';
 import { getTodayDateString } from './taskFilterService.js';
 
 const QUEST_PROGRESS_KEY = 'questProgress';
@@ -309,39 +309,24 @@ export async function updateQuestProgress(eventType, amount = 1) {
  * @returns {{ success: boolean, error?: string, quest?: object, reward?: object, scope?: string }}
  */
 export async function claimQuestReward(questId, scope) {
-  const qp = await getQuestProgress();
-  const bucket = scope === 'weekly' ? qp.weekly : qp.daily;
-  const quest = bucket?.quests?.[questId];
-
-  if (!quest) {
-    return { success: false, error: '找不到這個冒險任務' };
-  }
-  if (!quest.completed) {
-    return { success: false, error: '任務尚未完成，無法領取' };
-  }
-  if (quest.claimed) {
-    return { success: false, error: '獎勵已領取' };
-  }
-
-  const def = getDefById(scope, questId);
-  const reward = def?.reward || {};
-
   try {
-    await applyRewardBundle(reward);
+    return await applyRewardBundleAndUpdateMeta(QUEST_PROGRESS_KEY, (raw) => {
+      const qp = rolloverQuestProgress(normalizeQuestProgress(raw)).questProgress;
+      const quest = qp[scope]?.quests?.[questId];
+      const fail = (error) => ({ result: { success: false, error } });
+      if (!quest) return fail('找不到這個冒險任務');
+      if (!quest.completed) return fail('任務尚未完成，無法領取');
+      if (quest.claimed) return fail('獎勵已領取');
+      const reward = getDefById(scope, questId)?.reward || {};
+      quest.claimed = true;
+      const stat = scope === 'weekly' ? 'totalWeeklyQuestsClaimed' : 'totalDailyQuestsClaimed';
+      qp.stats[stat] = toSafeInt(qp.stats[stat]) + 1;
+      qp.stats.lastUpdatedAt = new Date().toISOString();
+      return { state: qp, reward, result: { success: true, quest, reward, scope } };
+    });
   } catch (err) {
     return { success: false, error: err?.message || '獎勵發放失敗' };
   }
-
-  quest.claimed = true;
-  if (scope === 'weekly') {
-    qp.stats.totalWeeklyQuestsClaimed = toSafeInt(qp.stats.totalWeeklyQuestsClaimed) + 1;
-  } else {
-    qp.stats.totalDailyQuestsClaimed = toSafeInt(qp.stats.totalDailyQuestsClaimed) + 1;
-  }
-  qp.stats.lastUpdatedAt = new Date().toISOString();
-  await dbPut(STORES.META, qp);
-
-  return { success: true, quest, reward, scope };
 }
 
 /** 將單一 quest 轉為含狀態與獎勵的顯示物件 */

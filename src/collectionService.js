@@ -1,24 +1,7 @@
 /**
- * 寵物圖鑑、碎片、升星、陪伴與親密度管理
+ * 寵物圖鑑、陪伴與親密度管理
  */
 import { dbGetAll, dbGet, dbPut, dbMutateRecords, STORES } from './db.js';
-
-/** 重複寵物轉換碎片數量 */
-export const FRAGMENT_BY_RARITY = {
-  N: 1,
-  R: 2,
-  SR: 5,
-  SSR: 10,
-  UR: 20,
-};
-
-/** 升星所需碎片 */
-export const STAR_UPGRADE_COST = {
-  2: 5,
-  3: 15,
-  4: 30,
-  5: 50,
-};
 
 /** 親密度等級門檻（累積 EXP） */
 export const BOND_LEVEL_THRESHOLDS = [0, 50, 150, 300, 500];
@@ -293,8 +276,7 @@ export function normalizeEntry(entry) {
   const bondLevel = entry.bondLevel ?? getBondLevelFromExp(bondExp);
   return {
     ...entry,
-    stars: entry.stars ?? 1,
-    fragments: entry.fragments ?? 0,
+    ...(entry.encounterMigrationVersion === 1 ? {} : { stars:entry.stars ?? 1, fragments:entry.fragments ?? 0 }),
     bondExp,
     bondLevel,
     isCompanion: entry.isCompanion ?? false,
@@ -320,7 +302,7 @@ function mutateCompanion(reduce) {
 
 /** Pure initial record shared by first draws and fixed gifts. */
 export function createCollectionEntry(petId, now = new Date().toISOString()) {
-  return normalizeEntry({ petId, stars: 1, fragments: 0, bondExp: 0, bondLevel: 1,
+  return normalizeEntry({ petId, encounterMigrationVersion:1, legacySpecialtyFloor:1, bondExp:0, bondLevel:1,
     isCompanion: false, nickname: null, lastPettedAt: null, obtainedAt: now });
 }
 
@@ -342,34 +324,6 @@ export async function getPetCollection(petId) {
 export async function addPetToCollection(petId) {
   return mutatePet(petId, (entry) => entry
     ? noCollectionChange(entry) : saveCollectionChange(createCollectionEntry(petId)));
-}
-
-/**
- * 增加碎片（重複抽到的寵物）
- */
-export async function addFragments(petId, amount) {
-  return mutatePet(petId, (existing) => {
-    const entry = existing || createCollectionEntry(petId);
-    entry.fragments = (entry.fragments || 0) + amount;
-    return saveCollectionChange(entry);
-  });
-}
-
-/**
- * 升星
- */
-export async function upgradeStar(petId) {
-  return mutatePet(petId, (entry) => {
-    if (!entry) return noCollectionChange({ success: false, message: '尚未獲得此寵物' });
-    const currentStars = entry.stars || 1;
-    if (currentStars >= 5) return noCollectionChange({ success: false, message: '已達最高星級' });
-    const nextStar = currentStars + 1;
-    const cost = STAR_UPGRADE_COST[nextStar];
-    if ((entry.fragments || 0) < cost) return noCollectionChange({ success: false, message: '碎片不足，需要 ' + cost + ' 碎片' });
-    entry.fragments -= cost;
-    entry.stars = nextStar;
-    return saveCollectionChange(entry, { success: true, entry });
-  });
 }
 
 /**
@@ -551,8 +505,8 @@ export async function getEnrichedCollection(allPets) {
     return {
       ...pet,
       owned: !!normalized,
-      stars: normalized?.stars ?? 0,
-      fragments: normalized?.fragments ?? 0,
+      legacySpecialtyFloor: normalized?.legacySpecialtyFloor ?? 1,
+      encounterMigrationVersion: normalized?.encounterMigrationVersion ?? 0,
       bondExp: normalized?.bondExp ?? 0,
       bondLevel: normalized?.bondLevel ?? 0,
       bondUnlockState: normalized?.bondUnlocks ?? defaultBondUnlocks(),

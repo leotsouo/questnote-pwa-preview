@@ -1,3 +1,4 @@
+import { planEncounterMigration, normalizeEncounterEconomy } from './encounterEconomyCore.js';
 /**
  * 備份與恢復服務 — QuestNote V2.3
  * 支援匯出、驗證、正規化與安全覆蓋恢復
@@ -61,6 +62,7 @@ const DATA_KEYS = [
   'idempotentGrants',
   'bondJourney',
   'petAwakening',
+  'encounterEconomy',
 ];
 
 /**
@@ -89,6 +91,7 @@ function buildDataPayload({
   idempotentGrants,
   bondJourney,
   petAwakening,
+  encounterEconomy,
 }) {
   const walletData = {
     stardust: wallet.stardust ?? 0,
@@ -144,6 +147,7 @@ function buildDataPayload({
     idempotentGrants,
     bondJourney,
     petAwakening,
+  encounterEconomy,
   };
 }
 
@@ -372,6 +376,8 @@ function normalizePayloadData(rawBackup) {
       reduceMotion: userPreferences.reduceMotion,
       theme: userPreferences.theme,
       fontSize: userPreferences.fontSize,
+      readingMode: userPreferences.readingMode,
+      seniorOnboardingCompleted: userPreferences.seniorOnboardingCompleted,
     },
     taskStats: data.taskStats ?? {},
     inventory: normalizeInventory(data.inventory),
@@ -388,6 +394,7 @@ function normalizePayloadData(rawBackup) {
     idempotentGrants: normalizeIdempotentGrants(data.idempotentGrants),
     bondJourney: normalizeBondJourney(data.bondJourney),
     petAwakening: normalizePetAwakening(data.petAwakening),
+    encounterEconomy:normalizeEncounterEconomy(data.encounterEconomy),
   };
 }
 
@@ -402,7 +409,7 @@ export function migrateImportedData(normalizedBackup) {
     .map((task) => normalizeTask(task, today))
     .filter(Boolean);
 
-  const collection = (normalizedBackup.collection || [])
+  let collection = (normalizedBackup.collection || [])
     .map((item) => {
       const petId = item?.petId || item?.id;
       if (!petId) return null;
@@ -413,6 +420,9 @@ export function migrateImportedData(normalizedBackup) {
       });
     })
     .filter(Boolean);
+
+  const encounter = planEncounterMigration({ economy:normalizedBackup.encounterEconomy, collection, now:normalizedBackup.exportedAt || new Date().toISOString() });
+  collection = encounter.collection;
 
   const habits = (normalizedBackup.habits || [])
     .map((habit) => normalizeHabit(habit))
@@ -487,6 +497,7 @@ export function migrateImportedData(normalizedBackup) {
     idempotentGrants,
     bondJourney,
     petAwakening,
+    encounterEconomy:encounter.economy,
   };
 }
 
@@ -586,6 +597,7 @@ export async function safeReplaceAllData(migratedData) {
     idempotentGrants: migratedData.idempotentGrants,
     bondJourney: migratedData.bondJourney,
     petAwakening: migratedData.petAwakening,
+    encounterEconomy: migratedData.encounterEconomy,
   });
 }
 

@@ -33,6 +33,7 @@ export const MAILBOX_ACTION_VIEWS = MAILBOX_ACTION_VIEW_ALLOWLIST;
 export const MAILBOX_REWARD_LIMITS = Object.freeze({
   stardust: 5000,
   adventureEnergy: 100,
+  encounterFragments: 500,
   material: 999,
   item: 99,
 });
@@ -61,7 +62,7 @@ export const MAILBOX_MESSAGE_ID_PATTERN = /^[A-Za-z0-9_-]+$/;
 const ALLOWED_TYPES = new Set(MAILBOX_MESSAGE_TYPES);
 const ALLOWED_PRIORITIES = new Set(MAILBOX_PRIORITIES);
 const ALLOWED_ACTION_VIEWS = new Set(MAILBOX_ACTION_VIEW_ALLOWLIST);
-const ALLOWED_REWARD_KEYS = new Set(['stardust', 'adventureEnergy', 'materials', 'items']);
+const ALLOWED_REWARD_KEYS = new Set(['stardust', 'adventureEnergy', 'encounterFragments', 'materials', 'items']);
 
 /**
  * Semantic version 比較（禁止單純字串比較）
@@ -145,6 +146,13 @@ export function validateMailboxReward(reward, catalogs = {}) {
     materials: {},
     items: {},
   };
+
+  if (reward.encounterFragments !== undefined) {
+    if (!isFiniteNonNegInt(reward.encounterFragments) || reward.encounterFragments > MAILBOX_REWARD_LIMITS.encounterFragments) {
+      return { ok: false, error: '此補償資料格式有誤' };
+    }
+    out.encounterFragments = reward.encounterFragments;
+  }
 
   if (reward.stardust !== undefined) {
     if (!isFiniteNonNegInt(reward.stardust)) return { ok: false, error: '此補償資料格式有誤' };
@@ -388,6 +396,9 @@ export function validateMailboxDocument(raw, catalogs = {}) {
       warnings.push(`${id}: enabled 建議為布林值`);
     }
     if (item.type === 'compensation') {
+      if (item.reward?.encounterFragments > 0 && (!item.minAppVersion || compareAppVersions(item.minAppVersion, '3.6.2') < 0)) {
+        errors.push(`${id}: 相遇碎片需要 minAppVersion 至少 3.6.2`);
+      }
       const validated = validateMailboxReward(item.reward, catalogs);
       if (!validated.ok) {
         errors.push(`${id}: reward 驗證失敗（${validated.error}）`);

@@ -7,10 +7,11 @@
  * - 略過／錯誤／Reduced Motion 都只能改變展示，不可重抽
  */
 import { getPetImageSrc, preloadImage, delay } from './imagePreloadService.js';
-import { createSwordwildShanheScene, swordwildPreludeDurations } from './swordwildShanheScene.js';
-import { createLionheartScene, lionheartPreludeDurations } from './lionheartScene.js';
+import { createSwordwildShanheScene } from './swordwildShanheScene.js';
+import { createLionheartScene } from './lionheartScene.js';
 import { createGlacierArrivalScene } from './glacierArrivalScene.js';
-import { createHoneylightSugarScene, sugarPreludeDurations } from './honeylightSugarScene.js';
+import { createHoneylightSugarScene } from './honeylightSugarScene.js';
+import { summonPreludeDurations, poolDebutDuration, poolDebutDissolveDuration } from './summonTiming.js';
 import {
   getHighestRarity,
   collectSsrPlusRevealQueue,
@@ -36,14 +37,6 @@ const STATES = {
 };
 
 const PHASE_MS = {
-  dreamDust: { single: 900, ten: 1200, reduced: 100 },
-  mirrorRipple: { single: 850, ten: 1100, reduced: 100 },
-  rarityOmen: {
-    N: 550, R: 700, SR: 950, SSR: 1300, UR: 1700, reduced: 120,
-  },
-  bloom: {
-    N: 650, R: 850, SR: 1100, SSR: 1500, UR: 1900, reduced: 140,
-  },
   summaryPause: { full: 480, reduced: 100 },
 };
 
@@ -189,7 +182,7 @@ function createParticles(count, className) {
  * 建立主題召喚 overlay（文字一律 textContent）
  * @param {{ mode: string, reduceMotion: boolean, highestRarity: string }} opts
  */
-function createOverlay({ mode, reduceMotion, highestRarity, poolName, animationKey }) {
+function createOverlay({ mode, reduceMotion, highestRarity, poolName, animationKey, sceneFactory }) {
   const glacier = animationKey === 'glacier_arrival';
   const overlay = document.createElement('div');
   overlay.className = 'dream-bloom-overlay';
@@ -246,6 +239,9 @@ function createOverlay({ mode, reduceMotion, highestRarity, poolName, animationK
     overlay.querySelector('.dream-bloom-bg').replaceWith(animationKey === 'lionheart_inverse_oath' ? createLionheartScene() : animationKey === 'swordwild_shanhe' ? createSwordwildShanheScene() : glacier ? createGlacierArrivalScene() : createHoneylightSugarScene());
     overlay.querySelectorAll('[data-role="dust"], [data-role="ripple"], [data-role="buds"], [data-role="crest"]').forEach((node) => node.remove());
   }
+  if (sceneFactory) overlay.querySelector('.dream-bloom-bg')?.replaceWith(sceneFactory());
+  // The glacier's sunrise is part of its landscape, not a second generic omen.
+  if (glacier) overlay.querySelector('[data-role="omen"]')?.remove();
 
   return overlay;
 }
@@ -276,7 +272,7 @@ function fillSeal(overlay, item) {
   if (compEl) {
     if (!isNew && fragments > 0) {
       compEl.hidden = false;
-      compEl.textContent = `夢塵碎片 +${fragments}`;
+      compEl.textContent = `相遇碎片 +${fragments}`;
     } else {
       compEl.hidden = true;
       compEl.textContent = '';
@@ -354,6 +350,7 @@ function setupBuds(container, count, reduceMotion) {
  *   mode?: 'single'|'ten'|'preview',
  *   reduceMotion?: boolean,
  *   skipRitual?: boolean,
+ *   ritualOnly?: boolean, // optional caller-owned reveal/result handoff
  * }} options
  * @returns {Promise<{ ok: boolean, fallback: boolean, state: string }>}
  */
@@ -377,7 +374,7 @@ export async function playThemedSummon(options = {}) {
   const sugar = animationKey === 'honeylight_sugar';
   const swordwild = animationKey === 'swordwild_shanhe';
   const lionheart = animationKey === 'lionheart_inverse_oath';
-  const sugarMs = lionheart ? lionheartPreludeDurations(reduce) : swordwild ? swordwildPreludeDurations(highestRarity, mode, reduce) : sugarPreludeDurations(highestRarity, mode, reduce);
+  const phaseMs = summonPreludeDurations(reduce);
   const previousFocus = document.activeElement;
   const controller = new AbortController();
   activeAbort = controller;
@@ -405,10 +402,13 @@ export async function playThemedSummon(options = {}) {
       delay(reduce ? 100 : 200),
     ]);
 
-    overlay = createOverlay({ mode, reduceMotion: reduce, highestRarity, poolName: options.poolName, animationKey });
+    overlay = createOverlay({ mode, reduceMotion: reduce, highestRarity, poolName: options.poolName, animationKey, sceneFactory: options.sceneFactory });
+    overlay.dataset.duration = String(phaseMs.reduce((total, ms) => total + ms, 0));
+    overlay.style.setProperty('--pool-scene-duration', `${Number(overlay.dataset.duration) * .96}ms`);
     activeOverlay = overlay;
     lockScroll();
     document.body.appendChild(overlay);
+    const ritualStartedAt = performance.now();
     overlay.querySelector('[data-action="skip"]')?.focus();
     requestAnimationFrame(() => overlay?.isConnected && overlay.classList.add('is-active'));
 
@@ -480,26 +480,20 @@ export async function playThemedSummon(options = {}) {
       }
     };
 
-    const omenMs = reduce
-      ? PHASE_MS.rarityOmen.reduced
-      : (PHASE_MS.rarityOmen[highestRarity] ?? PHASE_MS.rarityOmen.N);
-    const bloomMs = reduce
-      ? PHASE_MS.bloom.reduced
-      : (PHASE_MS.bloom[highestRarity] ?? PHASE_MS.bloom.N);
-
     if (!options.skipRitual) {
-      await runPhase(
-        STATES.DREAM_DUST,
-        (sugar || swordwild || lionheart) ? sugarMs[0] : reduce ? PHASE_MS.dreamDust.reduced : PHASE_MS.dreamDust[mode],
-      );
-      await runPhase(
-        STATES.MIRROR_RIPPLE,
-        (sugar || swordwild || lionheart) ? sugarMs[1] : reduce ? PHASE_MS.mirrorRipple.reduced : PHASE_MS.mirrorRipple[mode],
-      );
-      await runPhase(STATES.RARITY_OMEN, (sugar || swordwild || lionheart) ? sugarMs[2] : omenMs);
-      await runPhase(STATES.BLOOM, (sugar || swordwild || lionheart) ? sugarMs[3] : bloomMs);
+      await runPhase(STATES.DREAM_DUST, phaseMs[0]);
+      await runPhase(STATES.MIRROR_RIPPLE, phaseMs[1]);
+      await runPhase(STATES.RARITY_OMEN, phaseMs[2]);
+      await runPhase(STATES.BLOOM, phaseMs[3]);
     } else {
       introSkipped = true;
+    }
+
+    // Optional presentation handoff: the local viewer owns the character/result sequence.
+    // Existing callers retain the complete ritual, SSR+ queue and summary below.
+    if (options.ritualOnly) {
+      setState(STATES.COMPLETE, liveEl);
+      return { ok: true, fallback: false, state: STATES.COMPLETE, skipped: introSkipped, duration: Math.round(performance.now() - ritualStartedAt) };
     }
 
     // SSR+ 自動出場：主動畫（含略過）後、結果總覽前。introSkipped 不得跳過 queue。
@@ -619,13 +613,13 @@ export function skipThemedSummon() {
   }
 }
 
-const DEBUT_DUST_COUNT = { full: 8, short: 3, reduced: 0 };
+const DEBUT_DUST_COUNT = { normal: 8, reduced: 0 };
 
 /**
  * 永眠花海卡池入場演出
  * 流程：長夜沉幕 → 鏡池微光 → 月皇花甦醒 → 台詞 → 停在完整畫面等待點擊 → 關閉時化開成主畫面
- * 動畫播完後需使用者點擊／Esc／繼續才關閉；略過可提早結束。
- * @param {{ poolName?: string, presentation?: object, reduceMotion?: boolean, full?: boolean }} options
+ * 首次、切換與重播皆使用完整登場；播完等待點擊／Esc／繼續，略過可提早結束。
+ * @param {{ poolName?: string, presentation?: object, reduceMotion?: boolean, sceneFactory?: Function }} options
  */
 export async function playPoolDebutPresentation(options = {}) {
   const lionheart = options.presentation?.animationKey === 'lionheart_inverse_oath';
@@ -633,20 +627,25 @@ export async function playPoolDebutPresentation(options = {}) {
   const sugar = options.presentation?.animationKey === 'honeylight_sugar';
   const previousFocus = document.activeElement;
   const reduce = isReduceMotion(options.reduceMotion);
-  const full = options.full !== false;
-  // 進入「可關閉」狀態前的演出時長（不含等待點擊）
-  const readyMs = lionheart ? (reduce ? 500 : full ? 6000 : 1500) : reduce && sugar ? 240 : reduce ? (full ? 1400 : 820) : full ? 3400 : 900;
-  const dissolveMs = reduce && sugar ? 120 : reduce ? 240 : full ? 550 : 360;
+  const readyMs = poolDebutDuration(reduce);
+  const dissolveMs = poolDebutDissolveDuration(reduce);
 
   const panel = document.getElementById('gacha-panel');
+  const previousDissolve = panel?.style.getPropertyValue('--pool-dissolve-duration');
+  const previousDissolvePriority = panel?.style.getPropertyPriority('--pool-dissolve-duration');
+  panel?.style.setProperty('--pool-dissolve-duration', `${dissolveMs}ms`);
   panel?.classList.add('is-pool-debut-veil');
   panel?.classList.remove('is-pool-debut-reveal');
 
   const overlay = document.createElement('div');
   overlay.className = 'dream-debut-overlay';
+  overlay.dataset.layout = 'shared';
+  overlay.dataset.duration = String(readyMs);
+  overlay.dataset.dissolveDuration = String(dissolveMs);
+  overlay.style.setProperty('--pool-scene-duration', `${readyMs * .96}ms`);
+  overlay.style.setProperty('--pool-dissolve-duration', `${dissolveMs}ms`);
   overlay.dataset.animation = lionheart ? 'lionheart_inverse_oath' : options.presentation?.animationKey === 'swordwild_shanhe' ? 'swordwild_shanhe' : sugar ? 'honeylight_sugar' : glacier ? 'glacier_arrival' : 'dream_bloom';
   if (reduce) overlay.classList.add('is-reduced');
-  if (!full) overlay.classList.add('is-short');
   overlay.setAttribute('role', 'dialog');
   overlay.setAttribute('aria-modal', 'true');
   overlay.setAttribute('aria-label', options.presentation?.debutLabel || `${options.poolName || '卡池'}登場`);
@@ -671,6 +670,7 @@ export async function playPoolDebutPresentation(options = {}) {
       </div>
     </div>
     <div class="dream-debut-copy">
+      <h2 class="pool-entry-name"></h2>
       <p class="dream-debut-line" data-role="line">
         <span class="dream-debut-line__seg" data-seg="a"></span>
         <span class="dream-debut-line__seg" data-seg="b"></span>
@@ -685,7 +685,9 @@ export async function playPoolDebutPresentation(options = {}) {
   if (lionheart) overlay.querySelector('.dream-debut-stage').replaceWith(createLionheartScene());
   if (glacier) overlay.querySelector('.dream-debut-stage').replaceWith(createGlacierArrivalScene());
   if (sugar) overlay.querySelector('.dream-debut-stage').replaceWith(createHoneylightSugarScene());
-  const lines = options.presentation?.debutLines || [];
+  if (options.sceneFactory) overlay.querySelector('.dream-debut-stage')?.replaceWith(options.sceneFactory());
+  overlay.querySelector('.pool-entry-name').textContent = options.poolName || '卡池';
+  const lines = (options.presentation?.debutLines || []).filter((line) => line !== options.poolName);
   overlay.querySelectorAll('.dream-debut-line__seg').forEach((element, index) => {
     element.textContent = lines[index] || '';
   });
@@ -693,9 +695,7 @@ export async function playPoolDebutPresentation(options = {}) {
   const dustHost = overlay.querySelector('[data-role="dust"]');
   const dustCount = reduce
     ? DEBUT_DUST_COUNT.reduced
-    : full
-      ? DEBUT_DUST_COUNT.full
-      : DEBUT_DUST_COUNT.short;
+    : DEBUT_DUST_COUNT.normal;
   if (dustHost && dustCount > 0) {
     dustHost.appendChild(createParticles(dustCount, 'dream-debut-dust__mote'));
   }
@@ -706,6 +706,7 @@ export async function playPoolDebutPresentation(options = {}) {
   let ready = false;
   let finished = false;
   let resolveDone = null;
+  let startedAt = 0;
   const donePromise = new Promise((resolve) => {
     resolveDone = resolve;
   });
@@ -733,6 +734,7 @@ export async function playPoolDebutPresentation(options = {}) {
   const markReady = () => {
     if (finished || ready) return;
     ready = true;
+    overlay.dataset.elapsed = String(Math.round(performance.now() - startedAt));
     overlay.classList.add('is-ready');
     // 等待點擊期間維持完整夜幕；關閉時才淡出銜接主畫面
     if (continueEl) continueEl.hidden = false;
@@ -801,18 +803,16 @@ export async function playPoolDebutPresentation(options = {}) {
 
   lockDebutScroll();
   document.body.appendChild(overlay);
+  startedAt = performance.now();
   skipBtn?.focus();
   requestAnimationFrame(() => overlay?.isConnected && overlay.classList.add('is-active', 'is-phase-night'));
 
-  // 分鏡節奏：台詞完整顯現後進入可關閉狀態，等待使用者點擊
+  // 各池完整分鏡及文字到位後，等待使用者繼續。
   // full line CSS：a 0–0.7s、b 0.28–0.98s、c 0.55–1.3s → 約 1.3s 跑完
-  if (!reduce && full) {
+  if (!reduce) {
     schedule(() => overlay.classList.add('is-phase-pool'), 400);
     schedule(() => overlay.classList.add('is-phase-bloom'), 1000);
     schedule(() => overlay.classList.add('is-phase-line'), 1800);
-  } else if (!reduce && !full) {
-    schedule(() => overlay.classList.add('is-phase-pool', 'is-phase-bloom'), 120);
-    schedule(() => overlay.classList.add('is-phase-line'), 280);
   } else {
     schedule(() => overlay.classList.add('is-phase-pool', 'is-phase-bloom', 'is-phase-line'), 80);
   }
@@ -830,6 +830,8 @@ export async function playPoolDebutPresentation(options = {}) {
     document.removeEventListener('keydown', onKey, true);
     overlay.remove();
     panel?.classList.remove('is-pool-debut-veil', 'is-pool-debut-reveal');
+    if (previousDissolve) panel?.style.setProperty('--pool-dissolve-duration', previousDissolve, previousDissolvePriority);
+    else panel?.style.removeProperty('--pool-dissolve-duration');
     unlockDebutScroll();
     if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
   }

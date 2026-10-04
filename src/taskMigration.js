@@ -12,6 +12,11 @@ import { getTodayDateString } from './taskFilterService.js';
 
 const VALID_PRIORITIES = new Set(['normal', 'important', 'urgent']);
 
+/** Optional local clock note; it does not schedule a notification. */
+export function normalizePlannedTime(value) {
+  return typeof value === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(value) ? value : null;
+}
+
 
 
 /** 正規化子任務 */
@@ -147,6 +152,8 @@ export function normalizeTask(task, today = getTodayDateString()) {
     isPlannedToday,
 
     plannedDate,
+
+    plannedTime: normalizePlannedTime(task.plannedTime),
 
     subtasks: Array.isArray(task.subtasks)
 

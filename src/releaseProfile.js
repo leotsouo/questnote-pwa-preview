@@ -2,12 +2,12 @@
 export const RELEASE_PROFILE = {
   "schemaVersion": 1,
   "profile": "preview",
-  "artifactId": "ff26227b8640c58163b647730e5e54a3b0071774261d44e3c18b614f855427c0",
-  "sourceCommit": "60700bfe10f776bad40ddae151ea3b11652ee2ec",
+  "artifactId": "b040f52d85f544dfbaf1bc7cb10c2a4dcbeb7097bf1b6ab06a9fc06af1af2fbe",
+  "sourceCommit": "091a18f22d7ef6281337030f9b6736e6abaa1809",
   "scopePath": "/questnote-pwa-preview/",
   "runtimeContentSchema": 1,
   "dbName": "QuestNotePreviewDB",
   "cacheNamespace": "questnote-preview-",
-  "contentBundleSha256": "57ac7816a6dcc7c9db64373f2f98c2ab8f9b817f592ba186c6d41f2edf7f453d",
-  "contentBundleUrl": "data/releases/57ac7816a6dcc7c9db64373f2f98c2ab8f9b817f592ba186c6d41f2edf7f453d/catalog.json"
+  "contentBundleSha256": "da32429aa6caf259c31f6fb8b613585144bb7ccfc653733cff583b099f03456d",
+  "contentBundleUrl": "data/releases/da32429aa6caf259c31f6fb8b613585144bb7ccfc653733cff583b099f03456d/catalog.json"
 };

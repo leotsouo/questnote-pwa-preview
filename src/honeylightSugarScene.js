@@ -1,4 +1,6 @@
 /** Owned, local scenery; catalog copy never enters the markup. */
+import { summonPreludeDurations } from './summonTiming.js';
+
 export function createHoneylightSugarScene() {
   const scene = document.createElement('div');
   scene.className = 'sugar-scene';
@@ -21,9 +23,9 @@ export function createHoneylightSugarScene() {
   return scene;
 }
 
-/** The same state machine, with a shorter sugar-specific prelude. */
+/** Keep the established API while using the same clock as every other pool. */
 export function sugarPreludeDurations(rarity, mode, reduced) {
-  if (reduced) return [80, 80, 100, 100];
-  const finish = { N: 650, R: 700, SR: 850, SSR: 1000, UR: 1200 }[rarity] ?? 650;
-  return [850, mode === 'ten' ? 850 : 750, 750, finish];
+  void rarity;
+  void mode;
+  return summonPreludeDurations(reduced);
 }

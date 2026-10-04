@@ -1,3 +1,5 @@
+import { ensureEncounterMigration, getEncounterEconomy } from './encounterEconomyService.js';
+import { LOCAL_ART_PREVIEW } from './localArtPreview.js';
 /**
 
  * QuestNote 主程式 — 初始化、資料載入、狀態管理
@@ -66,7 +68,7 @@ import {
 
 import { getWelcomeCompanionLine } from './companionDialogueService.js';
 
-import { initUserPreferences, getUserPreferences, applyThemeToDocument, applyFontSizeToDocument } from './preferencesService.js';
+import { initUserPreferences, getUserPreferences, applyThemeToDocument, applyFontSizeToDocument, applyReadingModeToDocument } from './preferencesService.js';
 
 import {
 
@@ -319,6 +321,7 @@ async function refreshState(options = {}) {
   appState.tasks = sortTasks(tasks);
 
   appState.wallet = wallet;
+  appState.encounterEconomy = await getEncounterEconomy();
 
   appState.gachaStats = gachaStats;
 
@@ -432,6 +435,7 @@ async function resetAllData() {
   await clearAllData();
 
   await initWallet();
+  await ensureEncounterMigration();
 
   await initGachaStats();
 
@@ -474,6 +478,7 @@ export async function runAchievementCheck() {
 
 
 async function registerServiceWorker() {
+  if (LOCAL_ART_PREVIEW) return;
   const options = { showIconGuide: openModal, openBackupSettings: () => {
     closeModal(); switchView('settings');
     document.getElementById('btn-export')?.scrollIntoView({ block: 'center' });
@@ -525,6 +530,7 @@ async function initApp() {
 
     await initUserPreferences();
     appState.userPreferences = await getUserPreferences();
+    applyReadingModeToDocument(appState.userPreferences.readingMode);
     applyThemeToDocument(appState.userPreferences.theme);
     applyFontSizeToDocument(appState.userPreferences.fontSize);
     applyReduceMotionClass(appState.userPreferences?.reduceMotion ?? false);
@@ -556,6 +562,7 @@ async function initApp() {
 
 
     await initWallet();
+  await ensureEncounterMigration();
 
     await initGachaStats();
     // Each App launch starts on standard; later refreshes retain manual selection.
@@ -608,6 +615,7 @@ async function initApp() {
     }
 
     appState.userPreferences = await getUserPreferences();
+    applyReadingModeToDocument(appState.userPreferences.readingMode);
     applyThemeToDocument(appState.userPreferences.theme);
     applyFontSizeToDocument(appState.userPreferences.fontSize);
     applyReduceMotionClass(appState.userPreferences?.reduceMotion ?? false);

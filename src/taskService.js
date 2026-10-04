@@ -4,7 +4,7 @@
 import { dbGetAll, dbPut, dbDelete, STORES } from './db.js';
 import { putWithAwakeningProgress } from './petAwakeningService.js';
 import { claimTaskReward } from './rewardService.js';
-import { normalizeTask } from './taskMigration.js';
+import { normalizeTask, normalizePlannedTime } from './taskMigration.js';
 import {
   getTodayDateString,
   validateDateRange,
@@ -29,6 +29,13 @@ function generateId() {
   return crypto.randomUUID();
 }
 
+function validatePlannedTime(value) {
+  if (value == null || value === '') return null;
+  const time = normalizePlannedTime(value);
+  if (!time) throw new Error('請輸入有效時間（00:00 至 23:59）');
+  return time;
+}
+
 /** 產生子任務 ID */
 export function generateSubtaskId() {
   return `subtask_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
@@ -49,6 +56,7 @@ function buildTaskDefaults(data, now) {
     dueDate: data.dueDate || null,
     isPlannedToday: (data.plannedDate || (planToday ? today : null)) === today,
     plannedDate: data.plannedDate || (planToday ? today : null),
+    plannedTime: validatePlannedTime(data.plannedTime),
     subtasks: (data.subtasks || []).map((s) => ({
       id: s.id || generateSubtaskId(),
       text: (s.text || '').trim(),
@@ -121,6 +129,7 @@ export async function updateTask(id, updates) {
     ...updates,
     type: 'one_time',
     updatedAt: now,
+    plannedTime: updates.plannedTime !== undefined ? validatePlannedTime(updates.plannedTime) : task.plannedTime,
   };
 
   if (updates.content !== undefined) {

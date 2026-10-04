@@ -60,7 +60,7 @@ export function renderAwakeningReader(pet, state, portrait) {
   let body = '';
   if (p?.awakenedAt) {
     body = `<p class="awakening-mark">已覺醒 · ${escape(entry.title)}</p>${entry.story.map((text) => `<p>${escape(text)}</p>`).join('')}
-      <h3>形態選擇</h3><p>目前：${p.form === 'initial' ? '初遇相' : '覺醒相'}。形態不影響稀有度、星級或派遣收益。</p>
+      <h3>形態選擇</h3><p>目前：${p.form === 'initial' ? '初遇相' : '覺醒相'}。形態不影響稀有度或派遣收益。</p>
       <div class="awakening-panel__actions">${button('initial', '初遇相', p.form === 'initial')}${button('awakened', '覺醒相', p.form === 'awakened')}${button('replay', '重播覺醒演出')}</div>
       <p>稱號「${escape(entry.title)}」已開放，可到稱號管理裝備。</p>`;
   } else {

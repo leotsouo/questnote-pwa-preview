@@ -1,5 +1,6 @@
+import { ENCOUNTER_FRAGMENTS_BY_RARITY, earnEncounterFragments } from './encounterEconomyCore.js';
 /** Pure unlock state transitions, shared by draws and recovery transactions. */
-import { createCollectionEntry, FRAGMENT_BY_RARITY } from './collectionService.js';
+import { createCollectionEntry } from './collectionService.js';
 import { resolveUnlockGrantId, resolveUnlockRewardSource } from './poolContentContract.js';
 
 export const POOL_UNLOCK_META_KEY = 'poolUnlockState';
@@ -66,10 +67,10 @@ export function mergeLifetimeDraws(current, incoming) {
 }
 
 /** Mutates only the transaction's cloned records; never persists or awaits. */
-export function applyUnlockGift({ state, grants, collection, changed, poolId, expansion, allPets, now }) {
+export function applyUnlockGift({ state, grants, collection, changed, poolId, expansion, allPets, now, encounterEconomy }) {
   const pet = allPets.find((candidate) => candidate.id === expansion?.rewardPetId);
   if (!pet) throw new Error('缺少解鎖獎勵寵物資料');
-  if (!Number.isSafeInteger(FRAGMENT_BY_RARITY[pet.rarity])) throw new Error('解鎖獎勵稀有度無效');
+  if (!Number.isSafeInteger(ENCOUNTER_FRAGMENTS_BY_RARITY[pet.rarity])) throw new Error('解鎖獎勵稀有度無效');
   const grantId = resolveUnlockGrantId(poolId, expansion);
   const entry = state.byPool[poolId] || emptyPoolUnlockEntry(poolId);
   const alreadyClaimed = entry.rewardClaimed || grants.claimedIds.includes(grantId);
@@ -84,10 +85,10 @@ export function applyUnlockGift({ state, grants, collection, changed, poolId, ex
     changed.add(pet.id);
     isNew = true;
   } else if (!alreadyClaimed) {
-    fragmentsGained = FRAGMENT_BY_RARITY[pet.rarity];
+    fragmentsGained = ENCOUNTER_FRAGMENTS_BY_RARITY[pet.rarity];
     if (!Number.isSafeInteger(fragmentsGained)) throw new Error('解鎖獎勵稀有度無效');
-    if (!Number.isSafeInteger(existing.fragments + fragmentsGained)) throw new Error('碎片數量無效');
-    existing.fragments += fragmentsGained;
+    if (!encounterEconomy) throw new Error('缺少相遇碎片存檔');
+    earnEncounterFragments(encounterEconomy, fragmentsGained);
     changed.add(pet.id);
   }
   if (!grants.claimedIds.includes(grantId)) grants.claimedIds.push(grantId);

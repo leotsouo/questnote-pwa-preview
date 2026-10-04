@@ -1,13 +1,14 @@
+import { validateEncounterEconomy } from './encounterEconomyCore.js';
 /** Backup profiles verified against historical exporters; no database or DOM access. */
 import { SUPPORTED_THEMES } from './themeRegistry.js';
-import { FONT_SIZES } from './preferencesService.js';
+import { FONT_SIZES, READING_MODES } from './preferencesService.js';
 import { validateBondJourney } from './bondJourneyCore.js';
 import { validatePetAwakening } from './petAwakeningCore.js';
 const BASE_KEYS = ['tasks', 'wallet', 'collection', 'gachaStats', 'expeditions',
   'achievements', 'taskStats', 'userPreferences', 'habits'];
 const ADDITIONS = ['inventory', 'workshopStats', 'dailyCheckIn', 'questProgress',
   'explorationProgress', 'collectionMilestones', 'globalMailboxState',
-  'poolDebutSeen', 'poolUnlockState', 'idempotentGrants', 'campProgress', 'bondJourney', 'petAwakening'];
+  'poolDebutSeen', 'poolUnlockState', 'idempotentGrants', 'campProgress', 'bondJourney', 'petAwakening', 'encounterEconomy'];
 export const SNAPSHOT_KEYS = [...BASE_KEYS, ...ADDITIONS];
 // Counts come from actual versioned exports, not inferred release dates.
 const LEGACY_PROFILES = {
@@ -23,7 +24,7 @@ const FORBIDDEN_KEYS = new Set(['__proto__', 'prototype', 'constructor']);
 // obtainedSource is written by the V3.4 unlock gift, owned/id by legacy adapters.
 const COLLECTION_FIELDS = new Set(['petId', 'id', 'owned', 'stars', 'fragments',
   'bondExp', 'bondLevel', 'isCompanion', 'obtainedAt', 'nickname', 'lastPettedAt',
-  'bondUnlocks', 'obtainedSource']);
+  'bondUnlocks', 'obtainedSource', 'encounterMigrationVersion', 'legacySpecialtyFloor']);
 const OLD_COLLECTION_PROFILES = new Set(['1.8.1', '2.1.1', '2.1.2', '2.1.4',
   '2.2', '2.2.7', '2.3.5', '2.3.7']);
 // These keys/targets are serialized by every recorded quest/exploration exporter.
@@ -127,7 +128,8 @@ export function validateSnapshotData(data, requiredKeys = SNAPSHOT_KEYS, profile
     type: oneOf(['one_time', 'repeatable']), categoryId: id, startDate: nullable(dateKey),
     dueDate: nullable(dateKey), isPlannedToday: bool, plannedDate: nullable(dateKey),
     subtasks: list(subtask), completed: bool, rewardClaimed: bool, createdAt: timestamp,
-    updatedAt: timestamp, completedAt: nullable(timestamp), lastRewardClaimedAt: nullable(timestamp) });
+    updatedAt: timestamp, completedAt: nullable(timestamp), lastRewardClaimedAt: nullable(timestamp) },
+  { plannedTime: nullable(scalar((value) => typeof value === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(value), '時間格式無效')) });
   const habitLog = (value, path, key) => {
     if (key.startsWith('week_')) {
       dateKey(key.slice(5), path);
@@ -146,13 +148,14 @@ export function validateSnapshotData(data, requiredKeys = SNAPSHOT_KEYS, profile
       archivedAt: nullable(timestamp), logs: map(habitLog) })(value, path);
   };
   const collection = (value, path) => {
-    const fields = { stars: oneOf([1, 2, 3, 4, 5]), fragments: integer, bondExp: integer,
+    const converted = value?.encounterMigrationVersion === 1;
+    const fields = { ...(converted ? { encounterMigrationVersion:oneOf([1]), legacySpecialtyFloor:oneOf([1,2,3,4,5]) } : { stars:oneOf([1,2,3,4,5]), fragments:integer }), bondExp:integer,
       bondLevel: oneOf([1, 2, 3, 4, 5]), isCompanion: bool, obtainedAt: timestamp };
     if (profile !== '1.8.1') fields.nickname = nullable(text);
     if (!['1.8.1', '2.1.1', '2.1.2', '2.1.4'].includes(profile)) fields.lastPettedAt = nullable(timestamp);
     if (!OLD_COLLECTION_PROFILES.has(profile)) fields.bondUnlocks = bondUnlocks;
     shape(fields, { petId, id: petId, owned: bool, nickname: nullable(text),
-      lastPettedAt: nullable(timestamp), bondUnlocks, obtainedSource: text })(value, path);
+      lastPettedAt:nullable(timestamp), bondUnlocks, obtainedSource:text, encounterMigrationVersion:oneOf([0,1]), legacySpecialtyFloor:oneOf([1,2,3,4,5]), stars:converted ? oneOf([1]) : oneOf([1,2,3,4,5]), fragments:converted ? oneOf([0]) : integer })(value,path);
     if (isRecord(value)) {
       for (const key of Object.keys(value)) if (!COLLECTION_FIELDS.has(key)) fail(`${path}.${key}`, '收藏不可覆寫 catalog 或包含未知欄位');
     }
@@ -229,7 +232,8 @@ export function validateSnapshotData(data, requiredKeys = SNAPSHOT_KEYS, profile
     subtasksCompletedTotal: integer, completedBeforeDueTotal: integer });
   state('userPreferences', { reduceMotion: bool,
     ...(['1.8.1', '2.1.1'].includes(profile) ? {} : { theme: oneOf(SUPPORTED_THEMES) }) },
-  { theme: oneOf(SUPPORTED_THEMES), fontSize: oneOf(FONT_SIZES) });
+  { theme: oneOf(SUPPORTED_THEMES), fontSize: oneOf(FONT_SIZES),
+    readingMode: oneOf(READING_MODES), seniorOnboardingCompleted: bool });
   state('inventory', { items: amounts,
     itemUsageLogs: map(map(shape({ bondItemsUsed: integer }), petId), dateKey) });
   state('workshopStats', { craftCount: integer, giftCount: integer, favoriteGiftCount: integer,
@@ -301,6 +305,10 @@ export function validateSnapshotData(data, requiredKeys = SNAPSHOT_KEYS, profile
   };
   if (Object.hasOwn(data, 'bondJourney')) errors.push(...validateBondJourney(data.bondJourney));
   if (Object.hasOwn(data, 'petAwakening')) errors.push(...validatePetAwakening(data.petAwakening));
+  if (Object.hasOwn(data, 'encounterEconomy')) {
+    errors.push(...validateEncounterEconomy(data.encounterEconomy));
+    if (data.encounterEconomy?.migrationVersion === 1 && data.collection?.some((row) => row.encounterMigrationVersion !== 1)) fail('collection', '相遇轉換標記與角色資料不符');
+  }
   visit(data, '');
   return errors;
 }
@@ -360,7 +368,8 @@ export function validateBackupEnvelope(raw, currentVersion) {
     && (actual[1] < 5 || (actual[1] === 5 && (actual[2] ?? 0) < 1)));
   const preAwakeningRelease = actual[0] < 3 || (actual[0] === 3
     && (actual[1] < 5 || (actual[1] === 5 && (actual[2] ?? 0) < 5)));
-  const additions = LEGACY_PROFILES[version] ?? (preCampRelease ? 10 : preBondRelease ? 11 : preAwakeningRelease ? ADDITIONS.length - 1 : ADDITIONS.length);
+  const preEncounterRelease = actual[0] < 3 || (actual[0] === 3 && actual[1] < 6);
+  const additions = LEGACY_PROFILES[version] ?? (preCampRelease ? 10 : preBondRelease ? 11 : preAwakeningRelease ? ADDITIONS.length - 2 : preEncounterRelease ? ADDITIONS.length - 1 : ADDITIONS.length);
   const required = [...BASE_KEYS, ...ADDITIONS.slice(0, additions)];
   const errors = validateSnapshotData(data, required, version);
   if (isRecord(data)) {

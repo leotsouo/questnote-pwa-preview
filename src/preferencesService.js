@@ -6,12 +6,15 @@ import { SUPPORTED_THEMES, THEME_COLORS } from './themeRegistry.js';
 
 const PREFS_KEY = 'userPreferences';
 export const FONT_SIZES = Object.freeze(['standard', 'large', 'extra-large']);
+export const READING_MODES = Object.freeze(['normal', 'senior']);
 
 const DEFAULT_PREFS = {
   key: PREFS_KEY,
   reduceMotion: false,
   theme: 'default',
   fontSize: 'standard',
+  readingMode: 'normal',
+  seniorOnboardingCompleted: false,
 };
 
 /**
@@ -24,6 +27,18 @@ export function normalizeTheme(theme) {
 
 export function normalizeFontSize(fontSize) {
   return FONT_SIZES.includes(fontSize) ? fontSize : 'standard';
+}
+
+export function normalizeReadingMode(readingMode) {
+  return READING_MODES.includes(readingMode) ? readingMode : 'normal';
+}
+
+/** Presentation only: preserve the independently selected theme and text size. */
+export function applyReadingModeToDocument(readingMode) {
+  const valid = normalizeReadingMode(readingMode);
+  document.documentElement.dataset.readingMode = valid;
+  if (document.body) document.body.dataset.readingMode = valid;
+  return valid;
 }
 
 export function applyFontSizeToDocument(fontSize) {
@@ -44,6 +59,8 @@ export function normalizeUserPreferences(prefs) {
     reduceMotion: false,
     theme: normalizeTheme(prefs.theme),
     fontSize: normalizeFontSize(prefs.fontSize),
+    readingMode: normalizeReadingMode(prefs.readingMode),
+    seniorOnboardingCompleted: prefs.seniorOnboardingCompleted === true,
   };
 }
 
@@ -85,5 +102,19 @@ export async function setTheme(theme) {
 export async function setFontSize(fontSize) {
   return dbUpdateRecord(STORES.META, PREFS_KEY, (raw) => ({
     ...normalizeUserPreferences(raw), fontSize: normalizeFontSize(fontSize),
+  }));
+}
+
+/** The mode shares the existing preference row; gameplay stores are untouched. */
+export async function setReadingMode(readingMode) {
+  return dbUpdateRecord(STORES.META, PREFS_KEY, (raw) => ({
+    ...normalizeUserPreferences(raw), readingMode: normalizeReadingMode(readingMode),
+  }));
+}
+
+/** Remember the optional practice guide independently of switching the mode. */
+export async function setSeniorOnboardingCompleted(completed) {
+  return dbUpdateRecord(STORES.META, PREFS_KEY, (raw) => ({
+    ...normalizeUserPreferences(raw), seniorOnboardingCompleted: completed === true,
   }));
 }

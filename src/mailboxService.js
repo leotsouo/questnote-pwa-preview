@@ -12,6 +12,7 @@
 import { openDB, dbGet, dbPut, STORES } from './db.js';
 import { APP_VERSION, MAILBOX_RUNTIME_CACHE } from './version.js';
 import { normalizeWallet, DEFAULT_MATERIALS } from './rewardService.js';
+import { ENCOUNTER_ECONOMY_KEY, normalizeEncounterEconomy, earnEncounterFragments } from './encounterEconomyCore.js';
 import { normalizeInventory, DEFAULT_ITEM_IDS, getMaterialName, getItemName } from './workshopService.js';
 import { isDebugMode, isAuthorLocalDevMode } from './devService.js';
 import {
@@ -233,6 +234,7 @@ export function formatMailboxRewardPreview(reward) {
   if (!reward) return [];
   const lines = [];
   if (reward.stardust > 0) lines.push({ type: 'stardust', text: `星塵 ×${reward.stardust}` });
+  if (reward.encounterFragments > 0) lines.push({ type: 'fragment', text: `相遇碎片 ×${reward.encounterFragments}` });
   if (reward.adventureEnergy > 0) lines.push({ type: 'energy', text: `冒險能量 ×${reward.adventureEnergy}` });
   for (const [id, amt] of Object.entries(reward.materials || {})) {
     if (amt > 0) {
@@ -514,7 +516,7 @@ export async function markMailboxMessageRead(messageId) {
  * 若崩潰發生在 transaction commit 前：整筆 rollback，可再試。
  * 若崩潰發生在 commit 後、UI 更新前：獎勵與 claimed 已一致，不會重複發放。
  */
-async function applyMailboxRewardInTransaction(messageId, reward) {
+async function applyMailboxRewardInTransaction(messageId, reward, markRead = true) {
   const db = await openDB();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORES.META, 'readwrite');
@@ -522,16 +524,18 @@ async function applyMailboxRewardInTransaction(messageId, reward) {
     const walletReq = store.get(WALLET_KEY);
     const invReq = store.get(INVENTORY_KEY);
     const stateReq = store.get(MAILBOX_STATE_KEY);
+    const economyReq = store.get(ENCOUNTER_ECONOMY_KEY);
 
     let walletReady = false;
     let invReady = false;
     let stateReady = false;
+    let economyReady = false;
     let pendingError = null;
     let processed = false;
     let result = null;
 
     const process = () => {
-      if (processed || !walletReady || !invReady || !stateReady) return;
+      if (processed || !walletReady || !invReady || !stateReady || !economyReady) return;
       processed = true;
       try {
         const state = normalizeGlobalMailboxState(stateReq.result ?? null);
@@ -540,6 +544,12 @@ async function applyMailboxRewardInTransaction(messageId, reward) {
           return;
         }
 
+        let encounterEconomy = null;
+        if (reward.encounterFragments > 0) {
+          encounterEconomy = normalizeEncounterEconomy(economyReq.result);
+          if (encounterEconomy.migrationVersion !== 1) throw new Error('請重新開啟 QuestNote 完成相遇轉換後再領取。');
+          earnEncounterFragments(encounterEconomy, reward.encounterFragments);
+        }
         const wallet = normalizeWallet(walletReq.result);
         if (reward.stardust > 0) {
           wallet.stardust = (wallet.stardust || 0) + reward.stardust;
@@ -563,7 +573,7 @@ async function applyMailboxRewardInTransaction(messageId, reward) {
         const nextState = {
           ...state,
           claimedIds: [...state.claimedIds, messageId],
-          readIds: state.readIds.includes(messageId)
+          readIds: !markRead || state.readIds.includes(messageId)
             ? state.readIds
             : [...state.readIds, messageId],
         };
@@ -571,7 +581,8 @@ async function applyMailboxRewardInTransaction(messageId, reward) {
         store.put(wallet);
         store.put(inventory);
         store.put(nextState);
-        result = { alreadyClaimed: false, state: nextState, wallet, inventory };
+        if (encounterEconomy) store.put(encounterEconomy);
+        result = { alreadyClaimed: false, state: nextState, wallet, inventory, encounterEconomy };
       } catch (error) {
         pendingError = error;
         try { tx.abort(); } catch { /* ignore */ }
@@ -581,9 +592,11 @@ async function applyMailboxRewardInTransaction(messageId, reward) {
     walletReq.onsuccess = () => { walletReady = true; process(); };
     invReq.onsuccess = () => { invReady = true; process(); };
     stateReq.onsuccess = () => { stateReady = true; process(); };
+    economyReq.onsuccess = () => { economyReady = true; process(); };
     walletReq.onerror = () => { pendingError = walletReq.error; };
     invReq.onerror = () => { pendingError = invReq.error; };
     stateReq.onerror = () => { pendingError = stateReq.error; };
+    economyReq.onerror = () => { pendingError = economyReq.error; };
     tx.oncomplete = () => resolve(result);
     tx.onerror = () => reject(pendingError || tx.error || new Error('補償領取 transaction 失敗'));
     tx.onabort = () => reject(pendingError || tx.error || new Error('補償領取 transaction 已中止'));
@@ -640,7 +653,7 @@ export async function claimMailboxReward(message, options = {}) {
       return { success: false, error: '此補償已領取', alreadyClaimed: true };
     }
 
-    const result = await applyMailboxRewardInTransaction(message.id, validated.reward);
+    const result = await applyMailboxRewardInTransaction(message.id, validated.reward, options.markRead !== false);
     if (!result) {
       return { success: false, error: '領取失敗，請稍後再試' };
     }
@@ -656,6 +669,7 @@ export async function claimMailboxReward(message, options = {}) {
       state: result.state,
       wallet: result.wallet,
       inventory: result.inventory,
+      encounterEconomy: result.encounterEconomy,
     };
   } catch (err) {
     return { success: false, error: err?.message || '領取失敗，請稍後再試' };

@@ -1,6 +1,7 @@
+import { planEncounterMigration, ENCOUNTER_FRAGMENTS_BY_RARITY, earnEncounterFragments } from './encounterEconomyCore.js';
 /** Synchronous draw planner. Input records are copied; no persistence or UI effects. */
 import { normalizeWallet } from './rewardService.js';
-import { normalizeEntry, createCollectionEntry, FRAGMENT_BY_RARITY } from './collectionService.js';
+import { normalizeEntry, createCollectionEntry } from './collectionService.js';
 import { normalizePoolUnlockState, normalizeIdempotentGrants, emptyPoolUnlockEntry, applyPoolDrawProgress } from './poolUnlockCore.js';
 import { resolveActivePool, resolveDrawCost, resolveEffectivePool, validatePoolContent } from './poolContentContract.js';
 import { getEligiblePetsForPool } from './petPoolFilter.js';
@@ -165,7 +166,7 @@ function resolvePetFromRarity(poolPets, rarity, rng) {
 
 export function planGachaTransaction({ allPets, poolsData, selectedPoolId, count,
   wallet: rawWallet, stats: rawStats, unlockState: rawUnlock, grants: rawGrants,
-  collection: rawCollection, rng = Math.random, now = new Date().toISOString() }) {
+  collection: rawCollection, encounterEconomy:rawEncounterEconomy, rng = Math.random, now = new Date().toISOString() }) {
   let stats = normalizeGachaStats(rawStats);
   if (![stats.totalPulls, stats.tenPullCount].every((value) => Number.isSafeInteger(value) && value >= 0)) {
     throw new Error('抽卡統計資料無效');
@@ -183,8 +184,10 @@ export function planGachaTransaction({ allPets, poolsData, selectedPoolId, count
   const entryBefore = state.byPool[pool.id] || emptyPoolUnlockEntry(pool.id);
   const candidates = getEligiblePetsForPool(allPets, resolveEffectivePool(pool, entryBefore));
   if (!candidates.length) throw new Error('卡池中沒有可用寵物');
-  const collection = new Map((rawCollection || []).map((item) => [item.petId, normalizeEntry(structuredClone(item))]));
-  const changed = new Set();
+  const migration = planEncounterMigration({ economy:rawEncounterEconomy, collection:rawCollection || [], now });
+  const encounterEconomy = migration.economy;
+  const collection = new Map(migration.collection.map((item) => [item.petId, normalizeEntry(structuredClone(item))]));
+  const changed = new Set(migration.changedCollection.map((entry) => entry.petId));
   const random = () => {
     const value = rng();
     if (typeof value !== 'number' || !Number.isFinite(value) || value < 0 || value >= 1) throw new Error('隨機數無效');
@@ -198,35 +201,42 @@ export function planGachaTransaction({ allPets, poolsData, selectedPoolId, count
     if (![counters.ssrPity, counters.urPity].every((value) => Number.isSafeInteger(value) && value >= 0)) {
       throw new Error('保底資料無效');
     }
-    const { rarity, triggeredPity } = determineRarity(counters, pool, candidates, random);
+    const rolled = determineRarity(counters, pool, candidates, random);
+    // Resolve both existing pity rules first; a ten-pull floor only promotes N/R.
+    const tenGuarantee = pool.tenPullGuarantee === 'SR' && count === 10 && index === 9
+      && !pulls.some((pull) => RARITY_RANK[pull.rarity] >= RARITY_RANK.SR)
+      && RARITY_RANK[rolled.rarity] < RARITY_RANK.SR;
+    const rarity = tenGuarantee ? 'SR' : rolled.rarity;
+    const triggeredPity = rolled.triggeredPity;
     const pet = resolvePetFromRarity(candidates, rarity, random);
     if (!pet) throw new Error('無法從卡池抽取寵物');
     const existing = collection.get(pet.id);
     const isNew = !existing;
-    const fragmentsGained = isNew ? 0 : FRAGMENT_BY_RARITY[pet.rarity];
+    const fragmentsGained = isNew ? 0 : ENCOUNTER_FRAGMENTS_BY_RARITY[pet.rarity];
     if (existing) {
-      if (!Number.isSafeInteger(existing.fragments + fragmentsGained)) throw new Error('碎片數量無效');
-      existing.fragments += fragmentsGained;
+      earnEncounterFragments(encounterEconomy, fragmentsGained);
     } else collection.set(pet.id, createCollectionEntry(pet.id, now));
     changed.add(pet.id);
     stats = updatePityCounters(stats, pool.id, pet.rarity);
     if (!Number.isSafeInteger(stats.totalPulls)) throw new Error('抽卡累積數無效');
     stats.selectedPoolId = pool.id;
-    pulls.push({ pet, rarity: pet.rarity, isNew, fragmentsGained, triggeredPity });
+    pulls.push({ pet, rarity: pet.rarity, isNew, fragmentsGained, triggeredPity, encounterBalanceAfter:encounterEconomy.balance });
   }
   if (count === 10) {
     stats.tenPullCount += 1;
     if (!Number.isSafeInteger(stats.tenPullCount)) throw new Error('十連累積數無效');
   }
   // Eligibility was frozen before the first draw. Unlock and the gift happen after all draws.
-  const unlockProgress = applyPoolDrawProgress({ state, grants, collection, changed,
+  const unlockProgress = applyPoolDrawProgress({ state, grants, collection, changed, encounterEconomy,
     poolId: pool.id, expansion: pool.unlockExpansion, allPets, now }, count);
+  // The final displayed balance also includes a duplicate expansion gift committed here.
+  pulls.at(-1).encounterBalanceAfter = encounterEconomy.balance;
   const updatedCollection = [...collection.values()].sort((a, b) => a.petId < b.petId ? -1 : a.petId > b.petId ? 1 : 0);
   let result;
   if (count === 1) result = { ...pulls[0], pool, stats, unlockProgress };
   else {
     const results = pulls.map((pull) => ({ petId: pull.pet.id, pet: pull.pet, rarity: pull.rarity,
-      isNew: pull.isNew, duplicateFragments: pull.fragmentsGained, triggeredPity: pull.triggeredPity }));
+      isNew:pull.isNew, duplicateFragments:pull.fragmentsGained, encounterBalanceAfter:pull.encounterBalanceAfter, triggeredPity:pull.triggeredPity }));
     const newCount = results.filter((pull) => pull.isNew).length;
     result = { success: true, cost, pool, results, summary: {
       newCount, duplicateCount: count - newCount,
@@ -234,6 +244,6 @@ export function planGachaTransaction({ allPets, poolsData, selectedPoolId, count
       highestRarity: pulls.reduce((best, pull) => RARITY_RANK[pull.rarity] > RARITY_RANK[best] ? pull.rarity : best, 'N'),
     }, unlockProgress, updatedWallet: wallet, updatedCollection, updatedGachaStats: stats };
   }
-  return { wallet, stats, unlockState: state, grants, collection: updatedCollection,
+  return { wallet, stats, encounterEconomy, unlockState: state, grants, collection: updatedCollection,
     changedCollection: [...changed].map((id) => collection.get(id)), result };
 }

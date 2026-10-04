@@ -1,17 +1,34 @@
 /** Owned scenery for the glacier_arrival template. No catalog HTML or remote assets. */
+let glacierSceneCount = 0;
+
 export function createGlacierArrivalScene() {
+  const paintId = `glacier-dawn-${++glacierSceneCount}`;
   const scene = document.createElement('div');
   scene.className = 'glacier-scene';
   scene.setAttribute('aria-hidden', 'true');
   scene.innerHTML = `
     <div class="glacier-scene__sky"></div>
+    <div class="glacier-scene__daybreak"></div>
     <svg class="glacier-scene__landscape" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice" focusable="false">
+      <defs>
+        <radialGradient id="${paintId}-halo"><stop stop-color="#f6d193" stop-opacity=".65"/><stop offset=".45" stop-color="#e8b377" stop-opacity=".25"/><stop offset="1" stop-color="#e8b377" stop-opacity="0"/></radialGradient>
+        <linearGradient id="${paintId}-sun" x2="0" y2="1"><stop stop-color="#fff4cb"/><stop offset="1" stop-color="#eeb472"/></linearGradient>
+        <linearGradient id="${paintId}-water" x2="0" y2="1"><stop stop-color="#f3cf92" stop-opacity=".65"/><stop offset=".45" stop-color="#f1c282" stop-opacity=".25"/><stop offset="1" stop-color="#f1c282" stop-opacity="0"/></linearGradient>
+      </defs>
+      <g class="glacier-scene__sunrise">
+        <circle cx="500" cy="300" r="176" fill="url(#${paintId}-halo)"/>
+        <circle class="glacier-scene__sun" cx="500" cy="300" r="50" fill="url(#${paintId}-sun)"/>
+      </g>
       <g class="glacier-scene__distant">
         <path fill="#608a9a" d="M0 530 90 340 170 440 280 270 380 440 490 345 610 445 730 240 860 420 940 350 1000 500V1000H0Z"/>
-        <path fill="#adcbd0" d="m170 440 110-170 100 170-86-91-34 42-18-26Zm440 5 120-205 130 180-111-114-32 40-20-10Z"/>
+        <path class="glacier-scene__snow" fill="#adcbd0" d="m170 440 110-170 100 170-86-91-34 42-18-26Zm440 5 120-205 130 180-111-114-32 40-20-10Z"/>
         <path fill="#163c49" d="M0 567 250 510 400 555 590 548 780 510 1000 555V1000H0Z"/>
       </g>
       <path class="glacier-scene__channel" fill="#397889" d="M468 551 531 551 586 665 850 1000H150L416 667Z"/>
+      <g class="glacier-scene__reflection">
+        <path fill="url(#${paintId}-water)" d="M490 552h20l27 113 187 335H276L473 665Z"/>
+        <path fill="none" stroke="#f6d499" stroke-width="3" stroke-linecap="round" d="M485 581h30m-38 29h46m-58 37h70m-102 54h138m-186 80h234"/>
+      </g>
       <g class="glacier-scene__ripples" fill="none" stroke="#a0d0d7" stroke-width="2" opacity=".35">
         <path d="M462 613h76m-103 64h123m-181 89h234M296 886h396M210 979h577"/>
       </g>
@@ -41,14 +58,13 @@ export function createGlacierArrivalScene() {
       <g class="glacier-scene__ice" fill="#a4d5db" opacity=".8">
         <path d="m258 805 62-12 21 13-71 9Zm422 62 66 2 12 15-56 2ZM349 955l65-18 18 15-47 13Z"/>
       </g>
+      <g class="glacier-scene__beacons">
+        <ellipse cx="230" cy="760" rx="4" ry="8" style="--i:0"/><ellipse cx="770" cy="760" rx="4" ry="8" style="--i:1"/>
+        <ellipse cx="360" cy="650" rx="4" ry="8" style="--i:2"/><ellipse cx="640" cy="650" rx="4" ry="8" style="--i:3"/>
+        <ellipse cx="432" cy="570" rx="4" ry="8" style="--i:4"/><ellipse cx="588" cy="570" rx="4" ry="8" style="--i:5"/>
+      </g>
     </svg>
     <div class="glacier-scene__fog"></div>
-    <div class="glacier-scene__beacons">
-      <i style="--x:23%;--y:76%;--i:0"></i><i style="--x:77%;--y:76%;--i:1"></i>
-      <i style="--x:36%;--y:65%;--i:2"></i><i style="--x:64%;--y:65%;--i:3"></i>
-      <i style="--x:43%;--y:57%;--i:4"></i><i style="--x:57%;--y:57%;--i:5"></i>
-    </div>
-    <div class="glacier-scene__oath"></div>
     <div class="glacier-scene__vignette"></div>
   `;
   return scene;

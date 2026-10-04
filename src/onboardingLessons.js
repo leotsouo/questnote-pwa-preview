@@ -1,17 +1,18 @@
 /** Chapter definitions and read-only teaching previews. Product services own all writes. */
 import {
-  STAR_UPGRADE_COST, FRAGMENT_BY_RARITY, BOND_LEVEL_THRESHOLDS,
+  BOND_LEVEL_THRESHOLDS,
   PET_BOND_EXP_GAIN, PET_COOLDOWN_MS, getPetCooldownRemaining, formatCooldown,
   getBondUnlocksByLevel,
 } from './collectionService.js';
+import { ENCOUNTER_FRAGMENTS_BY_RARITY } from './encounterEconomyCore.js';
 import { canCraft, DAILY_BOND_ITEM_LIMIT } from './workshopService.js';
 import { isExpeditionTimeComplete } from './expeditionService.js';
 import { getDispatchTerms } from './expeditionGameplay.js';
 import { CHAPTER_LEVELS, CHAPTER_REWARDS, HABIT_TARGETS, DAILY_COMPANION_REWARD } from './bondJourneyCore.js';
 
 export const LESSONS = Object.freeze([
-  { id: 'stars', title: '升星與寵物碎片', summary: '重複召喚，讓夥伴變強。',
-    steps: ['fragments', 'cost', 'upgrade'], practice: { upgrade: 'star-upgraded' } },
+  { id: 'invitation', title: '重逢與指定邀請', summary: '一路相遇，讓下一位同行者由你選擇。',
+    steps: ['fragments', 'cost', 'invite'], practice: { invite: 'companion-invited' } },
   { id: 'bond', title: '陪伴、故事與同行約定', summary: '聽牠的故事，一起完成小事。',
     steps: ['sources', 'pet', 'unlocks', 'story', 'agreement', 'keepsake'], practice: { pet: 'companion-petted' } },
   { id: 'expedition', title: '組隊探險與旅程報告', summary: '選好隊伍，帶回旅程收穫。',
@@ -55,9 +56,6 @@ const UNLOCK_NAMES = {
 
 export function getLessonContext(state = {}) {
   const pets = (state.enrichedCollection || []).filter((pet) => pet.owned);
-  const upgradeable = pets.filter((pet) => pet.stars < 5);
-  const starPet = upgradeable.find((pet) => pet.fragments >= STAR_UPGRADE_COST[pet.stars + 1])
-    || upgradeable.find((pet) => pet.isCompanion) || upgradeable[0] || pets[0];
   const craftables = (state.craftablesCatalog || []).filter((item) => item.enabled);
   const craftable = craftables.find((item) => canCraft(item, state.wallet, 1))
     || craftables.find((item) => item.id === 'item_small_spirit_food') || craftables[0];
@@ -68,17 +66,15 @@ export function getLessonContext(state = {}) {
   });
   const area = state.expeditionAreas?.find((item) => item.id === 'mist_forest');
   const expeditionTerms = area ? getDispatchTerms(area, state.firstJourneyAvailable === true) : null;
-  return { pets, starPet, craftable, recipe, area, companion: state.companion,
+  return { pets, craftable, recipe, area, companion: state.companion,
     expeditionTerms, active: state.activeExpedition, energy: state.wallet?.adventureEnergy || 0 };
 }
 
 export function getLessonAvailability(id, state) {
   const c = getLessonContext(state);
-  if (id === 'stars') {
-    if (!c.starPet) return '先召喚一隻夥伴；現在也能先看懂碎片與升星。';
-    if (c.starPet.stars >= 5) return '目前夥伴都已滿星，可以回顧升星規則。';
-    const cost = STAR_UPGRADE_COST[c.starPet.stars + 1];
-    return c.starPet.fragments >= cost ? '已有足夠碎片，可自願練習升星。' : `升下一星需 ${cost} 個同一夥伴的碎片，目前有 ${c.starPet.fragments || 0} 個。`;
+  if (id === 'invitation') {
+    const balance = state.encounterEconomy?.balance || 0;
+    return balance >= 100 ? '已足夠邀請 SSR；也可以繼續累積，等待想同行的夥伴。' : `目前有 ${balance} 枚相遇碎片，再累積 ${100 - balance} 枚可指定邀請 SSR。`;
   }
   if (id === 'bond') {
     if (!c.companion) return '先在圖鑑設定陪伴；現在可以了解親密度來源。';
@@ -99,36 +95,30 @@ export function getLessonAvailability(id, state) {
 /** Values come from live catalogs/services, never from teaching-only rewards. */
 export function getLessonStepContent(id, step, state = {}) {
   const c = getLessonContext(state);
-  const name = c.starPet?.displayName || c.starPet?.name || '這位夥伴';
-  const stars = c.starPet?.stars || 1;
-  const cost = STAR_UPGRADE_COST[stars + 1];
   const missing = c.recipe.filter((material) => material.have < material.need);
   const materialList = c.recipe.map((material) => `${material.name} ${material.have}/${material.need}`).join('、');
   const sources = missing.map((material) => `${material.name}還差 ${material.need - material.have}，來源：${material.source || '探險獎勵'}`).join('；');
-  const target = { view: 'collection', filter: 'owned', petId: c.starPet?.id };
-  const collectionSelector = c.starPet
-    ? `.collection-card[data-pet-id="${c.starPet.id}"]` : '#collection-filters';
+  const target = { view: 'gacha' };
+  const collectionSelector = '[data-identity-action="invitation"]';
   const storyPet = c.companion || c.pets[0];
   const storyTarget = { view: 'collection', filter: 'owned', petId: storyPet?.id };
   const storySelector = storyPet
     ? `.collection-card[data-pet-id="${storyPet.id}"] [data-action="view-detail"]` : '#collection-filters';
   const descriptions = {
-    'stars/fragments': {
-      title: '重複夥伴會變成牠的碎片',
-      body: `召喚已獲得的夥伴時，會累積同一隻寵物的碎片。依稀有度：${Object.entries(FRAGMENT_BY_RARITY).map(([rarity, amount]) => `${rarity} +${amount}`).join('、')}。工坊的「星界碎片」是材料，與升星用的寵物碎片分開計算。`,
-      target, selector: collectionSelector, action: '查看已獲得圖鑑',
+    'invitation/fragments': {
+      title: '每次重逢，留下相遇的光痕',
+      body: `第一次相遇加入收藏；再次相遇留下跨卡池共用的相遇碎片：${Object.entries(ENCOUNTER_FRAGMENTS_BY_RARITY).map(([rarity, amount]) => `${rarity} +${amount}`).join('、')}。相遇碎片用來指定邀請新夥伴；工坊的星界碎片仍是獨立材料。`,
+      target, selector: collectionSelector, action: '查看指定邀請入口',
     },
-    'stars/cost': {
-      title: '先看下一星需要多少碎片',
-      body: `升星會消耗該夥伴的碎片。${Object.entries(STAR_UPGRADE_COST).map(([star, amount]) => `升到 ${star} 星需 ${amount} 個`).join('；')}。最高 5 星，星數會記錄在圖鑑與收藏里程中。`,
-      target, selector: collectionSelector, action: '查看星數與碎片',
+    'invitation/cost': {
+      title: '下一位同行者，由你決定',
+      body: '累積 100 枚可指定邀請 SSR，200 枚可指定邀請 UR。只開放目前正式開放的角色，故事條件仍需先完成；已相遇的夥伴不能再次邀請。指定邀請不改動召喚保底。',
+      target, selector: collectionSelector, action: '查看夥伴畫廊',
     },
-    'stars/upgrade': {
-      title: '自願練習一次升星',
-      body: !c.starPet ? '目前還沒有夥伴。先召喚、累積同一夥伴的碎片後，再回來練習。'
-        : stars >= 5 ? '目前已獲得的夥伴都已達到 5 星。可以完成本章回顧。'
-          : `「${name}」目前 ${stars} 星、${c.starPet.fragments || 0} 個碎片；升到 ${stars + 1} 星會花費 ${cost} 個。${c.starPet.fragments >= cost ? '願意實作時，點圖鑑的「升星」並確認花費。' : '碎片不足，可等之後重複召喚累積；不用為了教學額外召喚。'}`,
-      target, selector: `${collectionSelector} [data-action="upgrade"]`, action: '查看升星操作',
+    'invitation/invite': {
+      title: '先認識牠，再送出邀請',
+      body: '在指定邀請畫廊選一位夥伴，閱讀名字、稱號與故事，再確認碎片花費。可以先了解，之後再邀請；不用為了教學額外召喚。新夥伴從初識開始，日常陪伴才會培養親密度與探險專長。',
+      target, selector: collectionSelector, action: '前往指定邀請',
     },
     'bond/sources': {
       title: '親密度跟著日常累積',
@@ -172,7 +162,7 @@ export function getLessonStepContent(id, step, state = {}) {
     },
     'expedition/dispatch': {
       title: '組隊並選擇探險目標',
-      body: `${getLessonAvailability('expedition', state)} 點「查看地區」後，先選探索、採集或羈絆目標，再用「一鍵帶入推薦隊伍」選擇符合專長的夥伴，也可手動調整 1～3 隻隊伍。展開「專長是什麼？」可比較夥伴的隊伍作用；一星也有專長。確認能量花費後才會出發，途中不用操作。`,
+      body: `${getLessonAvailability('expedition', state)} 點「查看地區」後，先選探索、採集或羈絆目標，再用「一鍵帶入推薦隊伍」選擇符合專長的夥伴，也可手動調整 1～3 隻隊伍。展開「專長是什麼？」可比較夥伴的隊伍作用；初識也有專長；親密度會逐步培養能力。確認能量花費後才會出發，途中不用操作。`,
       target: { view: 'expedition' }, selector: c.active ? '#expedition-active' : '#expedition-areas [data-area-id="mist_forest"]', action: '查看派遣操作',
     },
     'expedition/claim': {
@@ -199,11 +189,9 @@ export function getLessonStepContent(id, step, state = {}) {
   const content = descriptions[`${id}/${step}`];
   if (!content) return null;
   const briefs = {
-    'stars/fragments': '召喚到重複夥伴，就會得到牠的碎片。',
-    'stars/cost': '在圖鑑查看碎片數量，足夠就能升星。',
-    'stars/upgrade': !c.starPet ? '先召喚一隻夥伴，之後再回來練習。'
-      : stars >= 5 ? '夥伴已滿星，可以往下看。'
-        : `下一星需要 ${cost} 個碎片；目前有 ${c.starPet.fragments || 0} 個。`,
+    'invitation/fragments': '每次重逢，都讓想要的下一次相遇更靠近。',
+    'invitation/cost': 'SSR 100 枚、UR 200 枚；跨卡池共用相遇碎片。',
+    'invitation/invite': '先認識夥伴，再確認邀請。收藏與親密度分開成長。',
     'bond/sources': '設為陪伴後，完成任務就能一起累積親密度。',
     'bond/pet': !c.companion ? '先到圖鑑選一隻設為陪伴。'
       : getPetCooldownRemaining(c.companion) > 0 ? '夥伴正在休息，可以先往下看。'

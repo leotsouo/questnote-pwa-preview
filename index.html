@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#080B16" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -40,7 +40,11 @@
   <link rel="stylesheet" href="src/reminder-settings.css" />
   <link rel="stylesheet" href="src/font-size-settings.css" />
   <link rel="stylesheet" href="src/bond-journey.css" />
-  <meta name="questnote-artifact" content="ff26227b8640c58163b647730e5e54a3b0071774261d44e3c18b614f855427c0">
+  <link rel="stylesheet" href="src/encounter-ceremony.css" />
+  <link rel="stylesheet" href="src/encounter-view.css">
+  <link rel="stylesheet" href="src/encounter-invitation.css">
+  <link rel="stylesheet" href="src/seniorMode.css">
+  <meta name="questnote-artifact" content="b040f52d85f544dfbaf1bc7cb10c2a4dcbeb7097bf1b6ab06a9fc06af1af2fbe">
 </head>
 <body data-theme="default">
   <div id="app-loader" class="app-loader">
@@ -49,8 +53,24 @@
   </div>
 
   <div id="app" class="app">
+    <nav id="senior-location" class="senior-only senior-location" aria-label="目前位置" hidden>
+      <strong>任務首頁</strong>
+      <button type="button" class="btn btn--ghost" data-senior-action="home">返回任務首頁</button>
+      <button type="button" class="btn btn--ghost" data-senior-action="settings">設定</button>
+    </nav>
     <!-- 任務頁 -->
     <main id="view-tasks" class="view active">
+      <header id="senior-home-intro" class="senior-only senior-home-intro" hidden>
+        <div class="senior-home-brand"><img src="assets/brand/questnote-icon-192.png" alt="" width="32" height="32"><span>QuestNote</span><span>易讀模式</span></div>
+        <p id="senior-today-date"></p>
+        <h1>從今天的一件小事開始</h1>
+        <p id="senior-today-summary"></p>
+        <div class="senior-home-tools"><button type="button" class="btn btn--ghost" data-senior-action="settings">設定</button><button type="button" class="btn btn--ghost" data-senior-action="mailbox">信箱與禮物</button></div>
+      </header>
+      <section id="senior-practice" class="senior-only senior-practice card" aria-label="易讀模式實作教學" hidden>
+        <h2>一起試一次，從一件小事開始</h2><p>建立一項真實任務，再完成它。</p>
+        <div class="form-actions"><button type="button" class="btn btn--primary" data-senior-action="practice">試著新增任務</button><button type="button" class="btn btn--primary" data-senior-action="guide-summon" hidden>去認識夥伴</button><button type="button" class="btn btn--ghost" data-senior-action="guide-finish">先自行使用</button></div>
+      </section>
       <section id="twilight-home" class="twilight-home" aria-label="今日的冒險與陪伴" hidden></section>
       <header class="page-header page-header--tasks">
         <div class="page-header__row">
@@ -162,7 +182,7 @@
           <select id="gacha-pool-select" class="gacha-pool-select" aria-label="選擇召喚卡池"></select>
         </div>
 
-        <h2 class="gacha-pool" id="gacha-pool-name">標準召喚</h2>
+        <h2 class="gacha-pool" id="gacha-pool-name">星旅之原</h2>
 
         <div class="gacha-stardust">
           <span class="gacha-stardust__label">目前星塵</span>
@@ -327,46 +347,18 @@
       <header class="page-header">
         <div class="page-header__inner">
           <h1 class="page-title">更多</h1>
-          <p class="page-subtitle">成就、習慣、工坊、設定與資料管理</p>
+          <p class="page-subtitle">日常功能、成長紀錄與 App 設定</p>
         </div>
       </header>
 
-      <section class="more-menu card">
-        <button class="more-menu-item" data-goto="settings" data-style-settings type="button">
-          <span class="more-menu-icon" aria-hidden="true">◐</span>
-          <span class="more-menu-text"><span class="more-menu-label">美術風格</span><span class="more-menu-desc" id="more-active-theme">深色幻想風 · 自由切換三種風格</span></span>
-          <span class="more-menu-arrow" aria-hidden="true">›</span>
-        </button>
-        <button class="more-menu-item" data-goto="share" type="button">
-          <span class="more-menu-icon" aria-hidden="true">🔗</span>
+      <section class="more-menu card" aria-label="更多功能">
+        <button class="more-menu-item" data-goto="habits" type="button">
+          <span class="more-menu-icon">🔄</span>
           <span class="more-menu-text">
-            <span class="more-menu-label">分享 QuestNote</span>
-            <span class="more-menu-desc">傳送正式版連結給朋友</span>
+            <span class="more-menu-label">習慣</span>
+            <span class="more-menu-desc">每日與每週習慣追蹤</span>
           </span>
-          <span class="more-menu-arrow" aria-hidden="true">›</span>
-        </button>
-        <button class="more-menu-item" data-feedback-open type="button">
-          <span class="more-menu-icon" aria-hidden="true">💬</span>
-          <span class="more-menu-text">
-            <span class="more-menu-label">意見與問題回報</span>
-            <span class="more-menu-desc">免登入，直接把問題與建議交給開發者</span>
-          </span>
-          <span class="more-menu-arrow" aria-hidden="true">›</span>
-        </button>
-        <button class="more-menu-item" data-goto="guide" type="button">
-          <span class="more-menu-icon more-menu-icon--image"><img src="assets/brand/questnote-icon-192.png" alt="" width="28" height="28"></span>
-          <span class="more-menu-text">
-            <span class="more-menu-label">使用教學</span>
-            <span class="more-menu-desc">重看入門流程與其他功能</span>
-          </span>
-          <span class="more-menu-arrow">›</span>
-        </button>
-        <button class="more-menu-item" data-goto="handbook" type="button">
-          <span class="more-menu-icon">📖</span>
-          <span class="more-menu-text">
-            <span class="more-menu-label">冒險手冊</span>
-            <span class="more-menu-desc">查看你的任務、收藏與探險成長</span>
-          </span>
+          <span class="more-menu-badge" id="more-habits-badge" hidden aria-hidden="true"></span>
           <span class="more-menu-arrow">›</span>
         </button>
         <button class="more-menu-item" data-goto="tasks" data-scroll-daily-blessing type="button">
@@ -387,15 +379,6 @@
           <span class="more-menu-badge" id="more-achievements-badge" hidden aria-hidden="true"></span>
           <span class="more-menu-arrow">›</span>
         </button>
-        <button class="more-menu-item" data-goto="habits" type="button">
-          <span class="more-menu-icon">🔄</span>
-          <span class="more-menu-text">
-            <span class="more-menu-label">習慣</span>
-            <span class="more-menu-desc">每日與每週習慣追蹤</span>
-          </span>
-          <span class="more-menu-badge" id="more-habits-badge" hidden aria-hidden="true"></span>
-          <span class="more-menu-arrow">›</span>
-        </button>
         <button class="more-menu-item" data-goto="workshop" type="button">
           <span class="more-menu-icon">🔨</span>
           <span class="more-menu-text">
@@ -404,18 +387,58 @@
           </span>
           <span class="more-menu-arrow">›</span>
         </button>
+        <button class="more-menu-item" data-goto="handbook" type="button">
+          <span class="more-menu-icon">📖</span>
+          <span class="more-menu-text">
+            <span class="more-menu-label">冒險手冊</span>
+            <span class="more-menu-desc">查看你的任務、收藏與探險成長</span>
+          </span>
+          <span class="more-menu-arrow">›</span>
+        </button>
         <button class="more-menu-item" data-goto="settings" type="button">
           <span class="more-menu-icon">⚙️</span>
           <span class="more-menu-text">
             <span class="more-menu-label">設定</span>
-            <span class="more-menu-desc">備份、統計與顯示偏好</span>
+            <span class="more-menu-desc">提醒、字體、美術風格與資料備份</span>
           </span>
           <span class="more-menu-arrow">›</span>
         </button>
-      </section>
-
-      <section class="card more-version-section" aria-label="版本資訊">
-        <div class="version-info-card version-info-card--compact" data-version-info data-version-info-compact></div>
+        <details class="more-support">
+          <summary class="more-menu-item">
+            <span class="more-menu-text">
+              <span class="more-menu-label">教學與支援</span>
+              <span class="more-menu-desc">使用教學、問題回報、分享與版本資訊</span>
+            </span>
+            <span class="more-menu-arrow" aria-hidden="true">›</span>
+          </summary>
+          <button class="more-menu-item" data-goto="guide" type="button">
+            <span class="more-menu-icon more-menu-icon--image"><img src="assets/brand/questnote-icon-192.png" alt="" width="28" height="28"></span>
+            <span class="more-menu-text">
+              <span class="more-menu-label">使用教學</span>
+              <span class="more-menu-desc">重看入門流程與其他功能</span>
+            </span>
+            <span class="more-menu-arrow">›</span>
+          </button>
+          <button class="more-menu-item" data-feedback-open type="button">
+            <span class="more-menu-icon" aria-hidden="true">💬</span>
+            <span class="more-menu-text">
+              <span class="more-menu-label">意見與問題回報</span>
+              <span class="more-menu-desc">免登入，直接把問題與建議交給開發者</span>
+            </span>
+            <span class="more-menu-arrow" aria-hidden="true">›</span>
+          </button>
+          <button class="more-menu-item" data-goto="share" type="button">
+            <span class="more-menu-icon" aria-hidden="true">🔗</span>
+            <span class="more-menu-text">
+              <span class="more-menu-label">分享 QuestNote</span>
+              <span class="more-menu-desc">傳送正式版連結給朋友</span>
+            </span>
+            <span class="more-menu-arrow" aria-hidden="true">›</span>
+          </button>
+          <section class="card more-version-section" aria-label="版本資訊">
+            <div class="version-info-card version-info-card--compact" data-version-info data-version-info-compact></div>
+          </section>
+        </details>
       </section>
     </main>
 
@@ -632,6 +655,18 @@
           <p class="page-subtitle">備份、統計與顯示偏好</p>
         </div>
       </header>
+
+      <section class="card settings-reading-mode" aria-labelledby="reading-mode-heading">
+        <h2 id="reading-mode-heading" class="section-title">顯示與操作</h2>
+        <label class="settings-toggle senior-mode-picker" for="reading-mode-toggle">
+          <span class="settings-toggle__text"><span class="settings-toggle__label">易讀模式</span><span class="settings-toggle__desc">使用較大的文字、按鈕與較簡單的操作方式。</span></span>
+          <input type="checkbox" id="reading-mode-toggle" class="settings-toggle__input" role="switch" aria-describedby="reading-mode-description">
+          <span class="settings-toggle__switch" aria-hidden="true"></span>
+        </label>
+        <p id="reading-mode-description" class="settings-section-note">隨時可以切回一般模式。任務、夥伴、收藏與獎勵完全共用。</p>
+        <p id="reading-mode-result" class="settings-section-note" role="status" aria-live="polite"></p>
+        <button type="button" class="btn btn--ghost senior-only" data-senior-action="guide-restart" hidden>再練習一次新增與完成任務</button>
+      </section>
 
       <section class="card settings-font-size" aria-labelledby="font-size-heading">
         <h2 id="font-size-heading" class="section-title">字體大小</h2>

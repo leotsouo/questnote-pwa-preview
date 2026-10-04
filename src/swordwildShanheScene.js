@@ -1,8 +1,10 @@
 /** Original local SVG scenery. Pure presentation; no transactions or storage. */
+import { summonPreludeDurations } from './summonTiming.js';
+
 export function swordwildPreludeDurations(rarity, mode, reduced) {
-  if (reduced) return [100, 120, 160, 140];
-  const omen = { N: 450, R: 550, SR: 700, SSR: 900, UR: 1200 }[rarity] || 450;
-  return [550, mode === 'ten' ? 850 : 650, omen, rarity === 'UR' ? 900 : 650];
+  void rarity;
+  void mode;
+  return summonPreludeDurations(reduced);
 }
 
 export function createSwordwildShanheScene(motif = 'summon') {

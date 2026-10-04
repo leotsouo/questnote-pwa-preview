@@ -234,7 +234,7 @@ export async function startExpedition(petIds, areaId, areas, allPets, objective 
       const catalog = allPets.find((p) => p.id === id);
       const saved = owned.get(id);
       if (!catalog || !saved) throw new Error('尚未獲得此寵物，無法派遣');
-      return { ...catalog, stars: saved.stars, bondLevel: saved.bondLevel };
+      return { ...catalog, legacySpecialtyFloor:saved.legacySpecialtyFloor, encounterMigrationVersion:saved.encounterMigrationVersion, bondLevel:saved.bondLevel };
     });
     const terms = getDispatchTerms(area, expeditions.length === 0);
     const wallet = normalizeWallet(walletRaw);
