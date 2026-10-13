@@ -68,7 +68,7 @@ export async function startBondAgreement(petId, chapter, sourceType, sourceId, {
         || journey.byPet[petId].chapters[chapter].claimedAt) throw new Error('請先閱讀並回應這一章故事。');
     } else if (pet.bondLevel < 5 || !journey.byPet[petId]?.chapters[5]?.claimedAt) throw new Error('完成 Lv.5 故事後才會解鎖日常同行。');
     if (!chapter && journey.dailyClaimDates.includes(getTodayDateString())) throw new Error('今天的日常同行獎勵已領取，明天可以再同行。');
-    if (!source || (sourceType === 'task' ? source.completed || journey.usedEventKeys.includes(`task:${sourceId}`)
+    if (!source || (sourceType === 'task' ? source.isTutorial || source.completed || journey.usedEventKeys.includes(`task:${sourceId}`)
       : !source.isActive || source.archivedAt)) throw new Error('請選擇尚未完成的任務或有效習慣。');
     const now = new Date().toISOString();
     journey.active = { petId, chapter, sourceType, sourceId, sourceTitle: source.title || source.name || '同行目標',

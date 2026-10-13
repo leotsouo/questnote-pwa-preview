@@ -1,3 +1,4 @@
+import { isDemonFinalTask } from './demonFinalTaskCore.js';
 /**
  * 任務篩選、智慧清單、排序與日期顯示
  */
@@ -27,7 +28,7 @@ export function daysBetween(a, b) {
 
 /** 任務是否在今日計畫中 */
 export function isInTodayPlan(task, today = getTodayDateString()) {
-  return task.plannedDate === today;
+  return task.plannedDate === today || (isDemonFinalTask(task) && !task.completed);
 }
 
 /** 從 ISO 時間字串取得本地日期 YYYY-MM-DD */
@@ -175,7 +176,7 @@ export function filterBySmartList(listId, tasks, today = getTodayDateString()) {
     case 'today':
       return tasks.filter(
         (t) =>
-          t.plannedDate === today ||
+          isInTodayPlan(t, today) ||
           t.dueDate === today ||
           t.startDate === today
       );

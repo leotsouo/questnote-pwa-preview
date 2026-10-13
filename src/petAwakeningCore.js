@@ -1,10 +1,7 @@
 /** Awakening progress; pure reducers shared by writers and backup validation. */
 export const AWAKENING_KEY = 'petAwakening';
-export const AWAKENING_PET_IDS = Object.freeze([
-  'pet_n36', 'pet_n37', 'pet_n38', 'pet_r36', 'pet_r37', 'pet_r38', 'pet_r39', 'pet_r40',
-  'pet_sr30', 'pet_sr31', 'pet_sr32', 'pet_sr33', 'pet_sr34',
-  'pet_ssr21', 'pet_ssr22', 'pet_ssr23', 'pet_ssr24', 'pet_ur16', 'pet_ur17', 'pet_ur18',
-]);
+import { AWAKENING_PROFILES, getAwakeningProfile } from './petAwakeningProfiles.js';
+export const AWAKENING_PET_IDS = Object.freeze(AWAKENING_PROFILES.flatMap(p=>p.petIds));
 const object = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
 const time = (v) => typeof v === 'string' && Number.isFinite(Date.parse(v));
 const unique = (v) => Array.isArray(v) && v.every((s) => typeof s === 'string' && /^(task|habit|expedition):[^\s]+$/.test(s)) && new Set(v).size === v.length;
@@ -63,7 +60,7 @@ export function normalizePetAwakening(raw) {
 
 export function awakeningEvents(tasks = [], habits = [], expeditions = []) {
   return [
-    ...tasks.filter((t) => t.completed && time(t.completedAt)).map((t) => ({ key: `task:${t.id}`, at: t.completedAt })),
+    ...tasks.filter((t) => !t.isTutorial && t.completed && time(t.completedAt)).map((t) => ({ key: `task:${t.id}`, at: t.completedAt })),
     ...habits.filter((h) => h.isActive && !h.archivedAt).flatMap((h) => Object.entries(h.logs || {})
       .filter(([date, log]) => /^\d{4}-\d{2}-\d{2}$/.test(date) && log.completed && time(log.completedAt))
       .map(([date, log]) => ({ key: `habit:${h.id}:${date}`, at: log.completedAt }))),
@@ -81,7 +78,7 @@ export function advancePetAwakening(raw, events) {
   for (const e of events) {
     if (!time(e.at) || Date.parse(e.at) <= Date.parse(p.observingSince) || used.has(e.key)) continue;
     if (/^(task|habit):/.test(e.key) && p.eventKeys.length < 3) p.eventKeys.push(e.key);
-    else if (e.key.startsWith('expedition:') && !p.expeditionKey && e.areaId === 'cloudrest_trail'
+    else if (e.key.startsWith('expedition:') && !p.expeditionKey && e.areaId === getAwakeningProfile(id)?.areaId
       && e.petIds?.includes(id) && time(e.startedAt) && Date.parse(e.startedAt) >= Date.parse(p.startedAt)) p.expeditionKey = e.key;
     else continue;
     state.usedEventKeys.push(e.key); used.add(e.key);

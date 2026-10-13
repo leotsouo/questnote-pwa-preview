@@ -1,6 +1,7 @@
 /** First-use guide state. Kept in the local profile, outside exported backups. */
 import { dbGet, dbPut, readAllStoresSnapshot, STORES } from './db.js';
 import { LESSONS, getLesson, normalizeLessonProgress, nextLessonProgress } from './onboardingLessons.js';
+import { prepareGuidedOnboarding } from './guidedOnboardingService.js';
 
 export const ONBOARDING_KEY = 'onboardingV1';
 export const ONBOARDING_STEPS = Object.freeze([
@@ -48,15 +49,15 @@ export function normalizeOnboardingState(raw) {
 
 /** Called immediately after openDB(), before normal startup creates default meta records. */
 export async function prepareOnboarding() {
+  await prepareGuidedOnboarding();
   const stored = await dbGet(STORES.META, ONBOARDING_KEY);
   if (stored) {
-    const record = normalizeOnboardingState(stored);
+    const record = normalizeOnboardingState({ ...stored, status: stored.activeLesson ? stored.status : 'dismissed' });
     if (stored.schemaVersion !== record.schemaVersion) await dbPut(STORES.META, record);
     return record;
   }
 
-  const snapshot = await readAllStoresSnapshot();
-  const record = initialOnboardingStateForSnapshot(snapshot);
+  const record = normalizeOnboardingState({ status: 'dismissed' });
   await dbPut(STORES.META, record);
   return record;
 }

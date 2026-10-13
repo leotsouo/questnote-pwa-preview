@@ -1,0 +1,754 @@
+/* =========================
+   V2.3.8 ? Sweet ??????????????
+   ?? body[data-theme="sweet"]???? default ??
+   ========================= */
+
+/* ?? Sweet ?????????? ?? */
+body[data-theme="sweet"] .gacha-rates {
+  background: #FFFFFF;
+  border: 1px solid #F0C9DA;
+  border-radius: 16px;
+  padding: 10px 12px;
+  box-shadow: 0 8px 20px rgba(199, 53, 120, 0.10);
+}
+
+body[data-theme="sweet"] .rate-tag {
+  background: #FFF8FC;
+  border: 1px solid #F7DDEA;
+  color: #3D2633;
+  font-weight: 800;
+}
+
+body[data-theme="sweet"] .rate-tag .rate-tag__label {
+  color: #3D2633;
+  font-weight: 800;
+}
+
+body[data-theme="sweet"] .rate-tag .rate-tag__value {
+  color: #4E3BA8;
+  font-weight: 900;
+}
+
+body[data-theme="sweet"] .rate-tag.rate-N,
+body[data-theme="sweet"] .rate-tag[data-rarity="N"] {
+  background: #F3F4F6;
+  border-color: #D9DDE4;
+  color: #616977;
+}
+body[data-theme="sweet"] .rate-tag.rate-N .rate-tag__label,
+body[data-theme="sweet"] .rate-tag.rate-N .rate-tag__value {
+  color: #616977;
+}
+
+body[data-theme="sweet"] .rate-tag.rate-R,
+body[data-theme="sweet"] .rate-tag[data-rarity="R"] {
+  background: #EAF3FF;
+  border-color: #B7D6F5;
+  color: #2E6FBE;
+}
+body[data-theme="sweet"] .rate-tag.rate-R .rate-tag__label,
+body[data-theme="sweet"] .rate-tag.rate-R .rate-tag__value {
+  color: #2E6FBE;
+}
+
+body[data-theme="sweet"] .rate-tag.rate-SR,
+body[data-theme="sweet"] .rate-tag[data-rarity="SR"] {
+  background: #EEE9FF;
+  border-color: #CFC3F6;
+  color: #4E3BA8;
+}
+body[data-theme="sweet"] .rate-tag.rate-SR .rate-tag__label,
+body[data-theme="sweet"] .rate-tag.rate-SR .rate-tag__value {
+  color: #4E3BA8;
+  font-weight: 900;
+}
+
+body[data-theme="sweet"] .rate-tag.rate-SSR,
+body[data-theme="sweet"] .rate-tag[data-rarity="SSR"] {
+  background: #FFF1D8;
+  border-color: #F0C878;
+  color: #8A4F10;
+}
+body[data-theme="sweet"] .rate-tag.rate-SSR .rate-tag__label,
+body[data-theme="sweet"] .rate-tag.rate-SSR .rate-tag__value {
+  color: #8A4F10;
+  font-weight: 900;
+}
+
+body[data-theme="sweet"] .rate-tag.rate-UR,
+body[data-theme="sweet"] .rate-tag[data-rarity="UR"] {
+  background: #FFE3F0;
+  border-color: #F3A8C7;
+  color: #9F2F67;
+}
+body[data-theme="sweet"] .rate-tag.rate-UR .rate-tag__label,
+body[data-theme="sweet"] .rate-tag.rate-UR .rate-tag__value {
+  color: #9F2F67;
+  font-weight: 900;
+}
+
+/* ?? Sweet ??????????? ?? */
+body[data-theme="sweet"] .modal:has(.expedition-reward-modal) {
+  background: #FFFFFF;
+  border: 1px solid #F0C9DA;
+  box-shadow: 0 18px 44px rgba(199, 53, 120, 0.18);
+  color: #3D2633;
+}
+
+body[data-theme="sweet"] .expedition-reward-modal {
+  background: #FFFFFF;
+  color: #3D2633;
+}
+
+body[data-theme="sweet"] .expedition-reward-modal__title,
+body[data-theme="sweet"] .expedition-reward-modal .modal-title {
+  color: #B83274;
+  font-weight: 900;
+}
+
+body[data-theme="sweet"] .expedition-reward-modal__pet-name {
+  color: #3D2633;
+  font-weight: 800;
+}
+
+body[data-theme="sweet"] .expedition-reward-modal .pet-original-name {
+  color: #6F4C5E;
+}
+
+body[data-theme="sweet"] .expedition-reward-list {
+  background: #FFF8FC;
+  border: 1px solid #F0C9DA;
+  border-radius: 16px;
+  color: #3D2633;
+}
+
+body[data-theme="sweet"] .expedition-reward-item {
+  background: #FFFFFF;
+  border: 1px solid #F7DDEA;
+  color: #3D2633;
+}
+
+body[data-theme="sweet"] .expedition-reward-item .expedition-reward-value {
+  color: inherit;
+  font-weight: 900;
+}
+
+body[data-theme="sweet"] .expedition-reward-item[data-reward-type="stardust"] {
+  background: #FFF1D8;
+  border-color: #F0C878;
+  color: #8A4F10;
+}
+
+body[data-theme="sweet"] .expedition-reward-item[data-reward-type="material"] {
+  background: #E7F6F1;
+  border-color: #8FCDBD;
+  color: #1F5C4D;
+}
+
+body[data-theme="sweet"] .expedition-reward-item[data-reward-type="bond"] {
+  background: #EEE9FF;
+  border-color: #CFC3F6;
+  color: #4E3BA8;
+}
+
+body[data-theme="sweet"] .expedition-reward-item[data-reward-type="fragment"] {
+  background: #FFE3F0;
+  border-color: #F3A8C7;
+  color: #9F2F67;
+}
+
+body[data-theme="sweet"] .expedition-reward-item .expedition-bonus {
+  color: #6F4C5E;
+  font-weight: 600;
+}
+
+body[data-theme="sweet"] .expedition-reward-modal__workshop-hint,
+body[data-theme="sweet"] .expedition-bonus-detail {
+  color: #6F4C5E;
+}
+
+body[data-theme="sweet"] .expedition-levelup {
+  color: #B83274;
+  font-weight: 800;
+}
+
+body[data-theme="sweet"] .expedition-confirm-button,
+body[data-theme="sweet"] .expedition-reward-modal .btn--primary {
+  background: linear-gradient(135deg, #D44786 0%, #C73578 100%);
+  color: #FFFFFF;
+  border: none;
+  font-weight: 800;
+}
+
+/* ============================================================
+   V2.4.0 ? SSR / UR ??????
+   ??????????????? default / sweet??z-index ?? Modal?
+   ============================================================ */
+.summon-reveal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 12250; /* 高於 dream-bloom / awakening，低於系統 alert */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  overflow: hidden;
+  animation: summonRevealFadeIn 260ms ease-out forwards;
+  -webkit-tap-highlight-color: transparent;
+  color: #f4f7ff;
+}
+
+.summon-reveal-overlay.is-ssr .summon-reveal-bg {
+  background: radial-gradient(circle at 50% 45%, rgba(167, 139, 250, 0.28) 0%, rgba(8, 11, 22, 0.88) 62%);
+  background-color: rgba(8, 11, 22, 0.88);
+}
+.summon-reveal-overlay.is-ur .summon-reveal-bg {
+  background: radial-gradient(circle at 50% 45%, rgba(139, 92, 246, 0.32) 0%, rgba(5, 8, 18, 0.92) 60%);
+  background-color: rgba(5, 8, 18, 0.92);
+}
+
+.summon-reveal-bg {
+  position: absolute;
+  inset: 0;
+}
+
+.summon-reveal-stage {
+  position: relative;
+  width: min(88vw, 420px);
+  height: min(88vw, 420px);
+  max-height: 78vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ?? */
+.summon-reveal-aura {
+  position: absolute;
+  width: 62%;
+  height: 62%;
+  border-radius: 50%;
+  opacity: 0;
+  transform: scale(0.4);
+  animation: summonAuraPulse 1300ms ease-out 120ms both;
+}
+.summon-reveal-overlay.is-ssr .summon-reveal-aura {
+  background: radial-gradient(circle, rgba(251, 191, 36, 0.55) 0%, rgba(167, 139, 250, 0.35) 45%, transparent 72%);
+}
+.summon-reveal-overlay.is-ur .summon-reveal-aura {
+  background: radial-gradient(circle,
+    rgba(251, 191, 36, 0.5) 0%,
+    rgba(244, 114, 182, 0.42) 32%,
+    rgba(34, 211, 238, 0.34) 56%,
+    transparent 74%);
+}
+
+/* ???? */
+.summon-reveal-ring {
+  position: absolute;
+  width: 34%;
+  height: 34%;
+  border-radius: 50%;
+  opacity: 0;
+  transform: scale(0.3);
+}
+.summon-reveal-overlay.is-ssr .summon-reveal-ring {
+  border: 2px solid rgba(251, 191, 36, 0.56);
+  animation: summonRingBurst 1300ms ease-out 200ms both;
+}
+.summon-reveal-overlay.is-ur .summon-reveal-ring {
+  border: 3px solid rgba(244, 114, 182, 0.62);
+  animation: summonURRingBurst 1800ms cubic-bezier(0.16, 0.8, 0.3, 1) 220ms both;
+}
+
+/* UR ???? */
+.summon-reveal-overlay.is-ur::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #ffffff;
+  opacity: 0;
+  pointer-events: none;
+  animation: summonURFlash 720ms ease-out 620ms both;
+}
+
+/* ?? */
+.summon-reveal-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.summon-reveal-particle {
+  position: absolute;
+  bottom: 42%;
+  width: var(--p-size, 6px);
+  height: var(--p-size, 6px);
+  border-radius: 50%;
+  opacity: 0;
+  will-change: transform, opacity;
+  animation: summonParticleDrift var(--p-dur, 1200ms) ease-out var(--p-delay, 0ms) both;
+}
+.summon-reveal-overlay.is-ssr .summon-reveal-particle {
+  background: #FBBF24;
+  box-shadow: 0 0 6px rgba(251, 191, 36, 0.8);
+}
+.summon-reveal-overlay.is-ur .summon-reveal-particle:nth-child(3n) { background: #F472B6; box-shadow: 0 0 6px rgba(244, 114, 182, 0.8); }
+.summon-reveal-overlay.is-ur .summon-reveal-particle:nth-child(3n+1) { background: #22D3EE; box-shadow: 0 0 6px rgba(34, 211, 238, 0.8); }
+.summon-reveal-overlay.is-ur .summon-reveal-particle:nth-child(3n+2) { background: #FBBF24; box-shadow: 0 0 6px rgba(251, 191, 36, 0.8); }
+
+/* ?? */
+.summon-reveal-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  opacity: 0;
+  transform: translateY(26px) scale(0.94);
+  animation: summonCardRise 900ms cubic-bezier(0.16, 0.8, 0.3, 1) 260ms both;
+}
+.summon-reveal-overlay.is-ur .summon-reveal-card {
+  animation-delay: 620ms;
+}
+
+.summon-reveal-rarity {
+  font-weight: 900;
+  letter-spacing: 4px;
+  line-height: 1;
+  opacity: 0;
+  transform: scale(0.5);
+  animation: summonRarityPop 620ms cubic-bezier(0.2, 1.2, 0.4, 1) 360ms both;
+}
+.summon-reveal-overlay.is-ssr .summon-reveal-rarity {
+  font-size: clamp(2.875rem, 15vw, 5.125rem);
+  color: #FDE68A;
+  text-shadow: 0 0 18px rgba(251, 191, 36, 0.7), 0 0 34px rgba(167, 139, 250, 0.5);
+}
+.summon-reveal-overlay.is-ur .summon-reveal-rarity {
+  font-size: clamp(3.625rem, 19vw, 6.75rem);
+  color: #FFFFFF;
+  text-shadow: 0 0 20px rgba(244, 114, 182, 0.8), 0 0 40px rgba(34, 211, 238, 0.6);
+  animation-delay: 720ms;
+}
+
+.summon-reveal-pet-frame {
+  width: clamp(120px, 42vw, 190px);
+  height: clamp(120px, 42vw, 190px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.summon-reveal-pet-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  opacity: 0;
+  filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.45));
+  transition: opacity 400ms ease-out;
+}
+.summon-reveal-pet-image.is-loaded {
+  opacity: 1;
+}
+
+.summon-reveal-pet-frame.is-missing {
+  border: 1px dashed rgba(255, 255, 255, 0.35);
+  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.summon-reveal-fallback-label {
+  font-size: 1rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.88);
+  text-align: center;
+  padding: 0.5rem;
+}
+
+.summon-reveal-overlay.is-fallback .summon-reveal-aura,
+.summon-reveal-overlay.is-fallback .summon-reveal-ring,
+.summon-reveal-overlay.is-fallback .summon-reveal-particles,
+.summon-reveal-overlay.is-fallback .summon-reveal-moon,
+.summon-reveal-overlay.is-fallback .summon-reveal-fall-petals {
+  display: none;
+}
+
+.summon-reveal-caption {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+.summon-reveal-overlay.is-ssr .summon-reveal-caption { color: #FDE68A; }
+.summon-reveal-overlay.is-ur .summon-reveal-caption { color: #FBCFE8; }
+
+/* ?????????????????????? / ????? */
+.summon-reveal-continue {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: max(84px, calc(env(safe-area-inset-bottom) + 76px));
+  text-align: center;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.8125rem;
+  letter-spacing: 1px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 300ms ease;
+}
+.summon-reveal-overlay.is-ready .summon-reveal-continue {
+  opacity: 1;
+  animation: summonContinueHint 1.8s ease-in-out infinite;
+}
+
+@keyframes summonContinueHint {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+/* ???? */
+.summon-reveal-skip {
+  position: absolute;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(24px, calc(env(safe-area-inset-bottom) + 16px));
+  min-height: 44px;
+  min-width: 88px;
+  padding: 0 20px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  cursor: pointer;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  z-index: 2;
+}
+.summon-reveal-skip:active {
+  background: rgba(255, 255, 255, 0.26);
+}
+
+/* --- V3.4.2 SSR+ 名稱／進度／雙 UR 映襯 --- */
+.summon-reveal-name {
+  margin-top: 0.15rem;
+  font-size: clamp(1.05rem, 4.2vw, 1.35rem);
+  font-weight: 800;
+  color: #f8fafc;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.55);
+  letter-spacing: 0.04em;
+  text-align: center;
+  max-width: 16rem;
+}
+.summon-reveal-title {
+  font-size: clamp(0.78rem, 3vw, 0.92rem);
+  font-weight: 600;
+  color: #d5def0;
+  text-align: center;
+  max-width: 16rem;
+  min-height: 1.1em;
+}
+.summon-reveal-progress {
+  position: absolute;
+  top: max(1rem, env(safe-area-inset-top));
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(8, 12, 24, 0.72);
+  border: 1px solid rgba(232, 238, 248, 0.28);
+  color: #e8eef8;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  z-index: 2;
+}
+.summon-reveal-pool {
+  position: absolute;
+  left: 50%;
+  bottom: 18%;
+  width: min(70vw, 18rem);
+  height: 3.5rem;
+  margin-left: calc(min(70vw, 18rem) / -2);
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 40%, rgba(148, 180, 220, 0.28), transparent 70%);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+/* 永眠花皇兔：月亮核心／收束 */
+.summon-reveal-overlay.is-moon-ur .summon-reveal-bg {
+  background:
+    radial-gradient(circle at 50% 28%, rgba(220, 230, 255, 0.22) 0%, transparent 42%),
+    radial-gradient(circle at 50% 55%, rgba(90, 70, 140, 0.28) 0%, rgba(5, 10, 22, 0.94) 62%);
+  background-color: #050a16;
+}
+.summon-reveal-overlay.is-moon-ur .summon-reveal-aura {
+  background: radial-gradient(circle,
+    rgba(232, 238, 248, 0.42) 0%,
+    rgba(120, 140, 200, 0.28) 40%,
+    transparent 72%);
+  animation: summonMoonConverge 1600ms ease-out 180ms both;
+}
+.summon-reveal-overlay.is-moon-ur .summon-reveal-ring {
+  border: 2px solid rgba(210, 220, 245, 0.55);
+  animation: summonRingBurst 1600ms ease-out 260ms both;
+}
+.summon-reveal-overlay.is-moon-ur .summon-reveal-rarity {
+  color: #e8eef8;
+  text-shadow: 0 0 18px rgba(180, 200, 255, 0.75), 0 0 36px rgba(107, 91, 149, 0.55);
+}
+.summon-reveal-overlay.is-moon-ur .summon-reveal-caption {
+  color: #c7d2ea;
+}
+.summon-reveal-moon {
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  width: min(42vw, 9.5rem);
+  height: min(42vw, 9.5rem);
+  margin-left: calc(min(42vw, 9.5rem) / -2);
+  pointer-events: none;
+  z-index: 1;
+}
+.summon-reveal-moon__disc {
+  position: absolute;
+  inset: 12%;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 32% 30%, #f7f9ff 0%, #d8e0f5 42%, #9aa8c8 78%, #6b7a9e 100%);
+  box-shadow:
+    0 0 28px rgba(220, 230, 255, 0.55),
+    0 0 60px rgba(140, 160, 220, 0.28);
+  opacity: 0;
+  transform: scale(0.55) translateY(18px);
+  animation: summonMoonRise 1400ms cubic-bezier(0.16, 0.8, 0.3, 1) 120ms both;
+}
+.summon-reveal-moon__glow {
+  position: absolute;
+  inset: -18%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(220, 230, 255, 0.35), transparent 68%);
+  opacity: 0;
+  animation: summonMoonGlow 1800ms ease-out 280ms both;
+}
+.summon-reveal-overlay.is-moon-ur .summon-reveal-card {
+  animation-delay: 520ms;
+}
+.summon-reveal-overlay.is-moon-ur::after {
+  animation: none;
+  opacity: 0;
+}
+
+/* 曙綻花后兔：花瓣落下／展開 */
+.summon-reveal-overlay.is-petal-ur .summon-reveal-bg {
+  background:
+    radial-gradient(circle at 50% 30%, rgba(255, 220, 200, 0.28) 0%, transparent 45%),
+    radial-gradient(circle at 50% 60%, rgba(232, 160, 150, 0.22) 0%, rgba(28, 14, 24, 0.94) 64%);
+  background-color: #1a1018;
+}
+.summon-reveal-overlay.is-petal-ur .summon-reveal-aura {
+  background: radial-gradient(circle,
+    rgba(255, 236, 220, 0.5) 0%,
+    rgba(244, 180, 160, 0.38) 36%,
+    rgba(232, 194, 122, 0.28) 58%,
+    transparent 74%);
+  animation: summonPetalBloom 1600ms ease-out 160ms both;
+}
+.summon-reveal-overlay.is-petal-ur .summon-reveal-ring {
+  border: 2px solid rgba(246, 199, 192, 0.62);
+  animation: summonURRingBurst 1700ms cubic-bezier(0.16, 0.8, 0.3, 1) 220ms both;
+}
+.summon-reveal-overlay.is-petal-ur .summon-reveal-rarity {
+  color: #fff4e8;
+  text-shadow: 0 0 18px rgba(244, 180, 160, 0.8), 0 0 36px rgba(232, 194, 122, 0.55);
+}
+.summon-reveal-overlay.is-petal-ur .summon-reveal-caption {
+  color: #f6d7c8;
+}
+.summon-reveal-overlay.is-petal-ur .summon-reveal-title {
+  color: #f0dcc8;
+}
+.summon-reveal-fall-petals {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 1;
+}
+.summon-reveal-fall-petal {
+  position: absolute;
+  top: -8%;
+  left: var(--fp-x, 50%);
+  width: var(--fp-size, 12px);
+  height: calc(var(--fp-size, 12px) * 1.35);
+  border-radius: 60% 40% 60% 40%;
+  background: linear-gradient(145deg, #fff1e6, #f6b4a8 55%, #e8a07a);
+  opacity: 0;
+  will-change: transform, opacity;
+  animation: summonPetalFall var(--fp-dur, 2000ms) linear var(--fp-delay, 0ms) infinite;
+  box-shadow: 0 0 8px rgba(246, 180, 160, 0.35);
+}
+.summon-reveal-fall-petal.is-static {
+  top: 18%;
+  opacity: 0.7;
+  animation: none;
+}
+.summon-reveal-overlay.is-petal-ur .summon-reveal-card {
+  animation-delay: 480ms;
+}
+.summon-reveal-overlay.is-petal-ur::after {
+  background: #fff4e8;
+  animation: summonURFlash 720ms ease-out 520ms both;
+}
+
+@keyframes summonMoonRise {
+  from { opacity: 0; transform: scale(0.55) translateY(22px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes summonMoonGlow {
+  from { opacity: 0; transform: scale(0.7); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes summonMoonConverge {
+  0% { opacity: 0; transform: scale(1.35); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes summonPetalBloom {
+  0% { opacity: 0; transform: scale(0.45); }
+  70% { opacity: 1; transform: scale(1.08); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes summonPetalFall {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -10%, 0) rotate(0deg);
+  }
+  12% { opacity: 0.9; }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--fp-drift, 0), 110vh, 0) rotate(var(--fp-rot, 40deg));
+  }
+}
+
+.dream-bloom-overlay.is-ssrplus-handoff .dream-bloom-controls {
+  visibility: hidden;
+}
+
+.summon-reveal-overlay.is-reduced .summon-reveal-fall-petals .summon-reveal-fall-petal:not(.is-static) {
+  animation: none;
+  opacity: 0.65;
+}
+.summon-reveal-overlay.is-reduced .summon-reveal-moon__disc {
+  animation: none;
+  opacity: 1;
+  transform: none;
+}
+
+@keyframes summonRevealFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes summonAuraPulse {
+  0% { opacity: 0; transform: scale(0.4); }
+  40% { opacity: 1; transform: scale(1.05); }
+  100% { opacity: 0.65; transform: scale(1.25); }
+}
+@keyframes summonRingBurst {
+  0% { opacity: 0; transform: scale(0.3); }
+  30% { opacity: 0.9; }
+  100% { opacity: 0; transform: scale(1.9); }
+}
+@keyframes summonURRingBurst {
+  0% { opacity: 0; transform: scale(0.25) rotate(0deg); }
+  25% { opacity: 1; }
+  100% { opacity: 0; transform: scale(2.4) rotate(140deg); }
+}
+@keyframes summonURFlash {
+  0% { opacity: 0; }
+  20% { opacity: 0.7; }
+  100% { opacity: 0; }
+}
+@keyframes summonParticleDrift {
+  0% { opacity: 0; transform: translate(0, 0) scale(0.6); }
+  25% { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--p-dx, 0), calc(var(--p-dy, 0) - 60px)) scale(1); }
+}
+@keyframes summonCardRise {
+  0% { opacity: 0; transform: translateY(26px) scale(0.94); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes summonRarityPop {
+  0% { opacity: 0; transform: scale(0.5); }
+  60% { opacity: 1; transform: scale(1.12); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* Reduce Motion???????????????? / ?? / ?? */
+.summon-reveal-overlay.is-reduced .summon-reveal-particles,
+.summon-reveal-overlay.is-reduced .summon-reveal-ring,
+.summon-reveal-overlay.is-reduced::after {
+  display: none;
+}
+.summon-reveal-overlay.is-reduced .summon-reveal-aura {
+  animation: none;
+  opacity: 0.5;
+  transform: scale(1);
+}
+.summon-reveal-overlay.is-reduced .summon-reveal-card,
+.summon-reveal-overlay.is-reduced .summon-reveal-rarity {
+  animation: none;
+  opacity: 1;
+  transform: none;
+}
+.summon-reveal-overlay.is-reduced .summon-reveal-pet-image {
+  opacity: 1;
+  transition: none;
+}
+
+body.reduce-motion .summon-reveal-overlay .summon-reveal-particles,
+body.reduce-motion .summon-reveal-overlay .summon-reveal-ring,
+body.reduce-motion .summon-reveal-overlay::after {
+  display: none;
+}
+body.reduce-motion .summon-reveal-overlay * {
+  animation-duration: 0.001ms !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .summon-reveal-overlay,
+  .summon-reveal-overlay *,
+  .summon-reveal-overlay::before,
+  .summon-reveal-overlay::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition: none !important;
+  }
+  .summon-reveal-overlay .summon-reveal-particles,
+  .summon-reveal-overlay .summon-reveal-ring,
+  .summon-reveal-overlay::after {
+    display: none;
+  }
+  .summon-reveal-overlay .summon-reveal-card,
+  .summon-reveal-overlay .summon-reveal-rarity,
+  .summon-reveal-overlay .summon-reveal-aura,
+  .summon-reveal-overlay .summon-reveal-pet-image {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ?? ?????????????? ?? */
+.dev-tools__group + .dev-tools__group {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed rgba(148, 163, 184, 0.5);
+}
+.dev-tools__subtitle {
+  font-size: 0.875rem;
+  font-weight: 800;
+  margin: 0 0 4px;
+}
+.btn--dev {
+  min-height: 44px;
+}
+

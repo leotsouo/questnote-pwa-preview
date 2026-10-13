@@ -1,0 +1,42 @@
+/* Dawn and dusk share a cloud kitchen. Entry typography remains the common layout. */
+.fairy-feast-scene { position:absolute; inset:0; z-index:0; overflow:hidden; pointer-events:none; background:#554765; }
+.fairy-feast-scene svg { width:100%; height:100%; }
+.fairy-fragrance { opacity:.22; stroke-dasharray:1400; stroke-dashoffset:1400; }
+.fairy-symbol { opacity:0; }
+.fairy-basket { transform-box:fill-box; transform-origin:center; }
+:is(.dream-debut-overlay,.dream-bloom-overlay)[data-animation=aurora_fairy_feast], .summon-reveal-overlay.is-fairy-reveal { background:#554765; color:#fff5fa; }
+.dream-debut-overlay[data-animation=aurora_fairy_feast]:not(.is-reduced) .fairy-fragrance { animation:fairy-fragrance-rise var(--pool-scene-duration,3264ms) ease-out both; }
+.dream-debut-overlay[data-animation=aurora_fairy_feast]:not(.is-reduced) .fairy-basket--dawn { animation:fairy-dawn-arrive var(--pool-scene-duration,3264ms) ease-out both; }
+.dream-debut-overlay[data-animation=aurora_fairy_feast]:not(.is-reduced) .fairy-basket--dusk { animation:fairy-dusk-arrive var(--pool-scene-duration,3264ms) ease-out both; }
+.dream-bloom-overlay[data-animation=aurora_fairy_feast] .dream-bloom-omen { display:none; }
+.dream-bloom-overlay[data-animation=aurora_fairy_feast]:is([data-phase=mirrorRipple],[data-phase=rarityOmen],[data-phase=bloom]) .fairy-fragrance { opacity:1; stroke-dashoffset:0; transition:stroke-dashoffset 650ms; }
+.dream-bloom-overlay[data-animation=aurora_fairy_feast]:is([data-phase=rarityOmen],[data-phase=bloom]) .fairy-symbol, .summon-reveal-overlay.is-fairy-reveal .fairy-symbol { opacity:1; }
+.summon-reveal-overlay.is-fairy-reveal :is(.summon-reveal-runes,.summon-reveal-moon,.summon-reveal-petals,.summon-reveal-arcane) { display:none; }
+.summon-reveal-overlay.is-fairy-reveal .fairy-fragrance { opacity:1; stroke-dashoffset:0; }
+.summon-reveal-overlay.is-fairy-reveal :is(.summon-reveal-name,.summon-reveal-title,.summon-reveal-caption) { color:#fff5fa; text-shadow:0 2px 10px #292039; }
+body[data-theme] .summon-reveal-overlay.is-fairy-reveal:is([data-theme="ssr"],[data-theme="ur"]) :is(.summon-reveal-name,.summon-reveal-title,.summon-reveal-caption) { color:#fff5fa; background:#463758; border-radius:8px; padding:4px 8px; width:fit-content; margin-inline:auto; text-shadow:none; }
+body[data-theme] .summon-reveal-overlay.is-fairy-reveal:is([data-theme="ssr"],[data-theme="ur"]) :is(.summon-reveal-title,.summon-reveal-caption) { font-size:1rem; line-height:1.45; }
+body[data-theme] .summon-reveal-overlay.is-fairy-reveal .summon-reveal-skip { color:#fff5fa; background:#463758; border-color:#dec9e2; min-height:44px; }
+/* A quiet portrait panel; empty metadata must never become a decorative dot. */
+.summon-reveal-overlay.is-fairy-reveal .fairy-feast-scene { opacity:.28; }
+.summon-reveal-overlay.is-fairy-reveal :is(.summon-reveal-aura,.summon-reveal-ring,.summon-reveal-particles) { display:none; }
+body[data-theme] .summon-reveal-overlay.is-fairy-reveal .summon-reveal-card { position:relative; isolation:isolate; overflow:hidden; box-sizing:border-box; width:min(86vw,440px); padding:42px 18px 24px; gap:12px; border:1px solid #fff7fc99; border-bottom:5px solid #ded0dfb3; border-radius:50% 50% 20px 20px / 20% 20% 20px 20px; background:linear-gradient(115deg,#fff7fc26,#e1dafa0a 45%,#ffeafa21); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); box-shadow:inset 2px 1px 3px #ffffffa6,inset -2px 0 4px #f0d7ff66,0 20px 70px #211b3c55; }
+body[data-theme] .summon-reveal-overlay.is-fairy-reveal .summon-reveal-card::before { content:''; position:absolute; inset:8px; z-index:2; pointer-events:none; border:1px solid #fff7fc40; border-radius:inherit; background:linear-gradient(110deg,transparent 10%,#ffffff1f 13%,transparent 17%,transparent 68%,#ffffff12 70%,transparent 75%); }
+body[data-theme] .summon-reveal-overlay.is-fairy-reveal .summon-reveal-card::after { content:''; position:absolute; z-index:2; pointer-events:none; top:16px; left:12%; right:12%; height:68px; border-top:2px solid #fff7fca6; border-radius:50%; filter:drop-shadow(0 0 3px #ffffff66); }
+body[data-theme] .summon-reveal-overlay.is-fairy-reveal .summon-reveal-pet-frame { width:min(70vw,46dvh,360px); height:min(70vw,46dvh,360px); border-radius:16px; overflow:hidden; background:#e2d5e8; border:1px solid #fff7fc66; }
+body[data-theme] .summon-reveal-overlay.is-fairy-reveal .summon-reveal-pet-image { width:100%; height:100%; object-fit:cover; filter:none; }
+body[data-theme] .summon-reveal-overlay.is-fairy-reveal .summon-reveal-rarity { font-size:1rem; line-height:1.3; letter-spacing:.2em; color:#72512d; background:#fff8ec; -webkit-text-fill-color:#72512d; padding:5px 14px; border:1px solid #cbb18a; border-radius:999px; text-shadow:none; }
+body[data-theme] .summon-reveal-overlay.is-fairy-reveal:is([data-theme="ssr"],[data-theme="ur"]) :is(.summon-reveal-name,.summon-reveal-title,.summon-reveal-caption) { color:#fff5fa; background:none; padding:0; border-radius:0; max-width:100%; min-height:0; text-shadow:0 1px 4px #211b3c,0 2px 8px #211b3c; }
+body[data-theme] .summon-reveal-overlay.is-fairy-reveal .summon-reveal-name { font-size:clamp(1.25rem,4.8vw,1.6rem); line-height:1.4; }
+body[data-theme] .summon-reveal-overlay.is-fairy-reveal :is(.summon-reveal-title,.summon-reveal-caption):empty { display:none; }
+[data-pool-theme=aurora_fairy_feast] { background:linear-gradient(125deg,#f7e6ee,#e0e9fa 48%,#8275a5); color:#342c4b; border-color:#b3a1c6; }
+[data-pool-theme=aurora_fairy_feast] :is(h2,h3,.pool-panel__tagline,.pool-panel__eyebrow) { color:#342c4b; }
+.awakening-scene--fairy { background:#554765; color:#fff5fa; }
+.awakening-scene--fairy .awakening-scene__sky { background:linear-gradient(125deg,#e6becf,#7976ac,#463c61); }
+.awakening-scene--fairy .awakening-ridges { fill:#655679; stroke:#dec9e2; }
+.awakening-scene--fairy :is(.awakening-scene__eyebrow,.awakening-scene__title) { color:#fff0f7; }
+:is(.dream-debut-overlay,.dream-bloom-overlay)[data-animation=aurora_fairy_feast].is-reduced .fairy-feast-scene *, .summon-reveal-overlay.is-fairy-reveal.is-reduced .fairy-feast-scene * { animation:none; transition:none; opacity:1; stroke-dashoffset:0; transform:none; }
+@keyframes fairy-fragrance-rise { 0%,25% { opacity:.1; stroke-dashoffset:1400; } 80%,100% { opacity:1; stroke-dashoffset:0; } }
+@keyframes fairy-dawn-arrive { 0%,12% { transform:translateX(-90px); opacity:0; } 45%,100% { transform:translateX(0); opacity:1; } }
+@keyframes fairy-dusk-arrive { 0%,12% { transform:translateX(90px); opacity:0; } 45%,100% { transform:translateX(0); opacity:1; } }
+@media (prefers-reduced-motion:reduce) { .fairy-feast-scene * { animation:none!important; transition:none!important; opacity:1; stroke-dashoffset:0; } }

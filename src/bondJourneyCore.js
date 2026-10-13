@@ -83,7 +83,7 @@ export function advanceBondJourney(raw, tasks, habits) {
   let events = [];
   if (a.sourceType === 'task') {
     const task = tasks.find((item) => item.id === a.sourceId);
-    if (task?.completed && time(task.completedAt)) events = [{ key: `task:${task.id}`, at: task.completedAt }];
+    if (task?.completed && !task.isTutorial && time(task.completedAt)) events = [{ key: `task:${task.id}`, at: task.completedAt }];
   } else {
     const habit = habits.find((item) => item.id === a.sourceId);
     if (habit?.isActive && !habit.archivedAt) events = Object.entries(habit.logs || {})

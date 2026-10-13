@@ -23,6 +23,92 @@ body[data-theme] #view-gacha .page-title {
   background: var(--pool-surface-strong, var(--pool-surface, var(--color-bg-card)));
   border-color: var(--pool-border, var(--color-border));
 }
+/* 晴信原野 uses the shared reveal scene, with a distinct rain-cleared pool surface. */
+body[data-theme] #view-gacha #gacha-panel[data-pool-id="sunward_letters"] {
+  --pool-text-primary: #f8f3df;
+  --pool-text-secondary: #d1e2d3;
+  --pool-surface: #244f4b;
+  --pool-surface-strong: #173a3a;
+  --pool-border: #a9d2a4;
+  --pool-accent: #f4d486;
+  --pool-accent-text: #243624;
+  color: var(--pool-text-primary);
+  background: radial-gradient(ellipse at 78% 8%, #5e8575 0%, transparent 54%), linear-gradient(150deg, #153c40, #2e5544 74%, #72684a);
+  border-color: var(--pool-border);
+}
+body[data-theme] #view-gacha #gacha-panel[data-pool-id="sunward_letters"] #btn-pull:not(:disabled) {
+  color: var(--pool-accent-text);
+  background: var(--pool-accent);
+}
+body[data-theme] #view-gacha #gacha-panel[data-pool-id="sunward_letters"] :is(.gacha-theme-stage__name, .gacha-theme-stage__eyebrow, .gacha-theme-stage__tagline, .gacha-theme-stage__meta, .gacha-theme-hero__name, .gacha-theme-details, .gacha-theme-details dd) {
+  color: var(--pool-text-primary);
+}
+body[data-theme] #view-gacha #gacha-panel[data-pool-id="sunward_letters"] :is(.gacha-theme-hero__cap, .gacha-theme-featured__item, .gacha-theme-details) {
+  background: var(--pool-surface);
+  border-color: var(--pool-border);
+}
+/* Reuse the shared 3.4s entry controller without another pool's flower scenery. */
+.dream-debut-overlay[data-pool-id="sunward_letters"] {
+  --debut-mist: rgba(108, 175, 157, 0.22);
+  --debut-moon: #fff0bf;
+  --debut-silver: #e2e8cf;
+}
+.dream-debut-overlay[data-pool-id="sunward_letters"] .dream-debut-bg {
+  background:
+    radial-gradient(circle at 70% 22%, #ffe6a6 0 3%, #dfc77555 8%, transparent 27%),
+    linear-gradient(180deg, #283f50 0%, #617f7c 45%, #c8ab70 52%, #25494b 100%);
+}
+.dream-debut-overlay[data-pool-id="sunward_letters"] :is(.dream-debut-flower, .dream-debut-mirror, .dream-debut-dust) { display: none; }
+.dream-debut-overlay[data-pool-id="sunward_letters"] .dream-debut-stage::after {
+  content: '';
+  position: absolute;
+  inset: 48% 0 0;
+  background: linear-gradient(90deg, #132e32 0%, #36564d 28%, #e1bb76 49%, #446e5c 72%, #173a3d 100%);
+  clip-path: polygon(49% 0, 51% 0, 78% 100%, 19% 100%);
+  opacity: 0;
+  transform: translateY(7%);
+  transition: opacity 1s ease, transform var(--pool-scene-duration, 3264ms) ease-out;
+}
+.dream-debut-overlay[data-pool-id="sunward_letters"]:is(.is-phase-pool, .is-phase-bloom, .is-phase-line, .is-ready, .is-skipped) .dream-debut-stage::after {
+  opacity: .72;
+  transform: translateY(0);
+}
+.dream-debut-overlay[data-pool-id="sunward_letters"].is-reduced .dream-debut-stage::after { transition: none; }
+.dream-debut-overlay[data-pool-id="sunward_letters"] .dream-debut-copy {
+  position: absolute;
+  bottom: max(12dvh, calc(env(safe-area-inset-bottom, 0px) + 36px));
+  width: min(calc(100% - 48px), 34rem);
+  max-width: none;
+  margin: 0;
+  padding: 1rem 1.25rem;
+  gap: 12px;
+  border-radius: 1rem;
+  background: rgba(15, 43, 45, .83);
+  box-shadow: 0 16px 48px rgba(8, 24, 26, .28);
+}
+.dream-debut-overlay[data-pool-id="sunward_letters"] .pool-entry-name {
+  margin: 0;
+  color: #fff0bf;
+  font-size: clamp(1.5rem, 6vw, 2rem);
+  line-height: 1.35;
+}
+.dream-debut-overlay[data-pool-id="sunward_letters"] .dream-debut-line {
+  display: grid;
+  gap: .25rem;
+  max-width: 100%;
+  padding: 0;
+  background: none;
+  color: #f8f3df;
+  font-size: .85rem;
+  line-height: 1.6;
+  letter-spacing: 0;
+}
+.dream-debut-overlay[data-pool-id="sunward_letters"] .dream-debut-line__seg { display: block; }
+.dream-debut-overlay[data-pool-id="sunward_letters"] .dream-debut-continue {
+  color: #f8f3df;
+  font-size: .75rem;
+  line-height: 1.5;
+}
 #view-gacha #gacha-pool-switcher { margin-bottom: var(--space-4); }
 #view-gacha #gacha-pool-switcher[hidden] { display: none; }
 #view-gacha .gacha-pool-switcher__label { color: var(--pool-text-secondary, var(--color-text-secondary)); }

@@ -23,6 +23,7 @@ const BOND_LEVEL_BONUS = { 1: 0, 2: 0.02, 3: 0.04, 4: 0.06, 5: 0.1 };
 
 /** 材料顯示名稱 */
 export const MATERIAL_LABELS = {
+  aurora_flower_dew: '霓霞花露',
   forest_leaf: '森林之葉',
   lava_core: '熔岩核心',
   machine_part: '機械零件',

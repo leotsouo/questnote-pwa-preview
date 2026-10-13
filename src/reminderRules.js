@@ -52,7 +52,7 @@ export function projectReminderData(tasks, habits, settings, now = Date.now()) {
   const today = zonedParts(now, settings.timeZone).date;
   const oldest = shiftDate(today, -28);
   return {
-    tasks: tasks.filter((t) => !t.completed).map((t) => ({
+    tasks: tasks.filter((t) => !t.isTutorial && !t.completed).map((t) => ({
       id: t.id, plannedDate: t.plannedDate || null, startDate: t.startDate || null,
       dueDate: t.dueDate || null, priority: t.priority || 'normal',
       ...(settings.showTitles ? { title: String(t.title || t.content?.split('\n')[0] || '').slice(0, 60) } : {}),
@@ -71,9 +71,9 @@ export function buildDailyDigest(state, now = Date.now()) {
   const day = new Date(`${date}T12:00:00Z`).getUTCDay();
   const monday = shiftDate(date, -(day === 0 ? 6 : day - 1));
   const nextMonday = shiftDate(monday, 7);
-  const due = settings.tasks ? tasks.filter((t) => !t.completed && [t.plannedDate, t.startDate, t.dueDate].includes(date)) : [];
+  const due = settings.tasks ? tasks.filter((t) => !t.isTutorial && !t.completed && [t.plannedDate, t.startDate, t.dueDate].includes(date)) : [];
   const ids = new Set(due.map((t) => t.id));
-  const overdue = settings.tasks && settings.overdue ? tasks.filter((t) => !t.completed && t.dueDate && t.dueDate < date && !ids.has(t.id)) : [];
+  const overdue = settings.tasks && settings.overdue ? tasks.filter((t) => !t.isTutorial && !t.completed && t.dueDate && t.dueDate < date && !ids.has(t.id)) : [];
   const daily = settings.habits ? habits.filter((h) => h.frequency === 'daily' && !h.completedDates.includes(date)) : [];
   const weekly = settings.habits && settings.weekly ? habits.filter((h) => h.frequency === 'weekly' && !h.completedDates.includes(date)
     && h.completedDates.filter((d) => d >= monday && d < nextMonday).length < h.targetPerWeek) : [];

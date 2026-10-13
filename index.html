@@ -27,12 +27,27 @@
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="assets/brand/questnote-icon-32.png" />
   <link rel="apple-touch-icon" href="assets/brand/questnote-icon-180.png" />
-  <link rel="stylesheet" href="src/styles.css" />
+  <link rel="stylesheet" href="src/styles/01-foundation.css" />
+  <link rel="stylesheet" href="src/styles/02-core-views.css" />
+  <link rel="stylesheet" href="src/styles/03-tasks-habits-workshop.css" />
+  <link rel="stylesheet" href="src/styles/04-toasts-forms-themes.css" />
+  <link rel="stylesheet" href="src/styles/05-daily-blessing-wheel.css" />
+  <link rel="stylesheet" href="src/styles/06-rates-summon-reveal.css" />
+  <link rel="stylesheet" href="src/styles/07-quests.css" />
+  <link rel="stylesheet" href="src/styles/08-bond.css" />
+  <link rel="stylesheet" href="src/styles/09-exploration-expedition.css" />
+  <link rel="stylesheet" href="src/styles/10-typography-collection.css" />
+  <link rel="stylesheet" href="src/styles/11-mailbox-handbook.css" />
+  <link rel="stylesheet" href="src/styles/12-themed-pools.css" />
+  <link rel="stylesheet" href="src/styles/13-feedback-workshop-camp.css" />
+  <link rel="stylesheet" href="src/daily-race.css" />
   <link rel="stylesheet" href="src/ui-polish.css" />
   <link rel="stylesheet" href="src/summon-polish.css" />
   <link rel="stylesheet" href="src/honeylight-sugar.css" />
   <link rel="stylesheet" href="src/swordwild-shanhe.css" />
+  <link rel="stylesheet" href="src/aurora-fairy-feast.css" />
   <link rel="stylesheet" href="src/lionheart.css" />
+  <link rel="stylesheet" href="src/chaos-demon-court.css" />
   <link rel="stylesheet" href="src/pet-awakening.css" />
   <link rel="stylesheet" href="src/themeTokens.css" />
   <link rel="stylesheet" href="src/theme-system.css" />
@@ -42,9 +57,10 @@
   <link rel="stylesheet" href="src/bond-journey.css" />
   <link rel="stylesheet" href="src/encounter-ceremony.css" />
   <link rel="stylesheet" href="src/encounter-view.css">
+  <link rel="stylesheet" href="src/guided-onboarding.css">
   <link rel="stylesheet" href="src/encounter-invitation.css">
   <link rel="stylesheet" href="src/seniorMode.css">
-  <meta name="questnote-artifact" content="b040f52d85f544dfbaf1bc7cb10c2a4dcbeb7097bf1b6ab06a9fc06af1af2fbe">
+  <meta name="questnote-artifact" content="3e70c13c06ffdc3834ea2dd3961682736e0d9101f3e7b85047d8bc13e0fd6bad">
 </head>
 <body data-theme="default">
   <div id="app-loader" class="app-loader">
@@ -65,7 +81,7 @@
         <p id="senior-today-date"></p>
         <h1>從今天的一件小事開始</h1>
         <p id="senior-today-summary"></p>
-        <div class="senior-home-tools"><button type="button" class="btn btn--ghost" data-senior-action="settings">設定</button><button type="button" class="btn btn--ghost" data-senior-action="mailbox">信箱與禮物</button></div>
+        <div class="senior-home-tools"><button type="button" class="btn btn--ghost" data-senior-action="settings">設定</button><button type="button" class="btn btn--ghost" data-senior-action="mailbox">信箱與禮物</button><button type="button" class="mailbox-entry-btn casino-entry-btn" data-action="daily-open-race" aria-label="開啟星辰賭場" aria-haspopup="dialog" title="星辰賭場"><svg aria-hidden="true" viewBox="0 0 24 24" width="25" height="25" fill="none"><rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="1.7"/><g fill="currentColor"><circle cx="8" cy="8" r="1.5"/><circle cx="16" cy="8" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="8" cy="16" r="1.5"/><circle cx="16" cy="16" r="1.5"/></g></svg></button></div>
       </header>
       <section id="senior-practice" class="senior-only senior-practice card" aria-label="易讀模式實作教學" hidden>
         <h2>一起試一次，從一件小事開始</h2><p>建立一項真實任務，再完成它。</p>
@@ -78,6 +94,7 @@
             <h1 class="page-title">任務</h1>
             <p class="page-subtitle">完成任務獲得星塵與冒險能量</p>
           </div>
+          <button type="button" class="mailbox-entry-btn casino-entry-btn" data-action="daily-open-race" aria-label="開啟星辰賭場" aria-haspopup="dialog" title="星辰賭場"><svg aria-hidden="true" viewBox="0 0 24 24" width="25" height="25" fill="none"><rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="1.7"/><g fill="currentColor"><circle cx="8" cy="8" r="1.5"/><circle cx="16" cy="8" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="8" cy="16" r="1.5"/><circle cx="16" cy="16" r="1.5"/></g></svg></button>
           <button
             type="button"
             id="btn-global-mailbox"
@@ -535,7 +552,7 @@
         <p>完成任務，遇見夥伴，慢慢走出自己的旅程。</p>
         <details class="guide-start-details"><summary>五步快速開始</summary>
         <ol class="guide-steps">
-          <li><b class="guide-step-number" aria-hidden="true">1</b><strong>記下任務</strong><span>按任務頁右下角「＋」；今天要做的事可加入今日計畫。</span></li>
+          <li><b class="guide-step-number" aria-hidden="true">1</b><strong>記下任務</strong><span>在「今日」點「新增任務」，寫下一件今天想做的事。</span></li>
           <li><b class="guide-step-number" aria-hidden="true">2</b><strong>完成並領資源</strong><span>做完後點「完成」，獲得星塵、冒險能量與陪伴夥伴的親密度。</span></li>
           <li><b class="guide-step-number" aria-hidden="true">3</b><strong>召喚夥伴</strong><span>用星塵召喚；星塵不足時看看信箱、任務與每日祝福。</span></li>
           <li><b class="guide-step-number" aria-hidden="true">4</b><strong>收藏、陪伴與故事</strong><span>到圖鑑選一隻設為陪伴；親密度 Lv.2 起可閱讀故事，再選自己的任務或習慣完成同行約定。</span></li>
@@ -547,9 +564,17 @@
       </section>
 
       <section class="guide-growth" aria-labelledby="guide-growth-title">
-        <h2 id="guide-growth-title">帶著夥伴繼續成長</h2>
-        <p>挑一章看看。隨時可停下，進度會保留。</p>
+        <p class="growth-eyebrow">完成第一件小事之後</p>
+        <h2 id="guide-growth-title" tabindex="-1">帶著夥伴繼續成長</h2>
+        <p>從碎片、日常陪伴，到探險與送禮。每章都會帶你到真正的操作位置，可以照順序走，也能挑現在想學的。</p>
+        <p class="growth-safety-note">不用額外召喚或花光資源。先了解、稍後實作也會保留進度。</p>
         <div id="guide-chapters" class="guide-chapters"></div>
+      </section>
+      <section class="guide-quick-help" aria-labelledby="guided-feature-help-title">
+        <h2 id="guided-feature-help-title">想用到時，再來看看</h2>
+        <p>小提醒可以自行關閉；這裡隨時能再讀一次。</p>
+        <div id="guided-feature-help"></div>
+        <button id="guided-page-tour-button" type="button" class="btn btn--secondary" data-page-tour-action="start">認識其他頁面</button>
       </section>
 
       <section id="guide-pet-awakening" class="awakening-panel card" aria-label="羈絆覺醒教學" tabindex="-1"></section>
@@ -971,6 +996,7 @@
 
   <!-- 首次使用引導 -->
   <div id="onboarding-root"></div>
+  <div id="guided-onboarding-root"></div>
 
   <!-- 通用彈窗 -->
   <div id="modal-overlay" class="modal-overlay" role="dialog" aria-modal="true">

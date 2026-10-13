@@ -1,0 +1,34 @@
+/* 黯冠王庭: seven routes resist a broken eclipse. All effects are display only. */
+.chaos-court-scene { position:absolute; inset:0; z-index:0; overflow:hidden; pointer-events:none; background:radial-gradient(ellipse at 50% 30%, #462736, transparent 70%), #100e1b; }
+.chaos-court-scene svg { width:100%; height:100%; }
+.chaos-tower { fill:#151321; stroke:#544250; stroke-width:3; }
+.chaos-crown { stroke:#e7a26d; stroke-width:14; transform-origin:500px 300px; }
+.chaos-routes { opacity:.6; transition:opacity .6s; }
+.chaos-mark { stroke:#eed2a6; stroke-width:7; opacity:0; transition:opacity .5s; }
+.chaos-rift { stroke:#d95b75; stroke-width:9; stroke-dasharray:600; stroke-dashoffset:600; transition:stroke-dashoffset .8s; }
+.chaos-court-vignette { position:absolute; inset:0; background:linear-gradient(#0e0c1966,transparent 35%,#0e0c19cf); }
+:is(.dream-debut-overlay,.dream-bloom-overlay)[data-animation=chaos_demon_court], .summon-reveal-overlay.is-chaos-reveal { background:#100e1b; color:#f7e6d1; }
+.dream-debut-overlay[data-animation=chaos_demon_court] .dream-debut-copy { position:absolute; z-index:3; bottom:14%; left:0; right:0; max-width:none; width:100%; padding:0 20px; }
+.dream-debut-overlay[data-animation=chaos_demon_court] :is(.pool-entry-name,.dream-debut-line) { color:#f6d4b9; text-shadow:0 2px 12px #000; }
+.dream-debut-overlay[data-animation=chaos_demon_court]:not(.is-reduced) .chaos-crown { animation:chaos-crown-turn var(--pool-scene-duration,3000ms) ease-out both; }
+.dream-debut-overlay[data-animation=chaos_demon_court]:not(.is-reduced) .chaos-mark { animation:chaos-mark-rise var(--pool-scene-duration,3000ms) both; }
+.dream-bloom-overlay[data-animation=chaos_demon_court] .dream-bloom-omen { display:none; }
+.dream-bloom-overlay[data-animation=chaos_demon_court]:is([data-phase=mirrorRipple],[data-phase=rarityOmen],[data-phase=bloom],[data-phase=revealing],[data-phase=summary]) .chaos-mark { opacity:1; }
+.dream-bloom-overlay[data-animation=chaos_demon_court]:is([data-phase=rarityOmen],[data-phase=bloom],[data-phase=revealing],[data-phase=summary]) .chaos-rift { stroke-dashoffset:0; }
+.dream-bloom-overlay[data-animation=chaos_demon_court]:is([data-phase=bloom],[data-phase=revealing],[data-phase=summary]) .chaos-routes { opacity:1; }
+.summon-reveal-overlay.is-chaos-reveal :is(.chaos-mark,.chaos-routes) { opacity:1; }
+.summon-reveal-overlay.is-chaos-reveal .chaos-rift { stroke-dashoffset:0; }
+.summon-reveal-overlay.is-chaos-reveal:not(.is-reduced) .chaos-crown { animation:chaos-crown-turn 3s ease-out both; }
+.summon-reveal-overlay.is-chaos-reveal :is(.summon-reveal-caption,.summon-reveal-name,.summon-reveal-title) { color:#f7e6d1; text-shadow:0 2px 10px #000; }
+[data-pool-theme=chaos_demon_court] { background:radial-gradient(ellipse at 80% 5%, #512633, transparent 60%),linear-gradient(155deg,#201729,#100e19); color:#f7e6d1; border-color:#a07369; }
+[data-pool-theme=chaos_demon_court] :is(h2,h3,.pool-panel__tagline,.pool-panel__eyebrow) { color:#f7e6d1; }
+:is(.dream-debut-overlay,.dream-bloom-overlay)[data-animation=chaos_demon_court].is-reduced :is(.chaos-crown,.chaos-mark,.chaos-routes,.chaos-rift), .summon-reveal-overlay.is-chaos-reveal.is-reduced .chaos-court-scene * { animation:none; transition:none; opacity:1; stroke-dashoffset:0; }
+@keyframes chaos-crown-turn { from { transform:rotate(-70deg) scale(.65); opacity:.2; } to { transform:rotate(0) scale(1); opacity:1; } }
+@keyframes chaos-mark-rise { 0%,25% { opacity:0; transform:translateY(35px); } 65%,100% { opacity:1; transform:translateY(0); } }
+@media (prefers-reduced-motion:reduce) { .chaos-court-scene * { animation:none!important; transition:none!important; } .chaos-mark { opacity:1; } .chaos-rift { stroke-dashoffset:0; } }
+
+.awakening-scene--darkcourt { background:#100e1b; color:#f7e6d1; }
+.awakening-scene--darkcourt .awakening-scene__sky { background:radial-gradient(ellipse at 50% 25%,#582b3f,#100e1b 70%); }
+.awakening-scene--darkcourt .awakening-ridges { fill:#191421; stroke:#8d636a; }
+.awakening-scene--darkcourt .awakening-trace { fill:none; stroke:#e5b783; }
+.awakening-scene--darkcourt :is(.awakening-scene__eyebrow,.awakening-scene__title) { color:#f3d5ae; }

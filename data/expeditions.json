@@ -258,6 +258,57 @@
         },
         "bondExp": 10
       }
+    },
+    {
+      "id": "darkcrown_border",
+      "name": "黯冠邊境",
+      "description": "黑塔裂冠試圖吞沒七色星路；沿著抵抗侵蝕的界石前進，找回每位生命自己的名字。邊境補給仍能採到森林嫩葉。",
+      "unlock": {
+        "type": "default"
+      },
+      "energyCost": 5,
+      "durationMinutes": 60,
+      "rewards": {
+        "stardust": {
+          "min": 30,
+          "max": 60
+        },
+        "material": {
+          "id": "forest_leaf",
+          "name": "森林嫩葉",
+          "min": 1,
+          "max": 2
+        },
+        "bondExp": 10
+      }
+    },
+    {
+      "id": "aurora_feast_garden",
+      "name": "霓霞膳庭",
+      "description": "雲上採香花園與晨昏膳亭；循香尋路、修復雲橋，再把花露帶回人間的工坊。",
+      "durationMinutes": 60,
+      "energyCost": 5,
+      "unlock": {
+        "type": "rustic_pet",
+        "poolTags": [
+          "aurora_fairy_feast",
+          "aurora_fairy_feast_expanded"
+        ],
+        "hint": "擁有任一霓霞仙膳靈獸即可前往"
+      },
+      "rewards": {
+        "stardust": {
+          "min": 30,
+          "max": 60
+        },
+        "material": {
+          "id": "aurora_flower_dew",
+          "name": "霓霞花露",
+          "min": 1,
+          "max": 2
+        },
+        "bondExp": 10
+      }
     }
   ]
 }

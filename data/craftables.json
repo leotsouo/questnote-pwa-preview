@@ -258,5 +258,77 @@
       "bond_item",
       "lionheart_inverse_oath"
     ]
+  },
+  {
+    "id": "item_sunward_grain_ring",
+    "name": "晴雨穀圈",
+    "type": "favorite_bond_item",
+    "rarity": "R",
+    "description": "雨後以森林嫩葉包裹豐穗護符的穀香小圈。自然與田園喜好的夥伴特別喜愛。",
+    "enabled": true,
+    "favoriteTags": [
+      "nature",
+      "harvest"
+    ],
+    "effect": {
+      "bondExp": 75,
+      "favoriteBonusBondExp": 150
+    },
+    "recipe": {
+      "forest_leaf": 3,
+      "harvest_charm": 3
+    },
+    "futureTags": [
+      "bond_item",
+      "sunward_letters"
+    ]
+  },
+  {
+    "id": "item_chaos_ember_tart",
+    "name": "黯莓餘燼塔",
+    "type": "favorite_bond_item",
+    "rarity": "R",
+    "description": "以森林嫩葉裹住暖燼莓香的小塔；黯紫外皮下留有暖意。喜愛餘燼與星界的夥伴特別喜愛，也用於黯冠王庭的化身儀式。",
+    "enabled": true,
+    "favoriteTags": [
+      "fire",
+      "astral"
+    ],
+    "effect": {
+      "bondExp": 75,
+      "favoriteBonusBondExp": 150
+    },
+    "recipe": {
+      "forest_leaf": 3,
+      "lava_core": 3
+    },
+    "futureTags": [
+      "bond_item",
+      "darkcrown_court_release"
+    ]
+  },
+  {
+    "id": "item_aurora_flower_tart",
+    "name": "霓霞花露塔",
+    "type": "favorite_bond_item",
+    "rarity": "R",
+    "enabled": true,
+    "description": "以森林嫩葉托住膳庭花露的果塔；普通送禮增加75親密經驗，符合偏好時總共150，也用於霓霞仙膳四位稀有夥伴的覺醒儀式。",
+    "favoriteTags": [
+      "nature",
+      "astral"
+    ],
+    "effect": {
+      "bondExp": 75,
+      "favoriteBonusBondExp": 150
+    },
+    "recipe": {
+      "forest_leaf": 2,
+      "aurora_flower_dew": 3
+    },
+    "futureTags": [
+      "bond_item",
+      "aurora_fairy_feast"
+    ]
   }
 ]

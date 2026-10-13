@@ -259,6 +259,154 @@
     "pet_ur20": [
       "fire",
       "machine"
+    ],
+    "pet_n41": [
+      "harvest"
+    ],
+    "pet_n42": [
+      "nature"
+    ],
+    "pet_n43": [
+      "nature"
+    ],
+    "pet_r44": [
+      "harvest"
+    ],
+    "pet_r45": [
+      "nature"
+    ],
+    "pet_r46": [
+      "nature"
+    ],
+    "pet_sr38": [
+      "harvest"
+    ],
+    "pet_sr39": [
+      "nature"
+    ],
+    "pet_sr40": [
+      "nature"
+    ],
+    "pet_ssr27": [
+      "harvest"
+    ],
+    "pet_ssr28": [
+      "nature"
+    ],
+    "pet_ur21": [
+      "harvest",
+      "nature"
+    ],
+    "pet_n50": [
+      "fire"
+    ],
+    "pet_n51": [
+      "machine"
+    ],
+    "pet_n52": [
+      "nature"
+    ],
+    "pet_r57": [
+      "astral"
+    ],
+    "pet_r58": [
+      "machine"
+    ],
+    "pet_r59": [
+      "astral"
+    ],
+    "pet_r60": [
+      "nature",
+      "harvest"
+    ],
+    "pet_r61": [
+      "fire"
+    ],
+    "pet_sr51": [
+      "fire"
+    ],
+    "pet_sr52": [
+      "frost"
+    ],
+    "pet_sr53": [
+      "frost"
+    ],
+    "pet_sr54": [
+      "astral"
+    ],
+    "pet_sr55": [
+      "nature"
+    ],
+    "pet_ssr37": [
+      "nature",
+      "fire"
+    ],
+    "pet_ssr38": [
+      "astral"
+    ],
+    "pet_ssr39": [
+      "machine",
+      "fire"
+    ],
+    "pet_ssr40": [
+      "astral"
+    ],
+    "pet_ur28": [
+      "fire",
+      "astral"
+    ],
+    "pet_ur29": [
+      "frost",
+      "astral"
+    ],
+    "pet_ur30": [
+      "astral"
+    ],
+    "pet_n53": [
+      "nature"
+    ],
+    "pet_n54": [
+      "astral",
+      "nature"
+    ],
+    "pet_r62": [
+      "nature"
+    ],
+    "pet_r63": [
+      "fire",
+      "harvest"
+    ],
+    "pet_sr56": [
+      "nature",
+      "harvest"
+    ],
+    "pet_sr57": [
+      "frost",
+      "nature"
+    ],
+    "pet_sr58": [
+      "nature",
+      "harvest"
+    ],
+    "pet_sr59": [
+      "astral",
+      "nature"
+    ],
+    "pet_ssr41": [
+      "nature",
+      "harvest"
+    ],
+    "pet_ssr42": [
+      "astral",
+      "frost"
+    ],
+    "pet_ur31": [
+      "nature",
+      "frost"
+    ],
+    "pet_ur32": [
+      "astral",
+      "fire"
     ]
   }
 }

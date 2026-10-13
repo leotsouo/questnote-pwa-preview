@@ -1,3 +1,4 @@
+import { createAuroraFairyScene } from './auroraFairyScene.js';
 /**
  * 主題召喚動畫控制器 — V3.3.0
  *
@@ -8,6 +9,7 @@
  */
 import { getPetImageSrc, preloadImage, delay } from './imagePreloadService.js';
 import { createSwordwildShanheScene } from './swordwildShanheScene.js';
+import { createChaosDemonCourtScene } from './chaosDemonCourtScene.js';
 import { createLionheartScene } from './lionheartScene.js';
 import { createGlacierArrivalScene } from './glacierArrivalScene.js';
 import { createHoneylightSugarScene } from './honeylightSugarScene.js';
@@ -76,7 +78,7 @@ function setState(next, liveEl) {
   if (liveEl && (next === 'rarityOmen' || next === 'revealing' || next === 'summary' || next === 'complete')) {
     const labels = {
       rarityOmen: '稀有度預兆顯現',
-      revealing: activeOverlay?.dataset.animation === 'lionheart_inverse_oath' ? '獅心城夥伴登場' : activeOverlay?.dataset.animation === 'swordwild_shanhe' ? '山河夥伴赴約' : activeOverlay?.dataset.animation === 'honeylight_sugar' ? '糖庭夥伴登場' : activeOverlay?.dataset.animation === 'glacier_arrival' ? '遠航夥伴抵達' : '夥伴甦醒中',
+      revealing: activeOverlay?.dataset.animation === 'aurora_fairy_feast' ? '霓霞仙膳夥伴登場' : activeOverlay?.dataset.animation === 'chaos_demon_court' ? '黯冠王庭夥伴降臨' : activeOverlay?.dataset.animation === 'lionheart_inverse_oath' ? '獅心城夥伴登場' : activeOverlay?.dataset.animation === 'swordwild_shanhe' ? '山河夥伴赴約' : activeOverlay?.dataset.animation === 'honeylight_sugar' ? '糖庭夥伴登場' : activeOverlay?.dataset.animation === 'glacier_arrival' ? '遠航夥伴抵達' : '夥伴甦醒中',
       summary: '召喚結果整理',
       complete: '召喚演出結束',
     };
@@ -207,7 +209,6 @@ function createOverlay({ mode, reduceMotion, highestRarity, poolName, animationK
     <div class="dream-bloom-stage">
       <div class="dream-bloom-dust" data-role="dust" aria-hidden="true"></div>
       <div class="dream-bloom-ripple" data-role="ripple" aria-hidden="true"></div>
-      <div class="dream-bloom-omen" data-role="omen" aria-hidden="true"></div>
       <div class="dream-bloom-buds" data-role="buds" aria-hidden="true"></div>
       <div class="dream-bloom-crest" data-role="crest" aria-hidden="true"></div>
       <article class="dream-bloom-seal" data-role="seal" hidden>
@@ -235,13 +236,11 @@ function createOverlay({ mode, reduceMotion, highestRarity, poolName, animationK
     </div>
   `;
 
-  if (glacier || animationKey === 'honeylight_sugar' || animationKey === 'swordwild_shanhe' || animationKey === 'lionheart_inverse_oath') {
-    overlay.querySelector('.dream-bloom-bg').replaceWith(animationKey === 'lionheart_inverse_oath' ? createLionheartScene() : animationKey === 'swordwild_shanhe' ? createSwordwildShanheScene() : glacier ? createGlacierArrivalScene() : createHoneylightSugarScene());
+  if (animationKey === 'aurora_fairy_feast' || animationKey === 'chaos_demon_court' || glacier || animationKey === 'honeylight_sugar' || animationKey === 'swordwild_shanhe' || animationKey === 'lionheart_inverse_oath') {
+    overlay.querySelector('.dream-bloom-bg').replaceWith(animationKey === 'aurora_fairy_feast' ? createAuroraFairyScene() : animationKey === 'chaos_demon_court' ? createChaosDemonCourtScene() : animationKey === 'lionheart_inverse_oath' ? createLionheartScene() : animationKey === 'swordwild_shanhe' ? createSwordwildShanheScene() : glacier ? createGlacierArrivalScene() : createHoneylightSugarScene());
     overlay.querySelectorAll('[data-role="dust"], [data-role="ripple"], [data-role="buds"], [data-role="crest"]').forEach((node) => node.remove());
   }
   if (sceneFactory) overlay.querySelector('.dream-bloom-bg')?.replaceWith(sceneFactory());
-  // The glacier's sunrise is part of its landscape, not a second generic omen.
-  if (glacier) overlay.querySelector('[data-role="omen"]')?.remove();
 
   return overlay;
 }
@@ -356,7 +355,7 @@ function setupBuds(container, count, reduceMotion) {
  */
 export async function playThemedSummon(options = {}) {
   const animationKey = options.animationKey || 'dream_bloom';
-  if (!['dream_bloom', 'glacier_arrival', 'honeylight_sugar', 'swordwild_shanhe', 'lionheart_inverse_oath'].includes(animationKey)) {
+  if (!['aurora_fairy_feast', 'chaos_demon_court', 'dream_bloom', 'glacier_arrival', 'honeylight_sugar', 'swordwild_shanhe', 'lionheart_inverse_oath'].includes(animationKey)) {
     return { ok: false, fallback: true, state: STATES.FALLBACK };
   }
   const results = Array.isArray(options.results) ? options.results.slice() : [];
@@ -529,8 +528,8 @@ export async function playThemedSummon(options = {}) {
         const eyebrow = overlay.querySelector('[data-role="summary-eyebrow"]');
         const title = overlay.querySelector('[data-role="summary-title"]');
         const grid = overlay.querySelector('[data-role="summary-grid"]');
-        if (eyebrow) eyebrow.textContent = lionheart ? '十連逆造之誓' : swordwild ? '十連山河赴約' : sugar ? '十連糖庭邀請' : animationKey === 'glacier_arrival' ? '十連遠航契約' : '十連夢境花印';
-        if (title) title.textContent = lionheart ? '獅心城的命運已交會' : swordwild ? '同行者已踏上古道' : sugar ? '甜蜜夥伴已到來' : animationKey === 'glacier_arrival' ? '遠航夥伴已抵達' : '沉睡生命已甦醒';
+        if (eyebrow) eyebrow.textContent = animationKey === 'chaos_demon_court' ? '十連裂冠召喚' : lionheart ? '十連逆造之誓' : swordwild ? '十連山河赴約' : sugar ? '十連糖庭邀請' : animationKey === 'glacier_arrival' ? '十連遠航契約' : '十連夢境花印';
+        if (title) title.textContent = animationKey === 'chaos_demon_court' ? '王庭的暗影已跨越界線' : lionheart ? '獅心城的命運已交會' : swordwild ? '同行者已踏上古道' : sugar ? '甜蜜夥伴已到來' : animationKey === 'glacier_arrival' ? '遠航夥伴已抵達' : '沉睡生命已甦醒';
         if (grid) buildSummaryCards(grid, results);
       }
     }
@@ -639,12 +638,13 @@ export async function playPoolDebutPresentation(options = {}) {
 
   const overlay = document.createElement('div');
   overlay.className = 'dream-debut-overlay';
+  if (options.poolId) overlay.dataset.poolId = options.poolId;
   overlay.dataset.layout = 'shared';
   overlay.dataset.duration = String(readyMs);
   overlay.dataset.dissolveDuration = String(dissolveMs);
   overlay.style.setProperty('--pool-scene-duration', `${readyMs * .96}ms`);
   overlay.style.setProperty('--pool-dissolve-duration', `${dissolveMs}ms`);
-  overlay.dataset.animation = lionheart ? 'lionheart_inverse_oath' : options.presentation?.animationKey === 'swordwild_shanhe' ? 'swordwild_shanhe' : sugar ? 'honeylight_sugar' : glacier ? 'glacier_arrival' : 'dream_bloom';
+  overlay.dataset.animation = options.presentation?.animationKey === 'aurora_fairy_feast' ? 'aurora_fairy_feast' : options.presentation?.animationKey === 'chaos_demon_court' ? 'chaos_demon_court' : lionheart ? 'lionheart_inverse_oath' : options.presentation?.animationKey === 'swordwild_shanhe' ? 'swordwild_shanhe' : sugar ? 'honeylight_sugar' : glacier ? 'glacier_arrival' : 'dream_bloom';
   if (reduce) overlay.classList.add('is-reduced');
   overlay.setAttribute('role', 'dialog');
   overlay.setAttribute('aria-modal', 'true');
@@ -682,6 +682,8 @@ export async function playPoolDebutPresentation(options = {}) {
   `;
 
   if (options.presentation?.animationKey === 'swordwild_shanhe') overlay.querySelector('.dream-debut-stage').replaceWith(createSwordwildShanheScene());
+  if (options.presentation?.animationKey === 'chaos_demon_court') overlay.querySelector('.dream-debut-stage').replaceWith(createChaosDemonCourtScene());
+  if (options.presentation?.animationKey === 'aurora_fairy_feast') overlay.querySelector('.dream-debut-stage').replaceWith(createAuroraFairyScene());
   if (lionheart) overlay.querySelector('.dream-debut-stage').replaceWith(createLionheartScene());
   if (glacier) overlay.querySelector('.dream-debut-stage').replaceWith(createGlacierArrivalScene());
   if (sugar) overlay.querySelector('.dream-debut-stage').replaceWith(createHoneylightSugarScene());

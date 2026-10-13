@@ -527,6 +527,358 @@
         "card": "assets/pets/awakening/pet_ur18-initial-20af21e2ee81-card.webp",
         "stage": "assets/pets/awakening/pet_ur18-initial-20af21e2ee81-stage.webp"
       }
+    },
+    {
+      "petId": "pet_ur28",
+      "name": "黯冠・無晝",
+      "rarity": "UR",
+      "trialTitle": "留住未被吞沒的名字",
+      "tokenName": "七路裂冠",
+      "title": "裂冠執界者",
+      "visual": "chaos_crown",
+      "signature": "破環雙角連起七路，界石留下自由裂隙",
+      "invitation": "黯冠・無晝邀你沿黯冠邊境同行。從接受試煉後的新日常與新派遣，留下三次日常及一次邊境同行的證明；準備黯莓餘燼塔，才揭開人形。",
+      "story": [
+        "無晝不肯讓王庭以外的道路擁有名字。你陪牠走過黯冠邊境，逐一記下那些仍抵抗吞光的路標；牠原本壓住界石的爪，終於停在最後一道裂縫前。",
+        "儀式裡，黯莓餘燼塔的紅光映入破環雙角。古龍收起雙翼，凝成披黑紅長袍的人形；七道星路沒有歸順，卻獲得一夜不被抹除的期限。牠仍是王庭的統治者，而你已成為能當面質問牠的人。"
+      ],
+      "dialogue": [
+        "我許你說完，並不代表我會認同。",
+        "七條道路的名字，我記住了。",
+        "冠冕能遮住光，遮不住你留下的裂縫。"
+      ],
+      "initialSha256": "5a28ce020209d5ef6f5ca5b7e32d71e8876775cb1b2e24539d35a6dcd838d9d7",
+      "initialImage": {
+        "original": "assets/pets/awakening/pet_ur28-initial-5a28ce020209.png",
+        "card": "assets/pets/awakening/pet_ur28-initial-5a28ce020209-card.webp",
+        "stage": "assets/pets/awakening/pet_ur28-initial-5a28ce020209-stage.webp"
+      },
+      "awakenedSha256": "aad0bb7e6cb43ca9b1f1ba561f20492628f79c3ac34560ebe8d18394bdb32f4f",
+      "awakenedImage": {
+        "original": "assets/pets/awakening/pet_ur28-awakened-aad0bb7e6cb4.png",
+        "card": "assets/pets/awakening/pet_ur28-awakened-aad0bb7e6cb4-card.webp",
+        "stage": "assets/pets/awakening/pet_ur28-awakened-aad0bb7e6cb4-stage.webp"
+      }
+    },
+    {
+      "petId": "pet_ur29",
+      "name": "裂月・瑟因",
+      "rarity": "UR",
+      "trialTitle": "讓潮門留下返回的路",
+      "tokenName": "裂月潮鱗",
+      "title": "月隙行刃者",
+      "visual": "chaos_moon",
+      "signature": "月刃獨角與銀紫潮光，斷潮之中留一道回流",
+      "invitation": "裂月・瑟因邀你沿黯冠邊境同行。從接受試煉後的新日常與新派遣，留下三次日常及一次邊境同行的證明；準備黯莓餘燼塔，才揭開人形。",
+      "story": [
+        "瑟因割開潮門，只允許向王庭前進的水流。同行時你在逆潮裡繫下一枚路記，牠撞開路記，卻看見後方的小夥伴因此找不到岸。",
+        "你將路記重新繫穩。儀式令魔鰩的銀紫鰭翼化為衣袂，月刃獨角仍在額前。瑟因沒有收回封潮的力量，只在刃下保留一條回流：想離開王庭的人，不必再向牠求情。"
+      ],
+      "dialogue": [
+        "這道回流，只留給知道方向的人。",
+        "我的刃不鈍，只是換了一處落點。",
+        "若你要回去，月隙還開著。"
+      ],
+      "initialSha256": "66302377ac10f92cb54f52896da722e5380a04c9a5bb5a8b66f15765cd76470c",
+      "initialImage": {
+        "original": "assets/pets/awakening/pet_ur29-initial-66302377ac10.png",
+        "card": "assets/pets/awakening/pet_ur29-initial-66302377ac10-card.webp",
+        "stage": "assets/pets/awakening/pet_ur29-initial-66302377ac10-stage.webp"
+      },
+      "awakenedSha256": "78057f120705a5edfcbe337291bdfe46b928678606d500ef050ca127f1cb909c",
+      "awakenedImage": {
+        "original": "assets/pets/awakening/pet_ur29-awakened-78057f120705.png",
+        "card": "assets/pets/awakening/pet_ur29-awakened-78057f120705-card.webp",
+        "stage": "assets/pets/awakening/pet_ur29-awakened-78057f120705-stage.webp"
+      }
+    },
+    {
+      "petId": "pet_ur30",
+      "name": "終鐘・維爾",
+      "rarity": "UR",
+      "trialTitle": "聽見鐘聲之外的夢",
+      "tokenName": "未鳴鐘繭",
+      "title": "終鐘守夢者",
+      "visual": "chaos_bell",
+      "signature": "金鐘翼紋化為鐘飾，停住的花重新落下一瓣",
+      "invitation": "終鐘・維爾邀你沿黯冠邊境同行。從接受試煉後的新日常與新派遣，留下三次日常及一次邊境同行的證明；準備黯莓餘燼塔，才揭開人形。",
+      "story": [
+        "維爾把每個夢都停在終鐘響起之前。三次日常讓你帶回三段不相同的聲音，牠起初將聲音封進繭，卻發現其中有人仍在呼喚遠方的同伴。",
+        "你把餘燼塔放在未落的花旁。夢蛾的翼紋在鐘光裡化為深紫禮服與金鈴，人形的維爾鬆開一枚鐘錘。花瓣落下，夢沒有全部醒來，但呼喚终于可以傳出王庭。"
+      ],
+      "dialogue": [
+        "我聽見了，鐘聲之外的那一句。",
+        "一枚鐘錘落下，足夠讓你選一次。",
+        "別替別人的夢作答。"
+      ],
+      "initialSha256": "b8b412a84e4a76691e06ccdf7865f237f144bcd5d505738bce8b76e826bdf26b",
+      "initialImage": {
+        "original": "assets/pets/awakening/pet_ur30-initial-b8b412a84e4a.png",
+        "card": "assets/pets/awakening/pet_ur30-initial-b8b412a84e4a-card.webp",
+        "stage": "assets/pets/awakening/pet_ur30-initial-b8b412a84e4a-stage.webp"
+      },
+      "awakenedSha256": "b05c22b304bb6cdfaaa798e67b9770055d4469a0b528524202c153d0986f21b7",
+      "awakenedImage": {
+        "original": "assets/pets/awakening/pet_ur30-awakened-b05c22b304bb.png",
+        "card": "assets/pets/awakening/pet_ur30-awakened-b05c22b304bb-card.webp",
+        "stage": "assets/pets/awakening/pet_ur30-awakened-b05c22b304bb-stage.webp"
+      }
+    },
+    {
+      "petId": "pet_ssr37",
+      "name": "荊誓・洛恩",
+      "rarity": "SSR",
+      "trialTitle": "把誓言交還立誓的人",
+      "tokenName": "未斷金誓",
+      "title": "荊誓裁約者",
+      "visual": "chaos_thorn",
+      "signature": "紅鬃荊角保留金線，契紙裂開卻不傷握紙的手",
+      "invitation": "荊誓・洛恩邀你沿黯冠邊境同行。從接受試煉後的新日常與新派遣，留下三次日常及一次邊境同行的證明；準備黯莓餘燼塔，才揭開人形。",
+      "story": [
+        "洛恩以荊角扯緊所有誓言，連從未同意的人也被紅線纏住。你沿邊境找回一份空白契紙，牠要你簽名，你卻先問這份約定允不允許拒絕。",
+        "儀式將紅鬃與荊角凝成人形，洛恩戴上黑金手套，撕開紙上強迫立誓的紅線。金線仍在，只有願意立約的人才會觸到它。牠仍善於交易，只不再把沉默當作答應。"
+      ],
+      "dialogue": [
+        "空白處，留給你自己的決定。",
+        "我的條件會寫明，你也可以拒絕。",
+        "金線沒有斷，枷鎖斷了。"
+      ],
+      "initialSha256": "3f8f8f80b5d89c4cca1b85a8625130b80613a8f1506143e8f35bb8c034b33019",
+      "initialImage": {
+        "original": "assets/pets/awakening/pet_ssr37-initial-3f8f8f80b5d8.png",
+        "card": "assets/pets/awakening/pet_ssr37-initial-3f8f8f80b5d8-card.webp",
+        "stage": "assets/pets/awakening/pet_ssr37-initial-3f8f8f80b5d8-stage.webp"
+      },
+      "awakenedSha256": "1f3d3d993efcefa01cde599a247927ab20205350e3de5d2d28aeba3ee0e6c3f3",
+      "awakenedImage": {
+        "original": "assets/pets/awakening/pet_ssr37-awakened-1f3d3d993efc.png",
+        "card": "assets/pets/awakening/pet_ssr37-awakened-1f3d3d993efc-card.webp",
+        "stage": "assets/pets/awakening/pet_ssr37-awakened-1f3d3d993efc-stage.webp"
+      }
+    },
+    {
+      "petId": "pet_ssr38",
+      "name": "鏡宴・奈璃",
+      "rarity": "SSR",
+      "trialTitle": "讓鏡宴有一張真實的席位",
+      "tokenName": "留影鏡片",
+      "title": "鏡宴留席者",
+      "visual": "chaos_mirror",
+      "signature": "銀狐耳與鏡尾化成鏡飾，虛席之中一盞燈不再重影",
+      "invitation": "鏡宴・奈璃邀你沿黯冠邊境同行。從接受試煉後的新日常與新派遣，留下三次日常及一次邊境同行的證明；準備黯莓餘燼塔，才揭開人形。",
+      "story": [
+        "奈璃在鏡宴裡映出每位來客最渴望的同伴，讓人忘記離席。你陪牠尋找一位沒有影子的客人，牠端來熟悉的笑容，你卻替真正缺席的人留下一把空椅。",
+        "黯莓的紅光照出鏡中的接縫。銀狐收起鏡尾，化成人形，仍端著能幻出萬千宴席的鏡盤；牠第一次讓空椅保持空著，燈火只有一重。失去的人不能被冒認，等待也能是一種陪伴。"
+      ],
+      "dialogue": [
+        "這一席，我不替你填上。",
+        "想看幻影，可以；要稱它是真人，我會先問你。",
+        "燈沒有重影，你看見的就是今晚。"
+      ],
+      "initialSha256": "cd751bb19ef086a8d14514614510b31458e5e5ddfc5460aeaa4d34b03c1f3b52",
+      "initialImage": {
+        "original": "assets/pets/awakening/pet_ssr38-initial-cd751bb19ef0.png",
+        "card": "assets/pets/awakening/pet_ssr38-initial-cd751bb19ef0-card.webp",
+        "stage": "assets/pets/awakening/pet_ssr38-initial-cd751bb19ef0-stage.webp"
+      },
+      "awakenedSha256": "98c5658396a8ee113e1af2d4ef25e6103e6bf3c25562b9304f68c9f7198ec343",
+      "awakenedImage": {
+        "original": "assets/pets/awakening/pet_ssr38-awakened-98c5658396a8.png",
+        "card": "assets/pets/awakening/pet_ssr38-awakened-98c5658396a8-card.webp",
+        "stage": "assets/pets/awakening/pet_ssr38-awakened-98c5658396a8-stage.webp"
+      }
+    },
+    {
+      "petId": "pet_ssr39",
+      "name": "灰律・奧鉻",
+      "rarity": "SSR",
+      "trialTitle": "為規則留下停止的刻度",
+      "tokenName": "止轉銅齒",
+      "title": "灰律停輪者",
+      "visual": "chaos_law",
+      "signature": "銅角齒輪胸紋延續，灰階齒輪停在不夾傷人的一格",
+      "invitation": "灰律・奧鉻邀你沿黯冠邊境同行。從接受試煉後的新日常與新派遣，留下三次日常及一次邊境同行的證明；準備黯莓餘燼塔，才揭開人形。",
+      "story": [
+        "奧鉻讓齒輪照灰律運行，遲到一步的行旅者會被門扉隔開。你和牠在邊境記下三次等待，牠原本認為等待只是誤差，直到看見有人為扶起同伴而錯過門的刻度。",
+        "儀式把銅鴉的角與金屬胸紋化入人形的正裝。奧鉻以手按住齒輪，增加一格能主動停輪的刻度。灰律仍然嚴密，卻第一次承認：守住同伴也能是準時之外的理由。"
+      ],
+      "dialogue": [
+        "這一格，允許停止。",
+        "規則要能說明為何，而不只是命令。",
+        "先扶穩他，門由我來守。"
+      ],
+      "initialSha256": "52ab5f0716e2530d8ea715c9334b72cd6df94ccfefc04d096b901ddd67b34fe9",
+      "initialImage": {
+        "original": "assets/pets/awakening/pet_ssr39-initial-52ab5f0716e2.png",
+        "card": "assets/pets/awakening/pet_ssr39-initial-52ab5f0716e2-card.webp",
+        "stage": "assets/pets/awakening/pet_ssr39-initial-52ab5f0716e2-stage.webp"
+      },
+      "awakenedSha256": "a88de493e815bae9dfd7be75d267d547fbab293c3e246d7c14153763910c176d",
+      "awakenedImage": {
+        "original": "assets/pets/awakening/pet_ssr39-awakened-a88de493e815.png",
+        "card": "assets/pets/awakening/pet_ssr39-awakened-a88de493e815-card.webp",
+        "stage": "assets/pets/awakening/pet_ssr39-awakened-a88de493e815-stage.webp"
+      }
+    },
+    {
+      "petId": "pet_ssr40",
+      "name": "蝕星獄獅",
+      "rarity": "SSR",
+      "trialTitle": "將星鏈的另一端握回自己手中",
+      "tokenName": "自持星環",
+      "title": "蝕星持鏈者",
+      "visual": "chaos_star",
+      "signature": "黑獅星裂與角形延續，星鏈鬆開一段仍握在手中",
+      "invitation": "蝕星獄獅邀你沿黯冠邊境同行。從接受試煉後的新日常與新派遣，留下三次日常及一次邊境同行的證明；準備黯莓餘燼塔，才揭開人形。",
+      "story": [
+        "蝕星獄獅把星鏈扣在抵抗王庭的路標上，胸前裂隙隨每次勒緊而發光。你沒有替牠解開全部鎖鏈，只陪牠辨認哪一節出於自己、哪一節只是王庭的命令。",
+        "餘燼映入星裂，獄獅化成人形，黑金獅角與胸前星光仍清楚可見。牠鬆開路標上的一節星鏈，握回末端。力量未曾消失，下一次鎖住誰，必須由牠自己承擔。"
+      ],
+      "dialogue": [
+        "這一節，是我自己選的。",
+        "力量可以借來，後果不能推給別人。",
+        "星鏈在我手裡，我會看清它通向哪裡。"
+      ],
+      "initialSha256": "8749b511b29a21a264a2dc701d32966d7ace7344ebdc5d7d4557c4c4160639d9",
+      "initialImage": {
+        "original": "assets/pets/awakening/pet_ssr40-initial-8749b511b29a.png",
+        "card": "assets/pets/awakening/pet_ssr40-initial-8749b511b29a-card.webp",
+        "stage": "assets/pets/awakening/pet_ssr40-initial-8749b511b29a-stage.webp"
+      },
+      "awakenedSha256": "66bc952921e66188516cc5b84ae7db3c6c0b9b645f7c48410cb91828346d3eb5",
+      "awakenedImage": {
+        "original": "assets/pets/awakening/pet_ssr40-awakened-66bc952921e6.png",
+        "card": "assets/pets/awakening/pet_ssr40-awakened-66bc952921e6-card.webp",
+        "stage": "assets/pets/awakening/pet_ssr40-awakened-66bc952921e6-stage.webp"
+      }
+    },
+    {
+      "petId": "pet_ssr41",
+      "name": "櫻紗靈狐",
+      "rarity": "SSR",
+      "trialTitle": "把晨昏香氣帶回同一席",
+      "tokenName": "晨露共席信物",
+      "title": "櫻紗點心仙子",
+      "visual": "fairy_petal",
+      "signature": "粉白狐尾、櫻花蕾絲領與雙緞帶",
+      "invitation": "櫻紗靈狐邀你沿霓霞膳庭同行。接受試煉後完成三次新的日常，並完成一次新的膳庭派遣及領取；以霓霞花露塔和共席信物，迎接仙女形態。",
+      "story": [
+        "櫻紗靈狐用尾尖卷起花瓣，替破裂的點心收攏外皮。裂口被花紋封住，熱香留在分給旅人的食盒裡。牠曾想獨自留住最美的滋味，卻發現香氣只有在分享時才會長久。",
+        "你和牠記下三次日常與一次膳庭同行。花露塔映起晨昏光影，粉白狐尾、櫻花蕾絲領與雙緞帶化入仙女的衣飾；櫻紗點心仙子為晚歸的你留下一席，仍願意用熟悉的靈獸模樣陪你走路。"
+      ],
+      "dialogue": [
+        "你的那一席，我一直留著。",
+        "晨露與暮香，都能成為我們共席的溫暖。",
+        "做完今天這一步，再一起嚐一口吧。"
+      ],
+      "initialSha256": "205a668df54df6a8fe39ac8b7673585ddb9b4bccc4ba6b6966dd2e004ccdb046",
+      "initialImage": {
+        "original": "assets/pets/awakening/pet_ssr41-initial-205a668df54d.png",
+        "card": "assets/pets/awakening/pet_ssr41-initial-205a668df54d-card.webp",
+        "stage": "assets/pets/awakening/pet_ssr41-initial-205a668df54d-stage.webp"
+      },
+      "awakenedSha256": "1f33cdc7ae574d838f35fc29e6ca3133788ec5b6b0ecc4a4874d6ae448e9af1a",
+      "awakenedImage": {
+        "original": "assets/pets/awakening/pet_ssr41-awakened-1f33cdc7ae57.png",
+        "card": "assets/pets/awakening/pet_ssr41-awakened-1f33cdc7ae57-card.webp",
+        "stage": "assets/pets/awakening/pet_ssr41-awakened-1f33cdc7ae57-stage.webp"
+      }
+    },
+    {
+      "petId": "pet_ssr42",
+      "name": "霧靛羽鵠",
+      "rarity": "SSR",
+      "trialTitle": "把晨昏香氣帶回同一席",
+      "tokenName": "暮香共席信物",
+      "title": "霧靛調香仙子",
+      "visual": "fairy_mist",
+      "signature": "暮靛長頸、銀紫羽紗與珠鏈",
+      "invitation": "霧靛羽鵠邀你沿霓霞膳庭同行。接受試煉後完成三次新的日常，並完成一次新的膳庭派遣及領取；以霓霞花露塔和共席信物，迎接仙女形態。",
+      "story": [
+        "霧靛羽鵠沿蒸氣中的香紋尋找遺失的調味次序。混濁香霧分成清楚的藍紫層次，古食譜浮出圖案。牠曾想獨自留住最美的滋味，卻發現香氣只有在分享時才會長久。",
+        "你和牠記下三次日常與一次膳庭同行。花露塔映起晨昏光影，暮靛長頸、銀紫羽紗與珠鏈化入仙女的衣飾；霧靛調香仙子為晚歸的你留下一席，仍願意用熟悉的靈獸模樣陪你走路。"
+      ],
+      "dialogue": [
+        "你的那一席，我一直留著。",
+        "晨露與暮香，都能成為我們共席的溫暖。",
+        "做完今天這一步，再一起嚐一口吧。"
+      ],
+      "initialSha256": "4e56c8918de4433b9a1509035ac851de1a92b689971a43552eacbeb58cc16789",
+      "initialImage": {
+        "original": "assets/pets/awakening/pet_ssr42-initial-4e56c8918de4.png",
+        "card": "assets/pets/awakening/pet_ssr42-initial-4e56c8918de4-card.webp",
+        "stage": "assets/pets/awakening/pet_ssr42-initial-4e56c8918de4-stage.webp"
+      },
+      "awakenedSha256": "378df386bed97d2231a70ac631d0981a7d61dfd36f7811737c3ec5e85707c91b",
+      "awakenedImage": {
+        "original": "assets/pets/awakening/pet_ssr42-awakened-378df386bed9.png",
+        "card": "assets/pets/awakening/pet_ssr42-awakened-378df386bed9-card.webp",
+        "stage": "assets/pets/awakening/pet_ssr42-awakened-378df386bed9-stage.webp"
+      }
+    },
+    {
+      "petId": "pet_ur31",
+      "name": "月露雪鹿",
+      "rarity": "UR",
+      "trialTitle": "把晨昏香氣帶回同一席",
+      "tokenName": "晨露共席信物",
+      "title": "月露司膳仙姬",
+      "visual": "fairy_dew",
+      "signature": "花枝鹿角、月滴吊飾、粉白薄紗與晶透蹄",
+      "invitation": "月露雪鹿邀你沿霓霞膳庭同行。接受試煉後完成三次新的日常，並完成一次新的膳庭派遣及領取；以霓霞花露塔和共席信物，迎接仙女形態。",
+      "story": [
+        "月露雪鹿以低頭的鹿角引下花露，落進待凝的果塔。露滴沿塔面結成光潔花紋，雲階亮起柔白歸路。牠曾想獨自留住最美的滋味，卻發現香氣只有在分享時才會長久。",
+        "你和牠記下三次日常與一次膳庭同行。花露塔映起晨昏光影，花枝鹿角、月滴吊飾、粉白薄紗與晶透蹄化入仙女的衣飾；月露司膳仙姬為晚歸的你留下一席，仍願意用熟悉的靈獸模樣陪你走路。"
+      ],
+      "dialogue": [
+        "你的那一席，我一直留著。",
+        "晨露與暮香，都能成為我們共席的溫暖。",
+        "做完今天這一步，再一起嚐一口吧。"
+      ],
+      "initialSha256": "d7a7f5b56ef5fcf87a53736ed8a809d08f71d9cda06955a4d95858e5151c4b75",
+      "initialImage": {
+        "original": "assets/pets/awakening/pet_ur31-initial-d7a7f5b56ef5.png",
+        "card": "assets/pets/awakening/pet_ur31-initial-d7a7f5b56ef5-card.webp",
+        "stage": "assets/pets/awakening/pet_ur31-initial-d7a7f5b56ef5-stage.webp"
+      },
+      "awakenedSha256": "e705aafeecfdb8e8b5a94f5e628809938e8283eed04a1ad3b04b3fc2c3dc474f",
+      "awakenedImage": {
+        "original": "assets/pets/awakening/pet_ur31-awakened-e705aafeecfd.png",
+        "card": "assets/pets/awakening/pet_ur31-awakened-e705aafeecfd-card.webp",
+        "stage": "assets/pets/awakening/pet_ur31-awakened-e705aafeecfd-stage.webp"
+      }
+    },
+    {
+      "petId": "pet_ur32",
+      "name": "曜夜玄鴞",
+      "rarity": "UR",
+      "trialTitle": "把晨昏香氣帶回同一席",
+      "tokenName": "暮香共席信物",
+      "title": "曜夜守灶仙姬",
+      "visual": "fairy_hearth",
+      "signature": "完整巨翼、紫藍眼、月冠與羽緣金絲",
+      "invitation": "曜夜玄鴞邀你沿霓霞膳庭同行。接受試煉後完成三次新的日常，並完成一次新的膳庭派遣及領取；以霓霞花露塔和共席信物，迎接仙女形態。",
+      "story": [
+        "曜夜玄鴞在夜灶旁展翼穩住風，讓莓香慢慢升起。散亂的香霧被聚成一條極光，引回晚歸的夥伴。牠曾想獨自留住最美的滋味，卻發現香氣只有在分享時才會長久。",
+        "你和牠記下三次日常與一次膳庭同行。花露塔映起晨昏光影，完整巨翼、紫藍眼、月冠與羽緣金絲化入仙女的衣飾；曜夜守灶仙姬為晚歸的你留下一席，仍願意用熟悉的靈獸模樣陪你走路。"
+      ],
+      "dialogue": [
+        "你的那一席，我一直留著。",
+        "晨露與暮香，都能成為我們共席的溫暖。",
+        "做完今天這一步，再一起嚐一口吧。"
+      ],
+      "initialSha256": "7d3d88cccae680772412dfc0ae7ae2c4945d2289510711e9444e3287a7dabbd3",
+      "initialImage": {
+        "original": "assets/pets/awakening/pet_ur32-initial-7d3d88cccae6.png",
+        "card": "assets/pets/awakening/pet_ur32-initial-7d3d88cccae6-card.webp",
+        "stage": "assets/pets/awakening/pet_ur32-initial-7d3d88cccae6-stage.webp"
+      },
+      "awakenedSha256": "fd374ec64bd9d9ad5b49eb0dcc3c238be16b39105e063091d197d3db31a5ad2d",
+      "awakenedImage": {
+        "original": "assets/pets/awakening/pet_ur32-awakened-fd374ec64bd9.png",
+        "card": "assets/pets/awakening/pet_ur32-awakened-fd374ec64bd9-card.webp",
+        "stage": "assets/pets/awakening/pet_ur32-awakened-fd374ec64bd9-stage.webp"
+      }
     }
   ]
 }

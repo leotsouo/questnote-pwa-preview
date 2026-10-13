@@ -5,6 +5,9 @@
 .invitation-entry strong { font-size:.9rem; font-weight:500; }
 .invitation-entry p span { font-size:.75rem; color:var(--color-text-muted); }
 .invitation-entry button { flex:none; background:transparent; }
+.daily-encounter-note { font-size:.85rem; line-height:1.7; color:var(--color-text-muted); margin-bottom:16px; overflow-wrap:anywhere; }
+.invitation-entry .daily-encounter-note { margin:2px 0 0; font-size:.8rem; }
+body[data-reading-mode="senior"] .daily-encounter-note { font-size:1rem; }
 .invitation-dialog { padding:0; width:min(100% - 24px, 780px); max-height:calc(100dvh - 24px); border:1px solid var(--color-border); border-radius:20px; overscroll-behavior:contain; }
 .invitation-dialog::backdrop { background:#080b16bb; backdrop-filter:blur(8px); }
 .invitation-dialog-header { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:14px 20px; border-bottom:1px solid var(--color-border); }

@@ -1,3 +1,4 @@
+import { isGuidedOnboardingActive } from './guidedOnboardingController.js';
 /** Alternative presentation only. All actions call the existing UI/services. */
 import { applyReadingModeToDocument, setReadingMode, setSeniorOnboardingCompleted } from './preferencesService.js';
 import { getTodayDateString, isInTodayPlan, isCompletedToday } from './taskFilterService.js';
@@ -82,6 +83,7 @@ export function initSeniorModeController(callbacks) {
       if (focus) { if (focus.matches('h1, h2')) focus.tabIndex = -1; focus.focus(); }
     }
   });
+  document.addEventListener('questnote:guided-state-change', syncSeniorPresentation);
   syncSeniorPresentation();
 }
 
@@ -142,7 +144,7 @@ export function syncSeniorPresentation() {
   document.getElementById('senior-today-summary').textContent = `今日計畫尚有 ${pending} 件待辦；今天已完成 ${done} 件。`;
   document.getElementById('senior-today-date').textContent = new Intl.DateTimeFormat('zh-TW', { month: 'long', day: 'numeric', weekday: 'long' }).format(new Date(`${today}T12:00:00`));
   const guide = document.getElementById('senior-practice');
-  guide.hidden = !senior || state.userPreferences.seniorOnboardingCompleted;
+  guide.hidden = !senior || isGuidedOnboardingActive() || state.userPreferences.seniorOnboardingCompleted;
   if (senior) {
     const content = document.getElementById('task-view-content');
     if (state.tasks.length && !practiceTaskId) content.after(guide);
@@ -169,7 +171,7 @@ export function seniorTaskFormClosed() { practicing = false; }
 function syncSeniorModalBackground() {
   const app = document.getElementById('app');
   if (!app) return;
-  const locked = isSeniorMode() && !!document.querySelector('#modal-overlay.open, #global-mailbox-modal.open, #pet-image-viewer.is-open, #expedition-dispatch-modal');
+  const locked = isSeniorMode() && !isGuidedOnboardingActive() && !!document.querySelector('#modal-overlay.open, #global-mailbox-modal.open, #pet-image-viewer.is-open, #expedition-dispatch-modal');
   if (locked) {
     if (modalBackgroundWasInert === null) modalBackgroundWasInert = app.inert;
     app.inert = true;
@@ -229,26 +231,14 @@ function renderFeedback() {
 export function composeSeniorTaskForm(isEdit) {
   if (!isSeniorMode()) return;
   const form = document.getElementById('task-form');
-  const details = document.createElement('details');
-  details.className = 'senior-form-options';
-  details.innerHTML = '<summary>更多設定：分類、重要程度、日期與子任務</summary>';
-  const categoryLabel = form.querySelector('[for="task-category"]');
-  const priority = form.querySelector('#task-priority');
-  for (let node = categoryLabel; node;) {
-    const next = node.nextSibling;
-    details.append(node);
-    if (node === priority) break;
-    node = next;
-  }
-  const dates = form.querySelector('#task-start-date').closest('.form-row');
-  const hint = dates.previousElementSibling;
-  if (hint?.classList.contains('form-hint')) details.append(hint);
-  details.append(dates, form.querySelector('#task-date-error'));
-  details.append(form.querySelector('[for="task-plan-today"]'));
+  const details = form.querySelector('.task-editor-options');
+  details.classList.add('senior-form-options');
+  // Keep the day's schedule visible while the optional classification stays folded.
+  const plannedDate = form.querySelector('#task-plan-date').closest('.form-field');
+  const plannedTime = form.querySelector('#task-planned-time').closest('.form-field');
+  details.before(plannedDate, plannedTime);
+  details.querySelector('summary').textContent = '更多設定：分類、重要程度、日期與子任務';
   form.querySelector('[data-plan-date]')?.parentElement.classList.add('senior-schedule-shortcuts');
-  const list = form.querySelector('#subtask-form-list');
-  details.append(list.previousElementSibling, list, form.querySelector('#subtask-form-empty'), form.querySelector('.subtask-form-add'));
-  form.insertBefore(details, form.lastElementChild);
   form.querySelector('[for="task-content"]').textContent = '要做什麼？';
   form.querySelector('#task-content').placeholder = '例如：晚上吃藥。換行可以補充說明。';
   form.querySelector('#task-content').rows = 3;

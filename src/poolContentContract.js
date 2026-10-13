@@ -4,16 +4,21 @@ import { getEligiblePetsForPool } from './petPoolFilter.js';
 export const POOL_CONTENT_SCHEMA_VERSION = 1;
 export const POOL_RARITIES = Object.freeze(['N', 'R', 'SR', 'SSR', 'UR']);
 export const POOL_THEME_REGISTRY = Object.freeze({
+  aurora_fairy_feast: Object.freeze({ cssTheme: 'aurora_fairy_feast' }),
   default: Object.freeze({ cssTheme: null }),
   dream_bloom: Object.freeze({ cssTheme: 'eternal_slumber_bloom' }),
   glacier_arrival: Object.freeze({ cssTheme: 'glacier_arrival' }),
   honeylight_sugar: Object.freeze({ cssTheme: 'honeylight_sugar' }),
   swordwild_shanhe: Object.freeze({ cssTheme: 'swordwild_shanhe' }),
+  chaos_demon_court: Object.freeze({ cssTheme: 'chaos_demon_court' }),
   lionheart_inverse_oath: Object.freeze({ cssTheme: 'lionheart_inverse_oath' }),
 });
-export const POOL_SUMMON_REGISTRY = Object.freeze({ none: true, dream_bloom: true, glacier_arrival: true, honeylight_sugar: true, swordwild_shanhe: true, lionheart_inverse_oath: true });
+export const POOL_SUMMON_REGISTRY = Object.freeze({ aurora_fairy_feast: true, none: true, chaos_demon_court: true, dream_bloom: true, glacier_arrival: true, honeylight_sugar: true, swordwild_shanhe: true, lionheart_inverse_oath: true });
 export const POOL_UNLOCK_REGISTRY = Object.freeze({ pool_unlock: true, morning_garden_unlock: true });
-export const PET_REVEAL_REGISTRY = Object.freeze({ ssr: true, ur: true, moon: true, petal: true, caramel: true, cream: true, sword_eagle: true, sword_toad: true, sword_ape: true, lionheart_griffin: true, lionheart_chimera: true });
+export const PET_REVEAL_REGISTRY = Object.freeze({ chaos_crown: true, chaos_moon: true, chaos_bell: true, chaos_thorn: true, chaos_mirror: true, chaos_law: true, chaos_star: true, ssr: true, ur: true, moon: true, petal: true, caramel: true, cream: true, sword_eagle: true, sword_toad: true, sword_ape: true, lionheart_griffin: true, lionheart_chimera: true });
+
+const SSR_REVEALS = Object.freeze(['ssr', 'chaos_thorn', 'chaos_mirror', 'chaos_law', 'chaos_star']);
+const revealMatchesRarity = (key, rarity) => own(PET_REVEAL_REGISTRY, key) && (SSR_REVEALS.includes(key) ? rarity === 'SSR' : rarity === 'UR');
 
 const TOKEN = /^[a-z][a-z0-9_]*$/;
 const PET_ID = /^pet_(?:(?:n|r|sr|ssr|ur)\d{2,}|sp\d{2,})$/;
@@ -314,7 +319,7 @@ export function validatePoolContent(poolsData, { pets, previousPoolsData } = {})
     if (pet?.presentation !== undefined && !record(pet.presentation)) errors.push(issue('PET_PRESENTATION_INVALID', 'Expected an object', `pets[${index}].presentation`));
     checkText(pet?.presentation?.revealCaption, `pets[${index}].presentation.revealCaption`, errors);
     const key = pet?.presentation?.revealKey;
-    if (key !== undefined && (!own(PET_REVEAL_REGISTRY, key) || (pet.rarity !== 'UR' && key !== 'ssr') || (key === 'ssr' && pet.rarity !== 'SSR'))) {
+    if (key !== undefined && (!revealMatchesRarity(key, pet.rarity))) {
       errors.push(issue('PET_REVEAL_INVALID', 'Reveal template does not match rarity', `pets[${index}].presentation.revealKey`));
     }
   });
@@ -340,7 +345,7 @@ export function validatePoolContent(poolsData, { pets, previousPoolsData } = {})
 export function resolvePetRevealKey(pet) {
   const key = pet?.presentation?.revealKey;
   if (key !== undefined) {
-    if (!own(PET_REVEAL_REGISTRY, key) || (pet.rarity === 'SSR' ? key !== 'ssr' : pet.rarity !== 'UR' || key === 'ssr')) {
+    if (!revealMatchesRarity(key, pet.rarity)) {
       throw new PoolContentError([issue('PET_REVEAL_INVALID', 'Reveal template does not match rarity', 'pet.presentation.revealKey')]);
     }
     return key;

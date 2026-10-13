@@ -11,13 +11,13 @@ import { getDispatchTerms } from './expeditionGameplay.js';
 import { CHAPTER_LEVELS, CHAPTER_REWARDS, HABIT_TARGETS, DAILY_COMPANION_REWARD } from './bondJourneyCore.js';
 
 export const LESSONS = Object.freeze([
-  { id: 'invitation', title: '重逢與指定邀請', summary: '一路相遇，讓下一位同行者由你選擇。',
+  { id: 'invitation', title: '重逢與指定邀請', summary: '一路相遇，讓下一位同行者由你選擇。', outcome: '學會累積相遇碎片與安全指定邀請', icon: '✦',
     steps: ['fragments', 'cost', 'invite'], practice: { invite: 'companion-invited' } },
-  { id: 'bond', title: '陪伴、故事與同行約定', summary: '聽牠的故事，一起完成小事。',
+  { id: 'bond', title: '陪伴、故事與同行約定', summary: '聽牠的故事，一起完成小事。', outcome: '學會陪伴、故事與同行約定', icon: '♡',
     steps: ['sources', 'pet', 'unlocks', 'story', 'agreement', 'keepsake'], practice: { pet: 'companion-petted' } },
-  { id: 'expedition', title: '組隊探險與旅程報告', summary: '選好隊伍，帶回旅程收穫。',
+  { id: 'expedition', title: '一起走一段新的旅程', summary: '看地區、選隊伍與目標，旅程結束後讀報告、領收穫。', outcome: '學會派遣與領取旅程收穫', icon: '⌁',
     steps: ['prepare', 'dispatch', 'claim'], practice: { dispatch: 'expedition-started', claim: 'expedition-claimed' } },
-  { id: 'workshop', title: '工坊製作與送禮', summary: '把探險材料做成一份心意。',
+  { id: 'workshop', title: '把收穫做成一份心意', summary: '查看材料、製作禮物，再選一位夥伴預覽送禮效果。', outcome: '學會從材料到製作與送禮', icon: '❋',
     steps: ['materials', 'craft', 'gift'], practice: { craft: 'item-crafted', gift: 'gift-given' } },
 ]);
 
@@ -101,9 +101,9 @@ export function getLessonStepContent(id, step, state = {}) {
   const target = { view: 'gacha' };
   const collectionSelector = '[data-identity-action="invitation"]';
   const storyPet = c.companion || c.pets[0];
-  const storyTarget = { view: 'collection', filter: 'owned', petId: storyPet?.id };
+  const storyTarget = { view: 'collection', filter: 'owned', petId: storyPet?.id, detail: Boolean(storyPet) };
   const storySelector = storyPet
-    ? `.collection-card[data-pet-id="${storyPet.id}"] [data-action="view-detail"]` : '#collection-filters';
+    ? `[data-bond-open="${storyPet.id}"]` : '#view-collection [data-filter="owned"]';
   const descriptions = {
     'invitation/fragments': {
       title: '每次重逢，留下相遇的光痕',
@@ -123,7 +123,7 @@ export function getLessonStepContent(id, step, state = {}) {
     'bond/sources': {
       title: '親密度跟著日常累積',
       body: '完成任務會提升目前陪伴夥伴的親密度；撫摸也能增加親密度。探險獎勵給派遣的夥伴，工坊禮物則給你選中的夥伴。首頁進度條顯示目前等級與距離下一級的進度。',
-      target: { view: c.companion ? 'tasks' : 'collection', filter: 'owned' }, selector: c.companion ? '#companion-section' : '#collection-filters', action: c.companion ? '查看陪伴與進度' : '前往設定陪伴',
+      target: { view: c.companion ? 'tasks' : 'collection', filter: 'owned' }, selector: c.companion ? '#twilight-home' : '#view-collection [data-filter="owned"]', action: c.companion ? '查看陪伴與進度' : '前往設定陪伴',
     },
     'bond/pet': {
       title: '試著撫摸你的夥伴',

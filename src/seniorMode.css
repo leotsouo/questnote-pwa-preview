@@ -438,3 +438,5 @@ body[data-reading-mode="senior"] *::after {
   body[data-reading-mode="senior"] :is(button, input, select, textarea, summary, .task-check) { border: 1px solid ButtonText; }
   body[data-reading-mode="senior"] :is(button, input, select, textarea, summary):focus-visible { outline-color: Highlight; }
 }
+/* The shared guide supplies labels in Normal Mode; Senior already has visible labels. */
+body[data-reading-mode="senior"]:is(.guided-active, .guided-learned) :is(.twilight-add-task, .task-check)::after { content: none; }

@@ -77,5 +77,13 @@
       "bond_item",
       "future_area_unlock"
     ]
+  },
+  {
+    "id": "aurora_flower_dew",
+    "name": "霓霞花露",
+    "rarity": "R",
+    "description": "從晨昏交會的花瓣收集的露珠，用於霓霞花露塔。",
+    "category": "nature",
+    "sourceArea": "aurora_feast_garden"
   }
 ]

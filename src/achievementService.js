@@ -176,7 +176,7 @@ export function getTitleForAchievement(achievementId) {
 
 /** 判斷任務是否已完成（含已領獎） */
 function isTaskCompleted(task) {
-  return task.completed || task.rewardClaimed;
+  return !task.isTutorial && (task.completed || task.rewardClaimed);
 }
 
 /**

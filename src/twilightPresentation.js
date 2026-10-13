@@ -26,8 +26,8 @@ export function getCompanionScene(companion, theme = 'twilight') {
 }
 
 export function getTwilightJourney(tasks, today = getTodayDateString()) {
-  const pending = tasks.filter((task) => !task.completed && isInTodayPlan(task, today)).length;
-  const done = tasks.filter((task) => isInTodayPlan(task, today) && isCompletedToday(task, today)).length;
+  const pending = tasks.filter((task) => !task.isTutorial && !task.completed && isInTodayPlan(task, today)).length;
+  const done = tasks.filter((task) => !task.isTutorial && isInTodayPlan(task, today) && isCompletedToday(task, today)).length;
   const total = pending + done;
   return { pending, done, total, percent: total ? Math.round(done / total * 100) : 0 };
 }

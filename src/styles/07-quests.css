@@ -1,0 +1,572 @@
+/* ============================================================
+   V2.5.0 ? ??????? / ???Daily & Weekly Quests
+   V2.7.1 ? ???????????????????????? / ???????
+   ???????sweet ? default ??????????? / ??????
+   ============================================================ */
+.quest-panel {
+  display: block;
+  margin: 12px 0;
+}
+.quest-panel[hidden] {
+  display: none;
+}
+.quest-panel__inner {
+  padding: 16px;
+  border-radius: 26px;
+}
+.quest-panel__header-wrap {
+  display: block;
+}
+.quest-panel__header {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  min-height: 44px;
+  font: inherit;
+  color: inherit;
+}
+.quest-panel__icon {
+  flex-shrink: 0;
+  font-size: 1.45rem;
+  line-height: 1;
+  width: 2rem;
+  text-align: center;
+}
+.quest-panel__header-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.08rem;
+  min-width: 0;
+  flex: 1;
+}
+.quest-panel__eyebrow {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+.quest-panel__title {
+  margin: 0;
+  font-size: 1.02rem;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  line-height: 1.25;
+}
+.quest-panel__subtitle {
+  font-size: 0.74rem;
+  font-weight: 500;
+  line-height: 1.35;
+  opacity: 0.88;
+}
+.quest-panel__status-badge {
+  flex-shrink: 0;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.22rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.quest-panel__collapse-icon {
+  flex-shrink: 0;
+  font-size: 0.68rem;
+  line-height: 1;
+  opacity: 0.65;
+  padding-left: 0.1rem;
+}
+.quest-panel__body {
+  display: block;
+}
+.quest-panel__body[hidden] {
+  display: none;
+}
+/* ??????? reward-badge ?????????? status-badge */
+.quest-panel__reward-badge {
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+.quest-panel__summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 14px;
+}
+.quest-panel__summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+}
+.quest-panel__summary-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+.quest-panel__summary-value {
+  font-size: 0.98rem;
+  font-weight: 800;
+}
+.quest-panel__footer-hint {
+  font-size: 0.78rem;
+  line-height: 1.5;
+  margin: 14px 0 0;
+  text-align: center;
+}
+/* ??????? quest-summary ????????? */
+.quest-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin-top: 10px;
+}
+.quest-summary__item {
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+.quest-panel__tabs {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+.quest-tab {
+  flex: 1;
+  min-height: 44px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+.quest-tab__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.quest-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 14px;
+}
+.quest-card {
+  border-radius: 14px;
+  padding: 14px;
+  border: 1px solid transparent;
+}
+.quest-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.quest-card__title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.quest-status-badge {
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+.quest-card__description {
+  font-size: 0.82rem;
+  line-height: 1.5;
+  margin: 8px 0 10px;
+}
+.quest-card__progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.quest-card__progress-bar {
+  flex: 1;
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.quest-card__progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.4s ease;
+  min-width: 2px;
+}
+.quest-card__progress-text {
+  font-size: 0.82rem;
+  font-weight: 700;
+  min-width: 48px;
+  text-align: right;
+}
+.quest-card__rewards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+.quest-reward-chip {
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 4px 9px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+}
+.quest-claim-button {
+  margin-top: 12px;
+  width: 100%;
+  min-height: 44px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  font-size: 0.9rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: opacity 0.2s ease, background 0.2s ease;
+}
+.quest-claim-button:disabled {
+  cursor: default;
+}
+.quest-empty {
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 18px 8px;
+}
+
+/* ??? Sweet ????????? + ????? ??? */
+body[data-theme="sweet"] .quest-panel__inner {
+  background:
+    radial-gradient(circle at top right, rgba(199, 53, 120, 0.14), transparent 34%),
+    radial-gradient(circle at bottom left, rgba(111, 85, 217, 0.12), transparent 32%),
+    linear-gradient(180deg, #FFFFFF 0%, #FFF8FC 100%);
+  border: 1px solid #F0C9DA;
+  border-radius: 26px;
+  box-shadow: 0 12px 30px rgba(199, 53, 120, 0.14);
+  color: #3D2633;
+}
+body[data-theme="sweet"] .quest-panel__eyebrow {
+  color: #B83274;
+}
+body[data-theme="sweet"] .quest-panel__title {
+  color: #3D2633;
+}
+body[data-theme="sweet"] .quest-panel__subtitle {
+  color: #6F4C5E;
+}
+body[data-theme="sweet"] .quest-panel__collapse-icon {
+  color: #6F4C5E;
+}
+body[data-theme="sweet"] .quest-summary__item {
+  color: #6F4C5E;
+}
+body[data-theme="sweet"] .quest-panel__summary-item {
+  background: rgba(255, 255, 255, 0.76);
+  border-color: #F7DDEA;
+}
+body[data-theme="sweet"] .quest-panel__summary-label {
+  color: #6F4C5E;
+}
+body[data-theme="sweet"] .quest-panel__summary-value {
+  color: #B83274;
+}
+body[data-theme="sweet"] .quest-panel__footer-hint {
+  color: #6F4C5E;
+}
+body[data-theme="sweet"] .quest-panel__reward-badge,
+body[data-theme="sweet"] .quest-panel__status-badge--claimable {
+  background: #E7F6F1;
+  color: #1F5C4D;
+  border-color: #8FCDBD;
+}
+body[data-theme="sweet"] .quest-panel__status-badge--progress {
+  background: #EEE9FF;
+  color: #4E3BA8;
+  border-color: #CFC3F6;
+}
+body[data-theme="sweet"] .quest-panel__status-badge--done {
+  background: #F3F4F6;
+  color: #616977;
+  border-color: #D4D7DE;
+}
+body[data-theme="sweet"] .quest-tab {
+  background: #FFF8FC;
+  color: #6F4C5E;
+  border-color: #F0C9DA;
+}
+body[data-theme="sweet"] .quest-tab.is-active {
+  background: #C73578;
+  color: #FFFFFF;
+  border-color: #C73578;
+}
+body[data-theme="sweet"] .quest-tab.is-active .quest-tab__dot {
+  background: #FFFFFF;
+}
+body[data-theme="sweet"] .quest-tab__dot {
+  background: #C73578;
+}
+body[data-theme="sweet"] .quest-card {
+  background: rgba(255, 255, 255, 0.84);
+  border-color: #F0C9DA;
+}
+body[data-theme="sweet"] .quest-card.is-complete {
+  background: #F7FFFC;
+  border-color: #8FCDBD;
+}
+body[data-theme="sweet"] .quest-card.is-claimed {
+  background: #F3F4F6;
+  border-color: #D4D7DE;
+}
+body[data-theme="sweet"] .quest-card__title {
+  color: #3D2633;
+}
+body[data-theme="sweet"] .quest-card__description {
+  color: #6F4C5E;
+}
+body[data-theme="sweet"] .quest-card.is-claimed .quest-card__title {
+  color: #616977;
+}
+body[data-theme="sweet"] .quest-card.is-claimed .quest-card__description {
+  color: #777F8D;
+}
+body[data-theme="sweet"] .quest-card__progress-text {
+  color: #3D2633;
+}
+body[data-theme="sweet"] .quest-card__progress-bar {
+  background: #F3DDEA;
+}
+body[data-theme="sweet"] .quest-card__progress-fill {
+  background: #C73578;
+}
+body[data-theme="sweet"] .quest-status-badge--progress {
+  background: #FFF0F7;
+  color: #B83274;
+  border-color: #E7AFC8;
+}
+body[data-theme="sweet"] .quest-status-badge--claimable {
+  background: #E7F6F1;
+  color: #1F5C4D;
+  border-color: #8FCDBD;
+}
+body[data-theme="sweet"] .quest-status-badge--claimed {
+  background: #F3F4F6;
+  color: #616977;
+  border-color: #D4D7DE;
+}
+body[data-theme="sweet"] .quest-reward-chip[data-reward-type="stardust"] {
+  background: #FFF1D8;
+  color: #8A4F10;
+  border-color: #F0C878;
+}
+body[data-theme="sweet"] .quest-reward-chip[data-reward-type="energy"] {
+  background: #EAF3FF;
+  color: #2E6FBE;
+  border-color: #B7D4F6;
+}
+body[data-theme="sweet"] .quest-reward-chip[data-reward-type="material"] {
+  background: #E7F6F1;
+  color: #1F5C4D;
+  border-color: #8FCDBD;
+}
+body[data-theme="sweet"] .quest-reward-chip[data-reward-type="item"] {
+  background: #EEE9FF;
+  color: #4E3BA8;
+  border-color: #CFC3F6;
+}
+body[data-theme="sweet"] .quest-claim-button {
+  background: #C73578;
+  color: #FFFFFF;
+}
+body[data-theme="sweet"] .quest-claim-button:disabled {
+  background: #F3F4F6;
+  color: #616977;
+  border-color: #D4D7DE;
+}
+body[data-theme="sweet"] .quest-empty {
+  color: #86677A;
+}
+
+/* ??? Default ?????????????? + ????? ??? */
+body[data-theme="default"] .quest-panel__inner {
+  background:
+    radial-gradient(circle at top right, rgba(139, 92, 246, 0.24), transparent 34%),
+    radial-gradient(circle at bottom left, rgba(34, 211, 238, 0.14), transparent 32%),
+    linear-gradient(180deg, #18203A 0%, #101628 100%);
+  border: 1px solid rgba(167, 139, 250, 0.28);
+  border-radius: 24px;
+  box-shadow:
+    0 14px 36px rgba(0, 0, 0, 0.36),
+    0 0 26px rgba(139, 92, 246, 0.16);
+  color: #F4F7FF;
+}
+body[data-theme="default"] .quest-panel__eyebrow {
+  color: #DDD6FE;
+}
+body[data-theme="default"] .quest-panel__title {
+  color: #F4F7FF;
+}
+body[data-theme="default"] .quest-panel__subtitle {
+  color: #C7D2EA;
+}
+body[data-theme="default"] .quest-panel__collapse-icon {
+  color: #C7D2EA;
+}
+body[data-theme="default"] .quest-summary__item {
+  color: #C7D2EA;
+}
+body[data-theme="default"] .quest-panel__summary-item {
+  background: rgba(15, 23, 42, 0.42);
+  border-color: rgba(148, 163, 184, 0.18);
+}
+body[data-theme="default"] .quest-panel__summary-label {
+  color: #C7D2EA;
+}
+body[data-theme="default"] .quest-panel__summary-value {
+  color: #FBBF24;
+}
+body[data-theme="default"] .quest-panel__footer-hint {
+  color: #C7D2EA;
+}
+body[data-theme="default"] .quest-panel__reward-badge,
+body[data-theme="default"] .quest-panel__status-badge--claimable {
+  background: rgba(52, 211, 153, 0.16);
+  color: #6EE7B7;
+  border-color: rgba(52, 211, 153, 0.36);
+}
+body[data-theme="default"] .quest-panel__status-badge--progress {
+  background: rgba(167, 139, 250, 0.18);
+  color: #DDD6FE;
+  border-color: rgba(167, 139, 250, 0.42);
+}
+body[data-theme="default"] .quest-panel__status-badge--done {
+  background: rgba(148, 163, 184, 0.12);
+  color: #CBD5E1;
+  border-color: rgba(148, 163, 184, 0.26);
+}
+body[data-theme="default"] .quest-tab {
+  background: rgba(148, 163, 184, 0.12);
+  color: #C7D2EA;
+  border-color: rgba(148, 163, 184, 0.22);
+}
+body[data-theme="default"] .quest-tab.is-active {
+  background: #8B5CF6;
+  color: #FFFFFF;
+  border-color: #8B5CF6;
+}
+body[data-theme="default"] .quest-tab.is-active .quest-tab__dot {
+  background: #FFFFFF;
+}
+body[data-theme="default"] .quest-tab__dot {
+  background: #22D3EE;
+}
+body[data-theme="default"] .quest-card {
+  background: rgba(20, 26, 46, 0.78);
+  border-color: rgba(167, 139, 250, 0.24);
+}
+body[data-theme="default"] .quest-card.is-complete {
+  background: rgba(52, 211, 153, 0.10);
+  border-color: rgba(52, 211, 153, 0.36);
+}
+body[data-theme="default"] .quest-card.is-claimed {
+  background: rgba(148, 163, 184, 0.10);
+  border-color: rgba(148, 163, 184, 0.24);
+}
+body[data-theme="default"] .quest-card__title {
+  color: #F4F7FF;
+}
+body[data-theme="default"] .quest-card__description {
+  color: #C7D2EA;
+}
+body[data-theme="default"] .quest-card.is-claimed .quest-card__title {
+  color: #CBD5E1;
+}
+body[data-theme="default"] .quest-card.is-claimed .quest-card__description {
+  color: #9BA8C7;
+}
+body[data-theme="default"] .quest-card__progress-text {
+  color: #F4F7FF;
+}
+body[data-theme="default"] .quest-card__progress-bar {
+  background: rgba(148, 163, 184, 0.16);
+}
+body[data-theme="default"] .quest-card__progress-fill {
+  background: #8B5CF6;
+}
+body[data-theme="default"] .quest-card[data-scope="weekly"] .quest-card__progress-fill {
+  background: #22D3EE;
+}
+body[data-theme="default"] .quest-status-badge--progress {
+  background: rgba(139, 92, 246, 0.18);
+  color: #DDD6FE;
+  border-color: rgba(167, 139, 250, 0.42);
+}
+body[data-theme="default"] .quest-status-badge--claimable {
+  background: rgba(52, 211, 153, 0.16);
+  color: #6EE7B7;
+  border-color: rgba(52, 211, 153, 0.36);
+}
+body[data-theme="default"] .quest-status-badge--claimed {
+  background: rgba(148, 163, 184, 0.12);
+  color: #CBD5E1;
+  border-color: rgba(148, 163, 184, 0.26);
+}
+body[data-theme="default"] .quest-reward-chip[data-reward-type="stardust"] {
+  background: rgba(251, 191, 36, 0.16);
+  color: #FDE68A;
+  border-color: rgba(251, 191, 36, 0.36);
+}
+body[data-theme="default"] .quest-reward-chip[data-reward-type="energy"] {
+  background: rgba(56, 189, 248, 0.14);
+  color: #7DD3FC;
+  border-color: rgba(56, 189, 248, 0.34);
+}
+body[data-theme="default"] .quest-reward-chip[data-reward-type="material"] {
+  background: rgba(52, 211, 153, 0.14);
+  color: #6EE7B7;
+  border-color: rgba(52, 211, 153, 0.34);
+}
+body[data-theme="default"] .quest-reward-chip[data-reward-type="item"] {
+  background: rgba(167, 139, 250, 0.16);
+  color: #DDD6FE;
+  border-color: rgba(167, 139, 250, 0.36);
+}
+body[data-theme="default"] .quest-claim-button {
+  background: #8B5CF6;
+  color: #FFFFFF;
+}
+body[data-theme="default"] .quest-claim-button:disabled {
+  background: rgba(148, 163, 184, 0.12);
+  color: #CBD5E1;
+  border-color: rgba(148, 163, 184, 0.26);
+}
+body[data-theme="default"] .quest-empty {
+  color: #9BA8C7;
+}
+
+/* ??? V2.7.1 ??????????????????? ??? */
+@media (max-width: 430px) {
+  .quest-panel__summary {
+    grid-template-columns: 1fr;
+  }
+  .quest-card {
+    padding: 12px;
+  }
+}
+

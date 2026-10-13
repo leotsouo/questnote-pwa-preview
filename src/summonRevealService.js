@@ -1,3 +1,4 @@
+import { createAuroraFairyScene } from './auroraFairyScene.js';
 /**
  * SSR / UR 抽卡演出特效 — V3.4.3
  *
@@ -9,6 +10,7 @@
  * 5. 主動畫略過 ≠ SSR+ queue 略過（由呼叫端區分；本模組只處理 reveal queue skip）。
  */
 import { createSwordwildShanheScene } from './swordwildShanheScene.js';
+import { createChaosDemonCourtScene, CHAOS_MOTIFS } from './chaosDemonCourtScene.js';
 import { createLionheartScene } from './lionheartScene.js';
 import { getPetImageSrc, preloadPetImage, delay } from './imagePreloadService.js';
 import { resolvePetRevealKey, resolvePetRevealPresentation } from './poolContentContract.js';
@@ -238,13 +240,13 @@ function themeClassName(theme) {
   if (theme === 'cream') return 'is-ur is-cream-ur';
   if (theme === 'moon') return 'is-ur is-moon-ur';
   if (theme === 'petal') return 'is-ur is-petal-ur';
-  if (theme === 'ur') return 'is-ur';
+  if (['ur', 'chaos_crown', 'chaos_moon', 'chaos_bell'].includes(theme)) return 'is-ur';
   return 'is-ssr';
 }
 
-function themeCaption(theme, pet) {
+function themeCaption(theme, pet, rarity) {
   return resolvePetRevealPresentation({
-    ...pet, rarity: theme === 'ssr' ? 'SSR' : 'UR',
+    ...pet, rarity,
     presentation: { ...pet?.presentation, revealKey: theme },
   }).caption;
 }
@@ -261,7 +263,7 @@ export function identityRevealDuration(rarity, reduced = false) {
  */
 export function createSummonRevealOverlay({ rarity, pet, reduceMotion, theme, progressText = '', fallback = false, presentationKey, sceneFactory }) {
   const resolvedTheme = theme || resolveRevealTheme(pet, { rarity, pet });
-  const isUR = rarity === 'UR' || resolvedTheme !== 'ssr';
+  const isUR = rarity === 'UR';
   const overlay = document.createElement('div');
   overlay.className = `summon-reveal-overlay ${themeClassName(resolvedTheme)}`;
   if (reduceMotion) overlay.classList.add('is-reduced');
@@ -272,7 +274,7 @@ export function createSummonRevealOverlay({ rarity, pet, reduceMotion, theme, pr
   overlay.setAttribute('aria-modal', 'true');
   overlay.setAttribute('aria-label', isUR ? '傳說召喚演出' : '稀有召喚演出');
 
-  const caption = fallback ? '演出簡化展示' : themeCaption(resolvedTheme, pet);
+  const caption = fallback ? '演出簡化展示' : themeCaption(resolvedTheme, pet, rarity);
   const petName = pet?.name ? String(pet.name) : '';
   const petTitle = pet?.title ? String(pet.title) : '';
   const imgSrc = fallback ? '' : getPetImageSrc(pet, 'stage');
@@ -320,6 +322,16 @@ export function createSummonRevealOverlay({ rarity, pet, reduceMotion, theme, pr
     const motif = resolvedTheme === 'lionheart_griffin' ? 'griffin' : resolvedTheme === 'lionheart_chimera' ? 'chimera' : pet?.expeditionSpecialty === 'gatherer' ? 'roots' : 'bridge';
     overlay.classList.add('is-lionheart-reveal');
     overlay.querySelector('.summon-reveal-bg').replaceWith(createLionheartScene(motif));
+  }
+  if (!fallback && presentationKey === 'aurora_fairy_feast') {
+    overlay.classList.add('is-fairy-reveal');
+    const motifs = { pet_ur31: 'dew', pet_ur32: 'hearth', pet_ssr41: 'petal', pet_ssr42: 'mist' };
+    overlay.querySelector('.summon-reveal-bg').replaceWith(createAuroraFairyScene(motifs[pet?.id]));
+  }
+  const chaosMotif = resolvedTheme?.startsWith('chaos_') ? resolvedTheme.slice(6) : null;
+  if (!fallback && (presentationKey === 'chaos_demon_court' || CHAOS_MOTIFS.includes(chaosMotif))) {
+    overlay.classList.add('is-chaos-reveal');
+    overlay.querySelector('.summon-reveal-bg').replaceWith(createChaosDemonCourtScene(chaosMotif));
   }
   const shanheMotifs = { sword_eagle: 'eagle', sword_toad: 'toad', sword_ape: 'ape' };
   if (!fallback && (presentationKey === 'swordwild_shanhe' || Object.hasOwn(shanheMotifs, resolvedTheme))) {

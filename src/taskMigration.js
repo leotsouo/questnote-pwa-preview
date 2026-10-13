@@ -4,6 +4,7 @@
 
  */
 
+import { isDemonFinalTask } from './demonFinalTaskCore.js';
 import { dbGetAll, dbPut, STORES } from './db.js';
 
 import { getTodayDateString } from './taskFilterService.js';
@@ -97,7 +98,7 @@ export function normalizeTask(task, today = getTodayDateString()) {
 
 
 
-  if (plannedDate === today) {
+  if (plannedDate === today || (isDemonFinalTask(task) && !task.completed)) {
 
     isPlannedToday = true;
 

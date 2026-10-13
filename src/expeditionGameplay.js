@@ -18,6 +18,8 @@ const ELEMENT_ROLES = [
 ];
 const RARITY_BONUS = { N: 0, R: 0.02, SR: 0.04, SSR: 0.06, UR: 0.08 };
 const AREA_DISCOVERIES = {
+  aurora_feast_garden: "雲橋盡頭的舊食譜只畫了兩副碗筷：真正留住香氣的是等待與共食。",
+  darkcrown_border: '界石裂縫仍映出七地各自的顏色；裂冠的黑影尚未抹去任何一條歸路。',
   lionheart_city: '封存試驗紀錄指出，人工翼設計已從模仿格里芬轉向突破格里芬。',
   mist_forest: '霧中露出一條通往古石碑的小路。',
   lava_rift: '火脈短暫平靜，岩壁顯出新的熔岩紋路。',
@@ -101,7 +103,7 @@ export function planExpeditionResult(area, pets, objective = 'explore', random =
   const event = discovered
     ? { id: `${area.id}_${objective}_${specialties[0].role}`, title: '隊伍的額外發現',
       text: `${pets.map((p) => p.name).join('、')}${rolePower > 0 ? `發揮${SPECIALTY_LABELS[matchingRole]}專長，` : '合力前行，'}${AREA_DISCOVERIES[area.id] || '發現了新的線索。'}` }
-    : { id: `${area.id}_steady`, title: '平安歸來', text: area.id === 'lionheart_city' ? '隊伍巡查獅心城公共管線，帶回回收零件；研究區的壓力仍在升高。' : '隊伍沿著熟悉的路線前進，帶回了穩定收穫。' };
+    : { id: `${area.id}_steady`, title: '平安歸來', text: area.id === 'darkcrown_border' ? '隊伍沿著抵抗侵蝕的界線歸來，帶回仍保留暖意的補給；王庭的黑塔仍在遠方。' : area.id === 'lionheart_city' ? '隊伍巡查獅心城公共管線，帶回回收零件；研究區的壓力仍在升高。' : '隊伍沿著熟悉的路線前進，帶回了穩定收穫。' };
   const eventMaterial = discovered && (objective === 'gather' || scholarPower > 0) ? 1 : 0;
   return {
     rewards: { stardust: baseStardust + bonusStardust, baseStardust, bonusStardust,

@@ -180,8 +180,10 @@ body[data-theme] :is(.global-mailbox-modal__icon-btn, .expedition-dispatch-modal
 body[data-theme] :is(.global-mailbox-modal__title, .expedition-dispatch-modal__title, .pet-image-viewer__title) { font-size: var(--font-size-xl); line-height: var(--line-height-snug); overflow-wrap: anywhere; }
 body[data-theme] .pet-image-viewer__content { max-height: calc(100dvh - var(--safe-top) - var(--safe-bottom) - var(--space-6)); overflow-y: auto; overscroll-behavior: contain; }
 body[data-theme] :is(.modal-body, .global-mailbox-modal__sheet, .expedition-dispatch-modal__content) :focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+@media (max-width: 600px) {
+  #task-form .form-row { grid-template-columns: minmax(0, 1fr); }
+}
 @media (max-width: 360px) {
-  #task-form .form-row { grid-template-columns: 1fr; }
   body[data-theme] .modal:not(:has(.sweet-summon-result, .default-summon-result)) > .modal-body { padding-inline: var(--space-4); }
 }
 

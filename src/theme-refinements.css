@@ -221,3 +221,8 @@ body[data-theme].reduce-motion *, body[data-theme].reduce-motion *::before, body
 .update-banner { display: block; width: calc(100% - 32px); max-height: calc(100dvh - var(--nav-height) - var(--safe-bottom) - 40px); overflow-y: auto; }
 .update-banner .app-update-status { margin-top: 6px; }
 body.modal-open .update-banner { visibility: hidden; pointer-events: none; }
+
+/* Reserve both 44px entry buttons, their gap and the right inset. */
+body[data-theme]:not([data-reading-mode="senior"]) .twilight-masthead { height: auto; min-height: 58px; padding-block: 10px; padding-right: 126px; flex-wrap: wrap; row-gap: 4px; }
+body[data-theme]:not([data-reading-mode="senior"]) .twilight-wordmark { flex-wrap: wrap; max-width: 100%; }
+body[data-theme]:not([data-reading-mode="senior"]) .qn-world-name { margin: 0; white-space: nowrap; }

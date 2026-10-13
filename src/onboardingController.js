@@ -8,6 +8,9 @@ import {
 import { resolveActivePool, resolveDrawCost } from './poolContentContract.js';
 import { getDispatchTerms } from './expeditionGameplay.js';
 import { LESSONS, LESSON_STATUS_LABELS, getLesson, getLessonStepContent, getLessonAvailability } from './onboardingLessons.js';
+import { isGuidedOnboardingActive, refreshGuidedOnboarding, recordGuidedOnboardingEvent,
+  replayGuidedOnboarding, guidedAfterReset, pauseGuidedPageTour } from './guidedOnboardingController.js';
+import { getPetImageSrc } from './imagePreloadService.js';
 
 const STEP_NUMBER = { task: 1, reward: 2, summon: 3, collection: 4, expedition: 5 };
 const WELCOME_MESSAGE_ID = '2026-07-welcome-10pull';
@@ -25,11 +28,15 @@ let lessonCompleted = null;
 let collapsed = false;
 let pendingWrite = Promise.resolve();
 let dockObserver = null;
+let rootHome;
 
 function enqueue(action) {
   const next = pendingWrite.then(action);
-  pendingWrite = next.catch((error) => console.warn('[Onboarding] update failed:', error));
-  return next;
+  pendingWrite = next.catch((error) => {
+    console.warn('[Onboarding] update failed:', error);
+    navigation?.showToast?.('教學進度還沒存好，請再試一次。', 'error');
+  });
+  return pendingWrite;
 }
 
 function escapeText(value) {
@@ -152,6 +159,13 @@ function hasActivePresentation() {
 
 function syncPresentationVisibility() {
   if (!root || !record) return;
+  if (record.activeLesson || lessonCompleted) {
+    // Product dialogs may replace their body. Remount only when its host changes;
+    // rendering on every descendant mutation would observe our own teaching DOM.
+    const paused = hasActivePresentation() && Boolean(document.querySelector('#confirm-cancel, .dream-bloom-overlay, .dream-debut-overlay, .summon-reveal-overlay'));
+    if (!root.isConnected || root.parentElement !== growthHost() || root.hidden !== paused) render();
+    return;
+  }
   const paused = hasActivePresentation();
   if (root.hidden === paused) return;
   root.hidden = paused;
@@ -207,13 +221,9 @@ function updateHighlight() {
 }
 
 function renderGuideStatus() {
-  const label = document.getElementById('guide-tutorial-status');
-  const button = document.getElementById('guide-tutorial-button');
-  if (!label || !button || !record) return;
-  const resumable = record.status === 'paused' || record.status === 'active';
-  label.textContent = resumable ? '你的教學進度已保留。' : '可以隨時重看，不會自動建立任務或發放獎勵。';
-  button.textContent = resumable ? '繼續實作引導' : '重新體驗引導';
-  button.dataset.onboardingAction = resumable ? 'resume' : 'replay';
+  // Basic practice status belongs to the guided controller; legacy lessons only
+  // render their own chapter progress and must not overwrite its replay label.
+  if (!record) return;
   const chapters = document.getElementById('guide-chapters');
   if (!chapters) return;
   const signature = JSON.stringify([record.lessons, LESSONS.map((lesson) => getLessonAvailability(lesson.id, appState))]);
@@ -224,12 +234,14 @@ function renderGuideStatus() {
     const resumable = ['active', 'paused'].includes(progress.status);
     const label = resumable ? '繼續本章' : progress.status === 'new' ? '開始本章' : '重看與練習';
     return `<article class="guide-chapter card" aria-labelledby="guide-chapter-${lesson.id}">
-      <div class="guide-chapter__top"><span>成長章節 ${index + 1}</span><span class="guide-chapter__status" data-status="${progress.status}">${LESSON_STATUS_LABELS[progress.status]}</span></div>
+      <div class="guide-chapter__top"><span>第 ${index + 1} 章 · ${lesson.steps.length} 個小步驟</span><span class="guide-chapter__status" data-status="${progress.status}">${LESSON_STATUS_LABELS[progress.status]}</span></div>
+      <span class="growth-chapter-icon" aria-hidden="true">${lesson.icon}</span>
       <h3 id="guide-chapter-${lesson.id}">${lesson.title}</h3>
       <p>${lesson.summary}</p>
+      <p class="growth-outcome">${lesson.outcome}</p>
       <details class="guide-chapter__help"><summary>開始前的小提醒</summary><p>${escapeText(getLessonAvailability(lesson.id, appState))}</p></details>
       ${resumable ? `<p class="guide-chapter__resume">進度 ${lesson.steps.indexOf(progress.step) + 1} / ${lesson.steps.length}：${getLessonStepContent(lesson.id, progress.step, appState).title}</p>` : ''}
-      <button class="btn btn--secondary" type="button" data-onboarding-action="lesson:${lesson.id}" aria-label="${label}：${lesson.title}">${label}</button>
+      <button class="btn btn--primary" type="button" data-onboarding-action="lesson:${lesson.id}" aria-label="${label}：${lesson.title}">${label} · ${lesson.steps.length} 步</button>
     </article>`;
   }).join('');
   guideSignature = signature;
@@ -238,8 +250,12 @@ function renderGuideStatus() {
 
 function render() {
   if (!root || !record) return;
+  if (isGuidedOnboardingActive()) { root.replaceChildren(); clearHighlight(); refreshGuidedOnboarding(); return; }
   renderGuideStatus();
-  if (hasActivePresentation()) {
+  const growth = Boolean(record.activeLesson || lessonCompleted);
+  document.body.classList.toggle('growth-learning', growth);
+  mountGrowthCoach(growth);
+  if (hasActivePresentation() && (!growth || document.querySelector('#confirm-cancel') || document.querySelector('.dream-bloom-overlay, .dream-debut-overlay, .summon-reveal-overlay'))) {
     root.hidden = true;
     clearHighlight();
     return;
@@ -299,23 +315,27 @@ function render() {
     } else if (lessonCompleted) {
       const completed = getLesson(lessonCompleted);
       const practiced = record.lessons[lessonCompleted].status === 'practiced';
-      root.innerHTML = `<aside class="onboarding-dock onboarding-lesson-dock" aria-label="章節完成">
+      const nextChapter = LESSONS[LESSONS.findIndex((entry) => entry.id === lessonCompleted) + 1];
+      root.innerHTML = `<aside class="onboarding-dock onboarding-lesson-dock growth-coach" aria-label="章節完成">
         <div role="status"><h2>${completed.title}：${practiced ? '已完成實作' : '已了解'}</h2>
-        <p>${practiced ? '這次練習已記錄，可以繼續下一章。' : '閱讀進度已保存；尚未實作的操作，可等資源或時間足夠時再練習。'}</p></div>
-        <div class="onboarding-dock__actions"><button class="btn btn--primary btn--sm" type="button" data-onboarding-action="lesson-guide">返回教學中心</button>
+        <p>${practiced ? '本章的實作紀錄已保存，可以繼續下一章。' : '閱讀進度已保存；尚未實作的操作，可等資源或時間足夠時再練習。'}</p></div>
+        <div class="onboarding-dock__actions">${nextChapter ? `<button class="btn btn--primary" type="button" data-onboarding-action="lesson:${nextChapter.id}">繼續下一章：${nextChapter.title}</button><button class="btn btn--secondary" type="button" data-onboarding-action="lesson-guide">返回成長教學</button>` : '<button class="btn btn--primary" type="button" data-onboarding-action="lesson-guide">完成這段成長旅程</button>'}
         <button class="btn btn--ghost btn--sm" type="button" data-onboarding-action="lesson-close">繼續使用 App</button></div></aside>`;
     } else if (content) {
       root.innerHTML = `
-        <aside class="onboarding-dock${lesson ? ' onboarding-lesson-dock' : ''}" data-step="${lesson ? progress.step : record.step}" data-collapsed="${collapsed}" aria-label="${lesson ? lesson.title : '新手教學'}">
+        <aside class="onboarding-dock${lesson ? ' onboarding-lesson-dock growth-coach' : ''}" data-step="${lesson ? progress.step : record.step}" data-collapsed="${collapsed}" aria-label="${lesson ? lesson.title : '新手教學'}">
           <div class="onboarding-dock__top">
             <span>${lesson ? `${lesson.title} ${lesson.steps.indexOf(progress.step) + 1} / ${lesson.steps.length}` : `新手教學 ${STEP_NUMBER[record.step]} / 5`}</span>
             <button type="button" data-onboarding-action="collapse" aria-expanded="${!collapsed}" aria-controls="onboarding-step-body">${collapsed ? '展開' : '收起'}</button>
             <button type="button" data-onboarding-action="${lesson ? 'lesson-pause' : 'pause'}">稍後</button>
           </div>
-          <h2>${escapeText(content.title)}</h2>
+          ${lesson ? growthCompanionMarkup() : ''}
+          <h2 tabindex="-1">${escapeText(content.title)}</h2>
+          ${lesson ? `<ol class="growth-step-rail" aria-label="本章步驟">${lesson.steps.map((step, i) => `<li ${step === progress.step ? 'aria-current="step"' : ''}><span>${i + 1}</span>${escapeText(getLessonStepContent(lesson.id, step, appState).title)}</li>`).join('')}</ol>` : ''}
           <progress class="onboarding-progress" value="${lesson ? lesson.steps.indexOf(progress.step) + 1 : STEP_NUMBER[record.step]}" max="${lesson ? lesson.steps.length : 5}" aria-label="教學進度"></progress>
           <div id="onboarding-step-body" ${collapsed ? 'hidden' : ''}>
           <p class="onboarding-brief" aria-live="polite" aria-atomic="true">${escapeText(coachBrief || content.body)}</p>
+          ${lesson && lesson.practice[progress.step] ? '<p class="growth-practice-note">可以親手試試；條件還不足或想保留資源，也能先了解，之後再實作。</p>' : ''}
           <div class="onboarding-dock__actions">
             <button class="btn btn--primary btn--sm" type="button" data-onboarding-action="${content.primary[1]}">${content.primary[0]}</button>
             <button class="btn btn--ghost btn--sm" type="button" data-onboarding-action="${content.secondary[1]}">${lesson && progress.step === lesson.steps.at(-1) ? '完成教學' : content.secondary[0]}</button>
@@ -331,7 +351,7 @@ function render() {
     }
 
     document.body.classList.toggle('onboarding-dialog-open', isDialog);
-    document.body.classList.toggle('onboarding-active', Boolean(content || lessonCompleted));
+    document.body.classList.toggle('onboarding-active', Boolean(content && !lesson));
     const app = document.getElementById('app');
     if (app) app.inert = isDialog;
     if (isDialog) {
@@ -343,11 +363,55 @@ function render() {
       root.querySelector(`[data-onboarding-action="${focusedAction}"]`)?.focus({ preventScroll: true });
     }
     lastSignature = signature;
+    if (lesson) requestAnimationFrame(centerGrowthStep);
     dockObserver?.disconnect();
     const dock = root.querySelector('.onboarding-dock');
     if (dock) dockObserver?.observe(dock);
   }
   updateHighlight();
+}
+
+function centerGrowthStep() {
+  const rail = root.querySelector('.growth-step-rail');
+  const current = rail?.querySelector('[aria-current]');
+  if (current) rail.scrollLeft = current.offsetLeft - rail.offsetLeft - (rail.clientWidth - current.offsetWidth) / 2;
+}
+
+function growthCompanionMarkup() {
+  const pet = appState.companion;
+  return pet ? `<div class="growth-companion"><img src="${escapeText(getPetImageSrc(pet, 'card'))}" width="44" height="44" alt=""><span>${escapeText(pet.displayName || pet.name)}陪你慢慢學</span></div>` : '<p class="growth-companion">先認識方法，準備好再與夥伴一起試。</p>';
+}
+
+function growthHost() {
+  const modal = document.querySelector('#specified-invitation-dialog[open] .invitation-content')
+    || document.querySelector('#identity-detail-dialog[open] .dialog-body')
+    || document.querySelector('#expedition-dispatch-modal .expedition-dispatch-modal__body')
+    || document.querySelector('#modal-overlay.open #modal-body');
+  const view = document.querySelector('.view.active');
+  const petDetail = modal?.querySelector('.pet-detail');
+  return petDetail || modal || view?.querySelector('.identity-surface') || view;
+}
+
+function mountGrowthCoach(growth) {
+  const host = growth ? growthHost() : rootHome;
+  if (!host || root.parentElement === host) return;
+  const heading = host.querySelector('.pet-detail__name');
+  if (growth && heading) heading.after(root);
+  else if (growth) host.prepend(root);
+  else host.append(root);
+  if (growth) requestAnimationFrame(centerGrowthStep);
+}
+
+async function locateLesson() {
+  const content = lessonContent();
+  if (!content) return;
+  await navigation.openTeachingTarget(content.target);
+  render();
+  requestAnimationFrame(() => {
+    root.querySelector('h2')?.focus({ preventScroll: true });
+    root.scrollIntoView({ block: 'start', behavior: 'instant' });
+    centerGrowthStep();
+  });
 }
 
 async function save(next) {
@@ -378,27 +442,34 @@ function revealTarget(selector) {
 }
 
 async function handleAction(action) {
+  if (action === 'replay' || action === 'resume') {
+    await save(pauseLesson(record));
+    return replayGuidedOnboarding();
+  }
   if (!record) return;
   if (action === 'collapse') { collapsed = !collapsed; return render(); }
   if (action.startsWith('lesson:')) {
+    await pauseGuidedPageTour();
     showCompletion = false;
     lessonCompleted = null;
     collapsed = false;
     await save(startLesson(record, action.slice(7)));
-    root.querySelector('[data-onboarding-action="lesson-locate"]')?.focus({ preventScroll: true });
+    await locateLesson();
     return;
   }
-  if (action === 'lesson-next') { collapsed = false; return save(advanceLesson(record)); }
-  if (action === 'lesson-back') return save(previousLessonStep(record));
+  if (action === 'lesson-next') { collapsed = false; await save(advanceLesson(record)); if (record.activeLesson) await locateLesson(); return; }
+  if (action === 'lesson-back') { await save(previousLessonStep(record)); return locateLesson(); }
   if (action === 'lesson-pause') {
+    const pausedId = record.activeLesson;
     await save(pauseLesson(record));
-    navigation.switchView('guide');
+    await navigation.openTeachingTarget({ view: 'guide' });
+    requestAnimationFrame(() => document.querySelector(`[data-onboarding-action="lesson:${pausedId}"]`)?.focus());
     return;
   }
   if (action === 'lesson-close' || action === 'lesson-guide') {
     lessonCompleted = null;
     render();
-    if (action === 'lesson-guide') navigation.switchView('guide');
+    if (action === 'lesson-guide') await navigation.openTeachingTarget({ view: 'guide' });
     return;
   }
   if (action === 'lesson-locate') {
@@ -490,17 +561,23 @@ export function initOnboarding(app, handlers, initialRecord) {
   record = normalizeOnboardingState(initialRecord);
   root = document.getElementById('onboarding-root');
   if (!root) return;
+  rootHome = root.parentElement;
   dockObserver = new ResizeObserver(() => {
     const height = root.querySelector('.onboarding-dock')?.getBoundingClientRect().height || 0;
     document.documentElement.style.setProperty('--onboarding-coach-space', `${height + 32}px`);
   });
   const presentationObserver = new MutationObserver(syncPresentationVisibility);
-  presentationObserver.observe(document.body, { childList: true });
+  presentationObserver.observe(document.body, { childList: true, subtree: true });
   const modalOverlay = document.getElementById('modal-overlay');
   if (modalOverlay) presentationObserver.observe(modalOverlay, { attributes: true, attributeFilter: ['class'] });
   root.addEventListener('click', (event) => {
     const action = event.target.closest('[data-onboarding-action]')?.dataset.onboardingAction;
-    if (action) void enqueue(() => handleAction(action));
+    const expected = record?.activeLesson ? `${record.activeLesson}:${record.lessons[record.activeLesson].step}` : null;
+    if (action) void enqueue(() => {
+      if (['lesson-next', 'lesson-back', 'lesson-locate'].includes(action)
+        && expected !== (record.activeLesson ? `${record.activeLesson}:${record.lessons[record.activeLesson].step}` : null)) return;
+      return handleAction(action);
+    });
   });
   root.addEventListener('keydown', (event) => {
     const dialog = root.querySelector('[role="dialog"]');
@@ -523,6 +600,7 @@ export function initOnboarding(app, handlers, initialRecord) {
     }
   });
   document.getElementById('view-guide')?.addEventListener('click', (event) => {
+    if (root.contains(event.target)) return;
     const action = event.target.closest('[data-onboarding-action]')?.dataset.onboardingAction;
     if (action) void enqueue(() => handleAction(action));
   });
@@ -533,13 +611,29 @@ export function initOnboarding(app, handlers, initialRecord) {
     void recordOnboardingEvent('task-completed', { taskId: record.taskId });
   }
   render();
+  if (record.activeLesson) void enqueue(locateLesson);
 }
 
 export function refreshOnboarding() {
   render();
+  refreshGuidedOnboarding();
+}
+
+export function openOnboardingEducation(feature) {
+  navigation.switchView('guide');
+  const detail = document.querySelector(`[data-education-feature="${CSS.escape(feature)}"]`);
+  if (detail) {
+    detail.open = true;
+    // The preceding modal close restores its opener on the next frame. Place
+    // focus after that restoration, while this requested help is still visible.
+    requestAnimationFrame(() => {
+      if (document.querySelector('#view-guide.active') && detail.isConnected) detail.querySelector('summary')?.focus();
+    });
+  }
 }
 
 export async function recordOnboardingEvent(event, detail = {}) {
+  await recordGuidedOnboardingEvent(event, detail);
   return enqueue(async () => {
     if (!record) return;
     if (event === 'view-changed') {
@@ -548,7 +642,9 @@ export async function recordOnboardingEvent(event, detail = {}) {
     }
     const next = advanceOnboardingForEvent(record, event, detail);
     if (JSON.stringify(next) !== JSON.stringify(record)) {
+      const wasLesson = record.activeLesson;
       await save(next);
+      if (wasLesson && record.activeLesson) await locateLesson();
     } else {
       render();
     }
@@ -556,12 +652,14 @@ export async function recordOnboardingEvent(event, detail = {}) {
 }
 
 export async function showOnboardingAfterReset() {
+  await guidedAfterReset();
   lessonCompleted = null;
   collapsed = false;
-  await save({ status: 'new', step: 'welcome', taskId: null });
+  await save({ status: 'dismissed', step: 'welcome', taskId: null });
 }
 
 export async function dismissOnboardingAfterRestore() {
+  await guidedAfterReset(true);
   showCompletion = false;
   lessonCompleted = null;
   await save({ status: 'dismissed', step: 'welcome', taskId: null });

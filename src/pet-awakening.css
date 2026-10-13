@@ -7,6 +7,21 @@
 #view-gacha .gacha-pet-awakening-guide{margin:0 0 14px;background:linear-gradient(145deg,#15372f,#102923);color:#f3ebd5;border-color:#9b875060;position:relative;overflow:hidden;border-radius:14px;font-size:.85rem}#view-gacha .gacha-pet-awakening-guide h2{color:#eac97a;font-size:1rem}#view-gacha .gacha-pet-awakening-guide li::marker{color:#eac97a;font-weight:700}#view-gacha .gacha-pet-awakening-guide strong{color:#f3dca2}#view-gacha .gacha-pet-awakening-guide .btn{color:#f3ebd5;border-color:#9b8750;background:#294b3d}
 #gacha-pet-awakening-toggle[hidden],#gacha-pet-awakening-guide[hidden]{display:none!important}
 @media(prefers-reduced-motion:reduce){.gacha-pet-awakening-btn,.gacha-pet-awakening-btn__chevron{transition:none}}
+.modal:has(.awakening-wizard){max-width:780px}
+.awakening-wizard{max-width:100%;color:var(--color-text-main)}
+.awakening-wizard__eyebrow{font-size:.85em;color:var(--color-text-secondary);letter-spacing:.08em}
+.awakening-wizard__layout{display:grid;grid-template-columns:minmax(100px,160px) minmax(0,1fr);gap:22px;align-items:start;margin:20px 0}
+.awakening-wizard__portrait img{width:100%;height:auto;max-height:220px;object-fit:contain;border-radius:16px}
+.awakening-wizard__stage{min-width:0;padding:18px;background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:16px}
+.awakening-wizard__stage h2{font-size:1.25em;margin-top:0}
+.awakening-wizard__message{border-inline-start:2px solid var(--color-primary);padding-inline-start:12px}
+.awakening-wizard__stage .btn--primary{width:100%;white-space:normal}
+.awakening-wizard__conditions{margin:20px 0;line-height:1.8}
+.awakening-wizard__conditions summary{cursor:pointer;min-height:44px;display:list-item}
+.awakening-wizard__conditions ul{padding-inline-start:22px}
+.awakening-wizard__note{font-size:.85em;color:var(--color-text-secondary)}
+.awakening-return{display:flex;align-items:center;gap:14px;flex-wrap:wrap}.awakening-return p{flex:1;margin:0;min-width:180px}
+@media(max-width:600px){.awakening-wizard__layout{grid-template-columns:1fr;gap:14px}.awakening-wizard__portrait img{display:block;width:130px;margin:auto}.awakening-wizard__stage{padding:16px}}
 .awakening-panel h3{margin:0 0 10px}.awakening-panel p{line-height:1.7}.awakening-panel__actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.awakening-panel__actions .btn{min-height:44px}.awakening-panel progress{width:100%;height:10px;accent-color:#98702e}.awakening-mark{font-size:.8em;color:#a37a34}.awakening-reader{max-width:620px;margin:auto}.awakening-reader h2{line-height:1.5}.awakening-reader p{line-height:1.85}.awakening-home{margin-top:12px}.awakening-error{color:var(--color-danger,#a33b37)}
 .awakening-scene{--awakening-duration:5000ms;position:fixed;inset:0;z-index:12500;isolation:isolate;display:flex;align-items:center;justify-content:center;flex-direction:column;background:#102725;color:#fff1d0;overflow:hidden;padding:20px;font-family:serif}
 .awakening-scene__sky{position:absolute;inset:0;z-index:-4;background:radial-gradient(ellipse at 50% 24%,#879a7c 0,#315452 45%,#102725 85%)}
@@ -18,3 +33,17 @@
 @keyframes awakening-before{0%,24%{opacity:1}47%,100%{opacity:0}}@keyframes awakening-after{0%,27%{opacity:0;transform:scale(.93)}55%,100%{opacity:1;transform:scale(1)}}@keyframes awakening-clouds{from{transform:translateX(-4%)}to{transform:translateX(5%)}}@keyframes awakening-line{0%,22%{stroke-dashoffset:2300}70%,100%{stroke-dashoffset:0}}@keyframes awakening-wing{0%,20%{transform:scaleX(.3);opacity:0}58%,100%{transform:scaleX(1);opacity:1}}@keyframes awakening-ring{0%,20%{transform:scale(.1);opacity:0}60%,100%{transform:scale(1);opacity:1}}@keyframes awakening-mist{from{transform:translateY(0);opacity:1}to{transform:translateY(-90px);opacity:0}}@keyframes awakening-leaves{0%,22%{opacity:0;transform:translateY(30px)}65%,100%{opacity:1;transform:translateY(-8px)}}
 .awakening-scene--reduced *{animation:none!important}.awakening-scene--reduced .awakening-before{display:none}.awakening-scene--reduced .awakening-after{opacity:1}.awakening-scene--reduced .awakening-trace,.awakening-scene--reduced .awakening-blade,.awakening-scene--reduced .awakening-bridge{stroke-dashoffset:0}.awakening-scene--reduced{animation:awakening-fade .6s ease-out both}@keyframes awakening-fade{from{opacity:0}to{opacity:1}}
 @media(max-width:360px){.awakening-scene{padding:12px}.awakening-scene__words p{font-size:13px}.awakening-scene__portraits{width:82vw}.awakening-scene__words h2{font-size:23px}}@media(prefers-reduced-motion:reduce){.awakening-panel *{scroll-behavior:auto}}
+
+.awakening-reader .awakening-wizard__portrait .pet-image-frame{width:100%;height:auto;aspect-ratio:1}.awakening-reader .awakening-wizard__portrait .pet-img{width:100%;height:100%;max-height:none;object-fit:contain}@media(max-width:600px){.awakening-reader .awakening-wizard__portrait .pet-image-frame{width:130px;margin:auto}}
+
+/* Keep the promise identifiable in every theme, including completed cards. */
+body[data-theme] #view-tasks .task-card.twilight-task-card.task-card--demon-final {
+  border: 2px solid #ab68cf;
+  padding: 16px 10px;
+  border-radius: 12px;
+  border-inline-start: 5px solid #ab68cf;
+  box-shadow: 0 0 0 1px #ab68cf33, 0 3px 14px #73379022;
+}
+.task-card--demon-final .task-card__meta, .demon-task-note { color: var(--color-text-main); }
+.demon-task-note { font-size: .8rem; margin: .5rem; }
+#demon-final-answer { display: block; width: 100%; box-sizing: border-box; margin: .7rem 0; padding: .7rem; color: var(--color-text-main); background: var(--color-surface); border: 2px solid #ab68cf; border-radius: 10px; font: inherit; }

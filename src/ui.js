@@ -1,3 +1,4 @@
+import { openDailyRace, closeDailyRace } from './dailyRaceController.js';
 import { inviteCompanion, acknowledgeEncounterMigration, getEncounterEconomy } from './encounterEconomyService.js';
 import { intimacySummary } from './invitationPresentation.js';
 import { renderEncounterView, presentCommittedEncounters } from './encounterView.js';
@@ -9,6 +10,7 @@ import { LOCAL_ART_PREVIEW, renderLocalIdentityView } from './localArtPreview.js
 import { buildWorkshopGiftView } from './workshopGiftView.js';
 import { initFilterGestures } from './filterGestureController.js';
 import { trackUpdateActivity } from './updateActivity.js';
+import { initTaskWizard } from './taskWizard.js';
 import { claimAllAvailableRewards, isBulkClaimInProgress } from './rewardClaimService.js';
 import { updateControlsHtml, refreshUpdateControls } from './updateController.js';
 import { initReminders, renderReminderSettings } from './reminderController.js';
@@ -82,6 +84,8 @@ import { applyReadingModeToDocument } from './preferencesService.js';
 import { initSeniorModeController, syncSeniorPresentation, isSeniorMode, seniorFeedback, seniorTaskCreated, seniorTaskFormClosed, composeSeniorTaskForm, decorateSeniorControls } from './seniorModeController.js';
 import { twilightIcon, getCompanionScene, initTwilightChrome, syncTwilightHome, syncTwilightGacha, setTwilightCompanionLine, reactTwilightCompanion } from './twilightPresentation.js';
 import { createBondJourneyController } from './bondJourneyController.js';
+import { isDemonFinalTask } from './demonFinalTaskCore.js';
+import { getAwakeningProfile, getPoolAwakeningProfile } from './petAwakeningProfiles.js';
 import { createAwakeningController } from './petAwakeningController.js';
 import { renderAwakeningDetail, renderAwakeningHome, renderAwakeningGuide, initialAwakeningPortrait } from './petAwakeningView.js';
 import { renderBondHome, renderBondDetail, renderBondKeepsake } from './bondJourneyView.js';
@@ -168,6 +172,7 @@ import {
   emptyStateHtml,
   errorStateHtml,
 } from './uiHelpers.js';
+import { buildWheelDiscHtml, animateDailyWheel } from './ui/dailyWheelView.js';
 import {
   startExpedition,
   claimExpeditionRewards,
@@ -263,6 +268,7 @@ import {
   showOnboardingAfterReset,
   dismissOnboardingAfterRestore,
 } from './onboardingController.js';
+import { getGuidedTutorialDraft, showSkippedEditorHint } from './guidedOnboardingController.js';
 
 /** 稀有度中文與色彩 */
 export const RARITY_LABELS = {
@@ -605,11 +611,32 @@ export function initUI(appState, refreshCallback, achievementCheckCallback) {
   uiInitialized = true;
   try {
     initTwilightChrome();
-    createBondJourneyController({ getState: () => state, refresh: (...args) => onRefresh(...args),
+    const bondJourneyController = createBondJourneyController({ getState: () => state, refresh: (...args) => onRefresh(...args),
       openModal, closeModal, showToast, switchView,
-      portrait: (pet) => petImageHtml(pet, { size: 'md', loading: 'eager', eager: true }) }).mount();
+      portrait: (pet) => petImageHtml(pet, { size: 'md', loading: 'eager', eager: true }) });
+    bondJourneyController.mount();
     createAwakeningController({ getState: () => state, refresh: (...args) => onRefresh(...args),
-      openModal, closeModal, showToast, switchView, portrait: (pet) => petImageHtml(pet, { size: 'md', loading: 'eager', eager: true }) }).mount();
+      openModal, closeModal, showToast, openDetail: openPetDetailModal,
+      portrait: (pet) => petImageHtml(pet, { size: 'md', loading: 'eager', eager: true }),
+      navigate: async (action, petId) => {
+        const profile = getAwakeningProfile(petId);
+        if (!profile) return;
+        if (action === 'story') { switchView('collection'); await bondJourneyController.open(petId); }
+        if (action === 'bond') { switchView('collection'); openPetFeedModal(state.enrichedCollection.find((pet) => pet.id === petId)); }
+        if (action === 'daily') { taskViewMode = 'today'; switchView('tasks'); renderTasksView(); }
+        if (action === 'summon') { state.gachaStats = await setSelectedPoolId(profile.poolId); switchView('gacha'); }
+        if (action === 'expedition') {
+          switchView('expedition');
+          if (!state.activeExpedition) {
+            openExpeditionDispatchModal(profile.areaId);
+            dispatchSelectedPetIds = [petId]; renderExpeditionDispatchModal();
+          }
+        }
+        if (action === 'workshop') {
+          await openTeachingTarget({ view: 'workshop', tab: 'craft' });
+          document.querySelector(`[data-action="craft-item"][data-item-id="${profile.foodId}"]`)?.closest('article')?.scrollIntoView({ block: 'center' });
+        }
+      } }).mount();
     initQuestIconLanguage();
     bindNavigation();
     initFilterGestures();
@@ -876,6 +903,7 @@ function bindDelegatedEvents() {
       const cardEl = target.closest('.task-card');
       const taskBefore = state.tasks.find((t) => t.id === id);
       const isCompleting = taskBefore && !taskBefore.completed;
+      const encounterDateBefore = state.encounterEconomy?.dailyReceipt?.date;
 
       if (cardEl && isCompleting && !isSeniorMode()) {
         cardEl.classList.add('task-card--completing');
@@ -903,23 +931,25 @@ function bindDelegatedEvents() {
         recentlyCompletedTaskIds.add(id);
         setTimeout(() => recentlyCompletedTaskIds.delete(id), 2500);
 
-        if (result.reward && !isSeniorMode()) {
-          showRewardToast(result.reward.amount, result.reward.energy);
-        } else if (!isSeniorMode()) {
-          showToast('任務已完成', 'success');
-        }
       }
 
-      if (isCompleting) {
+      if (isCompleting && !taskBefore?.isTutorial) {
         await trackQuest('complete_task');
       }
 
       await onRefresh();
 
+      const receipt = state.encounterEconomy?.dailyReceipt;
+      const encounterGain = isCompleting && receipt?.source === 'task' && receipt.sourceId === id && receipt.date !== encounterDateBefore ? receipt.amount : 0;
+      if (isCompleting && !isSeniorMode()) {
+        if (result.reward) showRewardToast(result.reward.amount, result.reward.energy, encounterGain);
+        else showToast(`任務已完成${encounterGain ? ` · 相遇碎片 +${encounterGain}` : ''}`, 'success');
+      }
+
       if (isSeniorMode()) {
         const reward = result.reward;
         seniorFeedback(isCompleting
-          ? `已完成「${taskBefore.title}」。${reward ? `獲得 ${reward.amount} 星塵、${reward.energy || 0} 冒險能量${reward.bond ? '，也增進了夥伴的親密度' : ''}。` : '完成狀態已儲存；這次沒有重複發放獎勵。'}`
+          ? `已完成「${taskBefore.title}」。${reward ? `獲得 ${reward.amount} 星塵、${reward.energy || 0} 冒險能量${reward.bond ? '，也增進了夥伴的親密度' : ''}。` : '完成狀態已儲存。'}${encounterGain ? `今日相遇碎片增加 ${encounterGain} 枚，已儲存。` : ''}`
           : `「${taskBefore.title}」已改回未完成。已領獎勵不會重複發放。`, 'success');
         syncSeniorPresentation();
         document.querySelector(`.task-card[data-id="${CSS.escape(String(id))}"] [data-action="toggle"]`)?.focus({ preventScroll: true });
@@ -1003,6 +1033,11 @@ function bindDelegatedEvents() {
       renderDailyBlessingSection();
     } else if (action === 'daily-check-in') {
       await handleDailyCheckIn();
+    } else if (action === 'daily-open-race') {
+      await openDailyRace({ pets: state.allPets || [],
+        ownedIds: (state.enrichedCollection || []).filter(p => p.owned).map(p => p.id),
+        imageHtml: petImageHtml, openModal, refresh: () => onRefresh(),
+        reduceMotion: state.userPreferences?.reduceMotion ?? false });
     } else if (action === 'daily-open-wheel') {
       await openDailyWheelModal();
     } else if (action === 'companion-view-image') {
@@ -1511,7 +1546,11 @@ export function switchView(viewName) {
 }
 
 /** Teaching links only navigate and select filters; product controls own every write. */
-export async function openTeachingTarget({ view, filter, tab, hub, petId } = {}) {
+export async function openTeachingTarget({ view, filter, tab, hub, petId, detail } = {}) {
+  closeModal();
+  document.querySelector('#specified-invitation-dialog[open] [data-invitation-action="close"]:not(:disabled)')?.click();
+  document.querySelector('#identity-detail-dialog[open] [data-identity-action="close-dialog"]')?.click();
+  if (document.body.classList.contains('expedition-dispatch-open')) closeExpeditionDispatchModal();
   if (view === 'collection' && filter === 'owned') {
     collectionFilter = 'owned';
     collectionSeriesFilter = 'all';
@@ -1531,6 +1570,7 @@ export async function openTeachingTarget({ view, filter, tab, hub, petId } = {})
   if (view === 'collection') renderCollectionView();
   if (view === 'tasks' && hub) renderHomeHub();
   await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  if (detail && petId) openPetDetailModal(petId);
 }
 
 function bindModals() {
@@ -1551,7 +1591,7 @@ function bindModals() {
 function dismissModal() {
   const overlay = document.getElementById('modal-overlay');
   if (!isTopDialog(overlay)) return;
-  if (overlay.querySelector('#task-form[data-saving="true"]')) return;
+  if (overlay.querySelector('#task-form[data-saving="true"], #habit-form[data-saving="true"]')) return;
   const form = overlay.querySelector('#task-form[data-dirty="true"]');
   if (isSeniorMode() && form) {
     if (form.querySelector('.senior-discard')) return;
@@ -1572,6 +1612,7 @@ function dismissModal() {
 }
 
 export function openModal(contentHtml) {
+  closeDailyRace();
   const overlay = document.getElementById('modal-overlay');
   const body = document.getElementById('modal-body');
   if (!overlay?.classList.contains('open')) rememberDialogFocus(overlay);
@@ -1584,6 +1625,7 @@ export function openModal(contentHtml) {
 }
 
 export function closeModal() {
+  closeDailyRace();
   const overlay = document.getElementById('modal-overlay');
   const wasOpen = overlay?.classList.contains('open');
   overlay?.classList.remove('open');
@@ -1804,7 +1846,7 @@ export function petImageHtml(pet, options = {}) {
   const originalSrc = pet.fallbackImage || getPetImageSrc(pet);
   const loadAttr = eager || loading === 'eager' ? 'eager' : loading;
   const onload = "this.classList.add('is-loaded');this.closest('.pet-image-frame')?.classList.remove('is-loading')";
-  const onerror = "if(this.dataset.originalSrc&&this.src!==new URL(this.dataset.originalSrc,location.href).href){this.src=this.dataset.originalSrc;return;}this.onerror=null;this.classList.add('is-error');var f=this.closest('.pet-image-frame');if(f){f.classList.remove('is-loading');f.classList.add('is-error');}";
+  const onerror = "if(this.dataset.originalSrc&&this.src!==new globalThis.URL(this.dataset.originalSrc,location.href).href){this.src=this.dataset.originalSrc;return;}this.onerror=null;this.classList.add('is-error');var f=this.closest('.pet-image-frame');if(f){f.classList.remove('is-loading');f.classList.add('is-error');var label=f.querySelector('.pet-image-frame__fallback');if(label)label.textContent='?';}";
   const fallbackAttr = originalSrc ? ` data-original-src="${escapeHtml(originalSrc)}"` : '';
   const placeholder = framed
     ? `<div class="pet-image-frame pet-image-frame--${size} is-error" role="img" aria-label="圖片暫時無法載入"><span class="pet-image-frame__fallback" aria-hidden="true">?</span></div>`
@@ -1820,7 +1862,7 @@ export function petImageHtml(pet, options = {}) {
   }
 
   if (!framed) {
-    const onErrorLegacy = `if(this.dataset.originalSrc&&this.src!==new URL(this.dataset.originalSrc,location.href).href){this.src=this.dataset.originalSrc;return;}this.onerror=null;this.replaceWith(Object.assign(document.createElement('div'),{className:'${cls} pet-img--placeholder',innerHTML:'<span>?</span>'}))`;
+    const onErrorLegacy = `if(this.dataset.originalSrc&&this.src!==new globalThis.URL(this.dataset.originalSrc,location.href).href){this.src=this.dataset.originalSrc;return;}this.onerror=null;this.replaceWith(Object.assign(document.createElement('div'),{className:'${cls} pet-img--placeholder',innerHTML:'<span>?</span>'}))`;
     return `<img class="${cls} is-loading" src="${escapeHtml(src)}"${fallbackAttr} alt="${escapeHtml(petDisplayName(pet))}" loading="${loadAttr}" decoding="async" onload="this.classList.add('is-loaded')" onerror="${onErrorLegacy}" />`;
   }
 
@@ -2027,6 +2069,7 @@ async function handleHabitCompletion(action, id, card) {
   if (habitActionBusy) return;
   const restoreFocus = card?.contains(document.activeElement);
   const view = card?.closest('.view');
+  const encounterDateBefore = state.encounterEconomy?.dailyReceipt?.date;
   habitActionBusy = true;
   const buttons = '[data-action="habit-complete"], [data-action="habit-uncomplete"]';
   document.querySelectorAll(buttons).forEach((button) => { button.disabled = true; });
@@ -2042,6 +2085,8 @@ async function handleHabitCompletion(action, id, card) {
     await onRefresh({ renderMode: ['habits', 'tasks'] });
     if (completing) {
       const parts = [];
+      const receipt = state.encounterEconomy?.dailyReceipt;
+      if (receipt?.source === 'habit' && receipt.sourceId === id && receipt.date !== encounterDateBefore) parts.push(`相遇碎片 +${receipt.amount}`);
       if (result.stardustGiven > 0) parts.push(`星塵 +${result.stardustGiven}`);
       if (result.energyGiven > 0) parts.push(`冒險能量 +${result.energyGiven}`);
       if (result.bondGiven > 0) parts.push('親密度 +1');
@@ -2088,7 +2133,7 @@ function renderTasksView() {
   renderQuestPanel();
   renderHomeHub();
   renderCompanionSection(companion, companionLine);
-  renderTodayPlanSummary(tasks, today);
+  renderTodayPlanSummary(tasks.filter((task) => !task.isTutorial), today);
   renderHabitSummary();
   renderCategoryFilters(categories);
   syncTwilightHome(state);
@@ -2619,213 +2664,6 @@ async function handleDailyCheckIn() {
   await handleAchievementCheckAfterAction();
 }
 
-const WHEEL_CX = 150;
-const WHEEL_CY = 150;
-const WHEEL_R = 140;
-const WHEEL_LABEL_R = 82;
-
-const WHEEL_COLORS_DEFAULT = [
-  '#2A1F4A', '#18304A', '#2B2340', '#3A2A18',
-  '#1F3A35', '#251F3F', '#18364A', '#3A2030',
-];
-
-/** Sweet 轉盤扇區：交錯莓果／金／紫／薄荷／藍／珊瑚，避免整盤淡粉 */
-const WHEEL_COLORS_SWEET = [
-  '#E8A6BE', '#F3C979', '#B9A6E8', '#9ECFBE',
-  '#9FC4DF', '#ECA5A5', '#E8B8D0', '#D4C4F0',
-];
-
-/** Sweet 扇區標籤文字色（依扇區明度選擇深色） */
-const WHEEL_LABEL_COLORS_SWEET = [
-  '#4A2E3B', '#684516', '#3F315F', '#245547',
-  '#294E68', '#4A2E3B', '#4A2E3B', '#3F315F',
-];
-
-function polarToCartesian(cx, cy, r, angleDeg) {
-  const angleRad = ((angleDeg - 90) * Math.PI) / 180;
-  return {
-    x: cx + r * Math.cos(angleRad),
-    y: cy + r * Math.sin(angleRad),
-  };
-}
-
-function describeArcSector(cx, cy, r, startAngle, endAngle) {
-  const start = polarToCartesian(cx, cy, r, endAngle);
-  const end = polarToCartesian(cx, cy, r, startAngle);
-  const largeArcFlag = endAngle - startAngle <= 180 ? '0' : '1';
-  return [
-    'M', cx, cy,
-    'L', start.x, start.y,
-    'A', r, r, 0, largeArcFlag, 0, end.x, end.y,
-    'Z',
-  ].join(' ');
-}
-
-function truncateWheelLabel(text, maxLen = 8) {
-  const chars = Array.from(text || '');
-  return chars.length <= maxLen ? chars.join('') : chars.slice(0, maxLen).join('');
-}
-
-function getWheelShortLabel(reward) {
-  const amount = reward.amount ?? 1;
-  const amtStr = `+${amount}`;
-
-  if (reward.type === 'stardust') {
-    return { name: '星塵', amount: amtStr };
-  }
-  if (reward.type === 'adventureEnergy') {
-    return { name: '能量', amount: amtStr };
-  }
-  if (reward.type === 'material') {
-    const matNames = {
-      forest_leaf: '嫩葉',
-      lava_core: '熔岩',
-      machine_part: '齒輪',
-      star_shard: '星界',
-    };
-    const name = matNames[reward.materialId];
-    if (name) return { name, amount: amtStr };
-  }
-  if (reward.type === 'item' && reward.itemId === 'item_small_spirit_food') {
-    return { name: '靈食', amount: amtStr };
-  }
-
-  const label = reward.label || '';
-  const plusMatch = label.match(/^(.+?)\s*(\+\d+)\s*$/);
-  if (plusMatch) {
-    return {
-      name: truncateWheelLabel(plusMatch[1].trim(), 8),
-      amount: plusMatch[2],
-    };
-  }
-  return { name: truncateWheelLabel(label, 8), amount: amtStr };
-}
-
-function getWheelSectorColors() {
-  return isSweetTheme() ? WHEEL_COLORS_SWEET : WHEEL_COLORS_DEFAULT;
-}
-
-function getWheelSectorStroke() {
-  return isSweetTheme() ? '#D4A0B8' : 'rgba(244, 247, 255, 0.16)';
-}
-
-function getWheelLabelFill(index) {
-  if (!isSweetTheme()) return '';
-  return WHEEL_LABEL_COLORS_SWEET[index % WHEEL_LABEL_COLORS_SWEET.length];
-}
-
-function buildWheelSvgHtml(rewards) {
-  const count = rewards.length || 8;
-  const seg = 360 / count;
-  const colors = getWheelSectorColors();
-  const stroke = getWheelSectorStroke();
-
-  const sectors = rewards.map((reward, i) => {
-    const startAngle = i * seg;
-    const endAngle = startAngle + seg;
-    const midAngle = startAngle + seg / 2;
-    const path = describeArcSector(WHEEL_CX, WHEEL_CY, WHEEL_R, startAngle, endAngle);
-    const short = getWheelShortLabel(reward);
-    const labelPoint = polarToCartesian(WHEEL_CX, WHEEL_CY, WHEEL_LABEL_R, midAngle);
-    let textRotation = midAngle;
-    if (midAngle > 90 && midAngle < 270) {
-      textRotation = midAngle + 180;
-    }
-    const labelFill = getWheelLabelFill(i);
-    const fillAttr = labelFill ? ` fill="${labelFill}"` : '';
-
-    return `
-      <path class="daily-wheel-sector" d="${path}" fill="${colors[i % colors.length]}" stroke="${stroke}" stroke-width="1.5"/>
-      <g class="daily-wheel-label-group" transform="translate(${labelPoint.x.toFixed(2)}, ${labelPoint.y.toFixed(2)}) rotate(${textRotation.toFixed(2)})">
-        <text class="daily-wheel-label" text-anchor="middle" dominant-baseline="middle"${fillAttr}>
-          <tspan x="0" dy="-0.35em" class="daily-wheel-label__name">${escapeHtml(short.name)}</tspan>
-          <tspan x="0" dy="1.15em" class="daily-wheel-label__amount">${escapeHtml(short.amount)}</tspan>
-        </text>
-      </g>`;
-  }).join('');
-
-  return `
-    <svg class="daily-wheel-svg" viewBox="0 0 300 300" aria-hidden="true">
-      <circle class="daily-wheel-outer-ring" cx="${WHEEL_CX}" cy="${WHEEL_CY}" r="${WHEEL_R}" fill="none"/>
-      ${sectors}
-    </svg>`;
-}
-
-function buildWheelDiscHtml(rewards) {
-  const previewItems = rewards.map((r) =>
-    `<li class="daily-wheel-preview__item">${escapeHtml(r.label)}</li>`
-  ).join('');
-
-  return `
-    <div class="daily-wheel-stage">
-      <div class="daily-wheel-wrapper">
-        <div class="daily-wheel-pointer" aria-hidden="true"></div>
-        <div class="daily-wheel-rotor" id="daily-wheel-rotor">
-          ${buildWheelSvgHtml(rewards)}
-        </div>
-        <button type="button" class="daily-wheel-center-button" id="daily-wheel-start" aria-label="轉動轉盤">開始</button>
-      </div>
-    </div>
-    <ul class="daily-wheel-preview" aria-label="轉盤獎勵清單">
-      ${previewItems}
-    </ul>`;
-}
-
-function waitForWheelRotorTransition(rotor, fallbackMs) {
-  return new Promise((resolve) => {
-    let settled = false;
-    const finish = () => {
-      if (settled) return;
-      settled = true;
-      rotor.removeEventListener('transitionend', onEnd);
-      clearTimeout(timer);
-      resolve();
-    };
-    const onEnd = (event) => {
-      if (event.target !== rotor || event.propertyName !== 'transform') return;
-      finish();
-    };
-    rotor.addEventListener('transitionend', onEnd);
-    const timer = setTimeout(finish, fallbackMs);
-  });
-}
-
-async function animateDailyWheel(rewardIndex, segmentCount) {
-  const rotor = document.getElementById('daily-wheel-rotor');
-  const startBtn = document.getElementById('daily-wheel-start');
-  if (!rotor) return;
-
-  const reduceMotion = state.userPreferences?.reduceMotion ?? false;
-  if (startBtn) {
-    startBtn.disabled = true;
-    startBtn.textContent = '轉動';
-  }
-
-  const extraSpins = reduceMotion ? 1 : 3 + Math.floor(Math.random() * 2);
-  const rotation = computeWheelRotationDeg(rewardIndex, segmentCount, extraSpins);
-
-  rotor.style.transition = reduceMotion
-    ? 'transform 300ms ease-out'
-    : 'transform 2800ms cubic-bezier(0.12, 0.72, 0.18, 1)';
-
-  void rotor.offsetHeight;
-  const transformValue = `translate3d(0, 0, 0) rotate(${rotation}deg)`;
-  rotor.style.setProperty('--wheel-rotation', `${rotation}deg`);
-  rotor.style.transform = transformValue;
-
-  const fallbackMs = reduceMotion ? 400 : 3000;
-  await waitForWheelRotorTransition(rotor, fallbackMs);
-
-  if (startBtn) startBtn.textContent = '已轉';
-}
-
-function computeWheelRotationDeg(rewardIndex, segmentCount, extraSpins = 4) {
-  const seg = 360 / segmentCount;
-  const targetMidAngle = rewardIndex * seg + seg / 2;
-  const jitter = (Math.random() - 0.5) * (seg * 0.2);
-  return extraSpins * 360 + (360 - targetMidAngle + jitter);
-}
-
 async function openDailyWheelModal() {
   const daily = state.dailyCheckIn;
   const today = getTodayDateString();
@@ -2843,7 +2681,7 @@ async function openDailyWheelModal() {
       <h2 class="modal-title">每日幸運轉盤</h2>
       <p class="wheel-modal__status ${canSpin ? 'wheel-modal__status--available' : 'wheel-modal__status--done'}">${canSpin ? '今天還可以轉 1 次' : '今天已經轉過了'}</p>
       <div class="wheel-container" id="daily-wheel-container">
-        ${buildWheelDiscHtml(rewards)}
+        ${buildWheelDiscHtml(rewards, { sweet: isSweetTheme() })}
       </div>
       <p class="wheel-modal__hint">轉盤結果由系統先決定，動畫僅為展示效果。</p>
     </div>
@@ -2884,7 +2722,9 @@ async function openDailyWheelModal() {
     };
 
     try {
-      await animateDailyWheel(prep.rewardIndex, prep.segmentCount);
+      await animateDailyWheel(prep.rewardIndex, prep.segmentCount, {
+        reduceMotion: state.userPreferences?.reduceMotion ?? false,
+      });
       await finishWheelSpin();
     } catch (err) {
       console.error('[QuestNote] 轉盤錯誤:', err);
@@ -3129,7 +2969,7 @@ function renderTaskCard(task) {
         <ul class="subtask-list">
           ${(task.subtasks || []).map((s) => `
             <li class="subtask-item ${s.completed ? 'subtask-item--done' : ''}">
-              <button type="button" class="subtask-check ${s.completed ? 'checked' : ''}" data-action="toggle-subtask" data-subtask-id="${escapeHtml(s.id)}" aria-label="完成子任務">
+              <button type="button" class="subtask-check ${s.completed ? 'checked' : ''}" data-action="toggle-subtask" data-subtask-id="${escapeHtml(s.id)}" aria-label="${s.completed ? '取消完成' : '完成'}：${escapeHtml(s.text)}" aria-pressed="${s.completed ? 'true' : 'false'}">
                 ${s.completed ? '✓' : ''}
               </button>
               <span class="subtask-text">${escapeHtml(s.text)}</span>
@@ -3141,7 +2981,8 @@ function renderTaskCard(task) {
   ` : '';
 
 
-  const planBtn = !task.completed
+  const demonTask = isDemonFinalTask(task);
+  const planBtn = !demonTask && !task.completed
     ? inPlan
       ? `<button class="btn btn--ghost btn--sm" data-action="unplan-today">移出今日</button>`
       : `<button class="btn btn--ghost btn--sm" data-action="plan-today">加入今日</button>`
@@ -3157,30 +2998,33 @@ function renderTaskCard(task) {
     ? `<div class="task-card__rewards"><span>${twilightIcon('check')}獎勵已領取</span></div>`
     : `<div class="task-card__rewards"><span>${twilightIcon('spark')}${stardust} 星塵</span><span>${twilightIcon('energy')}${energy} 能量</span>${state.companion ? `<span>${twilightIcon('heart')}+${calculateBondAmount(task)} 親密度</span>` : ''}</div>`;
 
-  const completeButton = `<button type="button" class="task-check ${task.completed ? 'checked' : ''}" data-action="toggle" aria-pressed="${task.completed}" aria-label="${task.completed ? '取消完成' : '完成'} ${escapeHtml(task.title)}">${task.completed ? twilightIcon('check') : ''}<span class="senior-label">${task.completed ? '取消完成' : '完成任務'}</span></button>`;
-  return `<article class="task-card twilight-task-card ${priorityClass} ${task.completed ? 'task-card--done' : ''} ${justCompleted ? 'task-card--just-done' : ''}" data-id="${escapeHtml(task.id)}">
+  const completeButton = `<button type="button" class="task-check ${task.completed ? 'checked' : ''}" data-action="toggle" ${(task.isTutorial || demonTask) && task.completed ? 'disabled' : ''} aria-pressed="${task.completed}" aria-label="${task.completed ? (task.isTutorial || demonTask) ? '已完成' : '取消完成' : '完成'} ${escapeHtml(task.title)}">${task.completed ? twilightIcon('check') : ''}<span class="senior-label">${task.completed ? (task.isTutorial || demonTask) ? '已完成' : '取消完成' : '完成任務'}</span></button>`;
+  return `<article class="task-card twilight-task-card ${priorityClass} ${demonTask ? 'task-card--demon-final' : ''} ${task.completed ? 'task-card--done' : ''} ${justCompleted ? 'task-card--just-done' : ''}" data-id="${escapeHtml(task.id)}">
     ${isSeniorMode() ? '' : completeButton}
     <div class="twilight-task-body">
-      <div class="task-card__meta"><span>${formatCategoryLabel(category)}</span>${task.priority !== 'normal' ? `<span class="twilight-task-priority">${escapeHtml(PRIORITY_LABELS[task.priority])}</span>` : ''}${task.dueDate || task.startDate ? `<span class="${dateClass}">${escapeHtml(dateText)}</span>` : ''}${!inPlan && !task.completed ? '<span>未排入今日</span>' : ''}</div>
+      <div class="task-card__meta"><span>${demonTask ? '惡魔的趣味 · 覺醒約定 · 無期限' : task.isTutorial ? '基本操作練習' : formatCategoryLabel(category)}</span>${task.priority !== 'normal' ? `<span class="twilight-task-priority">${escapeHtml(PRIORITY_LABELS[task.priority])}</span>` : ''}${task.dueDate || task.startDate ? `<span class="${dateClass}">${escapeHtml(dateText)}</span>` : ''}${!inPlan && !task.completed ? '<span>未排入今日</span>' : ''}</div>
       <h3 class="task-card__title">${escapeHtml(task.title)}</h3>
       ${task.plannedTime ? `<p class="task-card__time">安排時間 ${escapeHtml(task.plannedTime)}</p>` : ''}
       ${preview ? `<p class="task-card__preview">${escapeHtml(preview)}</p>` : ''}
       ${description ? `<details class="task-card__description"><summary>任務說明</summary><p class="task-card__preview">${escapeHtml(description)}</p></details>` : ''}
       ${subtasksHtml}
       ${rewardsHtml}
+      ${demonTask ? '<p class="demon-task-note">夥伴的約定 · 只能完成，無完成期限</p>' : ''}
       ${expandBtn ? `<div class="twilight-task-expander">${expandBtn}</div>` : ''}
     </div>
-    ${isSeniorMode() ? `<div class="senior-task-actions">${completeButton}<button type="button" class="btn btn--ghost" data-action="edit">編輯任務</button></div>` : ''}
-    <details class="twilight-task-menu"><summary aria-label="${escapeHtml(task.title)}：更多操作">${twilightIcon('more')}<span class="senior-label">更多操作</span></summary><div class="task-card__actions">${planBtn}<button type="button" class="btn btn--ghost btn--sm" data-action="edit">編輯</button><button type="button" class="btn btn--ghost btn--sm btn--danger" data-action="delete">刪除</button></div></details>
+    ${isSeniorMode() ? `<div class="senior-task-actions">${completeButton}${demonTask ? '' : '<button type="button" class="btn btn--ghost" data-action="edit">編輯任務</button>'}</div>` : ''}
+    ${demonTask ? '' : `<details class="twilight-task-menu"><summary aria-label="${escapeHtml(task.title)}：更多操作">${twilightIcon('more')}<span class="senior-label">更多操作</span></summary><div class="task-card__actions">${planBtn}<button type="button" class="btn btn--ghost btn--sm" data-action="edit">編輯</button><button type="button" class="btn btn--ghost btn--sm btn--danger" data-action="delete">刪除</button></div></details>`}
   </article>`;
 }
 
-function openTaskForm(taskId = null) {
-  const task = taskId ? state.tasks.find((t) => t.id === taskId) : null;
-  const isEdit = !!task;
+export function openTaskForm(taskId = null) {
+  showSkippedEditorHint();
+  const practice = !taskId ? getGuidedTutorialDraft() : null;
+  const task = taskId ? state.tasks.find((t) => t.id === taskId) : practice;
+  const isEdit = !!taskId && !!task;
   const today = getTodayDateString();
   const categories = state.categories || [];
-  const inPlan = task ? isInTodayPlan(task, today) : false;
+  const inPlan = practice ? true : task ? isInTodayPlan(task, today) : taskViewMode === 'today';
   const subtasks = task?.subtasks || [];
 
   const categoryOptions = categories.map(
@@ -3200,6 +3044,17 @@ function openTaskForm(taskId = null) {
       <label class="form-label" for="task-content">任務內容</label>
       <textarea id="task-content" class="form-textarea" rows="4" placeholder="第一行將自動成為標題…" required>${task ? escapeHtml(task.content) : ''}</textarea>
 
+      <label class="settings-toggle form-toggle" for="task-plan-today">
+        <span class="settings-toggle__text">
+          <span class="settings-toggle__label">加入今日計畫</span>
+          <span class="settings-toggle__desc">標記為今天打算完成的任務</span>
+        </span>
+        <input type="checkbox" id="task-plan-today" class="settings-toggle__input" ${inPlan ? 'checked' : ''} />
+        <span class="settings-toggle__switch" aria-hidden="true"></span>
+      </label>
+
+      <details class="task-editor-options" ${isEdit ? 'open' : ''}>
+      <summary>分類、日期與子任務</summary>
       <label class="form-label" for="task-category">分類</label>
       <select id="task-category" class="form-select">${categoryOptions}</select>
 
@@ -3225,18 +3080,9 @@ function openTaskForm(taskId = null) {
       </div>
       <p class="form-error" id="task-date-error" hidden>開始日不可晚於截止日</p>
 
-      <label class="settings-toggle form-toggle" for="task-plan-today">
-        <span class="settings-toggle__text">
-          <span class="settings-toggle__label">加入今日計畫</span>
-          <span class="settings-toggle__desc">標記為今天打算完成的任務</span>
-        </span>
-        <input type="checkbox" id="task-plan-today" class="settings-toggle__input" ${inPlan ? 'checked' : ''} />
-        <span class="settings-toggle__switch" aria-hidden="true"></span>
-      </label>
-
       <div class="form-field">
         <label class="form-label" for="task-plan-date">安排日期</label>
-        <input type="date" id="task-plan-date" class="form-input" value="${escapeHtml(task?.plannedDate || '')}" />
+        <input type="date" id="task-plan-date" class="form-input" value="${escapeHtml(task?.plannedDate || (inPlan ? today : ''))}" />
         <div class="form-actions">
           <button type="button" class="btn btn--secondary btn--sm" data-plan-date="today">今天</button>
           <button type="button" class="btn btn--secondary btn--sm" data-plan-date="tomorrow">明天</button>
@@ -3258,6 +3104,7 @@ function openTaskForm(taskId = null) {
         <input type="text" id="subtask-new-input" class="form-input" placeholder="輸入子任務內容" maxlength="200" />
         <button type="button" class="btn btn--secondary btn--sm" id="subtask-add-btn">新增子任務</button>
       </div>
+      </details>
 
       <div class="form-actions">
         <button type="button" class="btn btn--ghost" id="form-cancel">取消</button>
@@ -3267,6 +3114,11 @@ function openTaskForm(taskId = null) {
   `);
 
   composeSeniorTaskForm(isEdit);
+  if (practice) {
+    document.getElementById('task-plan-date').value = today;
+    void recordOnboardingEvent('editor-opened');
+  }
+
   document.getElementById('form-cancel')?.addEventListener('click', dismissModal);
 
   document.querySelectorAll('[data-plan-date]').forEach((button) => button.addEventListener('click', () => {
@@ -3342,9 +3194,11 @@ function openTaskForm(taskId = null) {
 
   renderSubtaskFormList();
 
+  let wizard = null;
   document.getElementById('task-form')?.addEventListener('submit', trackUpdateActivity(async (e) => {
     e.preventDefault();
     const form = e.currentTarget;
+    if (wizard && !wizard.isReview()) { wizard.next(); return; }
     if (form.dataset.saving === 'true') return;
     const content = document.getElementById('task-content').value.trim();
     const priority = document.getElementById('task-priority').value;
@@ -3363,6 +3217,7 @@ function openTaskForm(taskId = null) {
 
     const dateCheck = validateDateRange(startDate, dueDate);
     if (!dateCheck.valid) {
+      wizard?.goTo(4);
       const options = dateError?.closest('details');
       if (options) options.open = true;
       if (dateError) {
@@ -3395,6 +3250,7 @@ function openTaskForm(taskId = null) {
     }
 
     const payload = {
+      ...(practice || {}),
       content,
       priority,
       categoryId,
@@ -3432,7 +3288,7 @@ function openTaskForm(taskId = null) {
       }
       closeModal();
       await onRefresh();
-      await handleAchievementCheckAfterAction();
+      if (!createdTask?.isTutorial) await handleAchievementCheckAfterAction();
       if (createdTask) {
         void recordOnboardingEvent('task-created', { taskId: createdTask.id });
       }
@@ -3440,6 +3296,16 @@ function openTaskForm(taskId = null) {
       showToast(err.message || '儲存失敗', 'error');
     } finally { form.dataset.saving = 'false'; submit.disabled = false; }
   }));
+  if (!isEdit && !practice) wizard = initTaskWizard(document.getElementById('task-form'));
+}
+
+/** Reuse the real today list, repairing filters and interrupted modal navigation. */
+export function showGuidedHome() {
+  closeModal();
+  taskViewMode = 'today';
+  taskCategoryFilter = 'all';
+  switchView('tasks');
+  renderTasksView();
 }
 
 /** 設定首頁中樞圖示的提示紅點 */
@@ -3868,7 +3734,7 @@ function openPetFeedModal(companion) {
   if (src) warmPetImageCache(src).catch(() => {});
 
   const rarityClass = `rarity-${companion.rarity}`;
-  const onError = `if(this.dataset.fallbackSrc&&this.src!==new URL(this.dataset.fallbackSrc,location.href).href){this.src=this.dataset.fallbackSrc;return;}this.onerror=null;this.classList.add('companion-image-preview__img--error')`;
+  const onError = `if(this.dataset.fallbackSrc&&this.src!==new globalThis.URL(this.dataset.fallbackSrc,location.href).href){this.src=this.dataset.fallbackSrc;return;}this.onerror=null;this.classList.add('companion-image-preview__img--error')`;
   const onload = "this.classList.add('is-loaded');this.closest('.pet-image-frame')?.classList.remove('is-loading')";
   const feedSection = buildPetFeedSection(companion);
   const imageHtml = src
@@ -4994,8 +4860,8 @@ async function notifyBondUnlocks(petId) {
   }
 }
 
-function showRewardToast(amount, energy = 0) {
-  seniorFeedback(`已獲得 ${amount} 星塵、${energy} 冒險能量。`, 'success');
+function showRewardToast(amount, energy = 0, encounterFragments = 0) {
+  seniorFeedback(`已獲得 ${amount} 星塵、${energy} 冒險能量。${encounterFragments ? `相遇碎片 +${encounterFragments}。` : ''}`, 'success');
   if (isSeniorMode()) return;
   const toast = document.createElement('div');
   toast.className = 'reward-toast reward-toast--reward';
@@ -5003,6 +4869,7 @@ function showRewardToast(amount, energy = 0) {
   if (energy > 0) {
     text += `<span class="reward-toast__energy">＋<strong class="toast-highlight">${energy}</strong> 冒險能量</span>`;
   }
+  if (encounterFragments > 0) text += `<span class="reward-toast__energy">相遇碎片 ＋${encounterFragments}</span>`;
   toast.innerHTML = text;
   (document.getElementById('toast-container') || document.body).appendChild(toast);
   requestAnimationFrame(() => toast.classList.add('show'));
@@ -5036,6 +4903,7 @@ function renderGachaUnavailable() {
   }
   const panel = document.getElementById('gacha-panel');
   panel?.removeAttribute('data-pool-theme');
+  panel?.removeAttribute('data-pool-id');
   panel?.removeAttribute('data-pool-phase');
   const name = document.getElementById('gacha-pool-name');
   if (name) { name.hidden = false; name.textContent = '目前沒有可用的召喚卡池'; }
@@ -5092,7 +4960,7 @@ function renderGachaView() {
   renderGachaThemeStage(pool);
   const awakeningGuide = document.getElementById('gacha-pet-awakening-guide');
   const awakeningToggle = document.getElementById('gacha-pet-awakening-toggle');
-  const hasPetAwakening = normalizePoolPresentation(pool)?.animationKey === 'swordwild_shanhe';
+  const hasPetAwakening = !!getPoolAwakeningProfile(pool.id);
   if (awakeningGuidePoolId !== pool.id) {
     awakeningGuidePoolId = pool.id;
     awakeningGuideExpanded = false;
@@ -5103,7 +4971,7 @@ function renderGachaView() {
   }
   if (awakeningGuide) {
     awakeningGuide.hidden = !hasPetAwakening || !awakeningGuideExpanded;
-    if (hasPetAwakening) awakeningGuide.innerHTML = renderAwakeningGuide({ compact: true });
+    if (hasPetAwakening) awakeningGuide.innerHTML = renderAwakeningGuide({ compact: true, poolId: pool.id });
   }
   setText('gacha-pool-name', pool.name);
   setText('gacha-stardust', stardust);
@@ -5286,6 +5154,8 @@ function renderGachaThemeStage(pool) {
   const awakened = model.awakened;
 
   if (panel) {
+    if (pool?.id) panel.dataset.poolId = pool.id;
+    else panel.removeAttribute('data-pool-id');
     if (themeAttr) panel.dataset.poolTheme = themeAttr;
     else panel.removeAttribute('data-pool-theme');
     if (awakened) panel.dataset.poolPhase = 'awakened';
@@ -6492,7 +6362,7 @@ function openPetDetailModal(petId) {
     const liberatedLabel = st.bondLiberated
       ? '<span class="bond-liberated-label">羈絆解放</span>'
       : '';
-    const storyHtml = renderBondDetail(pet, state) + renderAwakeningDetail(pet, state);
+    const storyHtml = renderBondDetail(pet, state);
     bondStatusSection = `
       <section class="bond-section">
         <div class="bond-section__title-row">
@@ -6581,6 +6451,7 @@ function openPetDetailModal(petId) {
       ${owned && pet.lore ? `<p class="pet-detail__lore">${escapeHtml(pet.lore)}</p>` : ''}
       ${!owned ? '<p class="pet-detail__locked">召喚解鎖後，可閱讀完整背景與親密度故事。</p>' : ''}
       ${bondStatusSection}
+      ${renderAwakeningDetail(pet, state)}
       ${bondSection}
       ${nicknameSection}
       ${
@@ -6591,11 +6462,7 @@ function openPetDetailModal(petId) {
       ${owned && pet.isCompanion ? '<p class="companion-badge companion-badge--detail">目前陪伴中</p>' : ''}
     </div>
   `);
-
-  document.querySelector('[data-action="detail-view-image"]')?.addEventListener('click', (e) => {
-    const id = e.currentTarget.dataset.petId;
-    if (id) openPetImageViewer(id, e.currentTarget);
-  });
+  if (owned) void recordOnboardingEvent('pet-care-opened');
 
   document.querySelector('[data-action="detail-feed-pet"]')?.addEventListener('click', () => {
     openPetFeedModal(pet);
@@ -7815,7 +7682,7 @@ function openHabitForm(habitId = null) {
         <select class="form-select" id="habit-target">${targetOptions}</select>
       </div>
 
-      <p id="habit-form-error" class="form-error" hidden></p>
+      <p id="habit-form-error" class="form-error" role="alert" hidden></p>
 
       <div class="form-actions">
         <button type="button" class="btn btn--ghost" id="habit-form-cancel">取消</button>
@@ -7830,10 +7697,18 @@ function openHabitForm(habitId = null) {
     if (targetWrap) targetWrap.hidden = freqSelect.value !== 'weekly';
   });
 
-  document.getElementById('habit-form-cancel')?.addEventListener('click', closeModal);
+  const habitForm = document.getElementById('habit-form');
+  const cancel = document.getElementById('habit-form-cancel');
+  cancel?.addEventListener('click', () => {
+    if (habitForm?.dataset.saving !== 'true') closeModal();
+  });
 
   document.getElementById('habit-form')?.addEventListener('submit', trackUpdateActivity(async (e) => {
     e.preventDefault();
+    const form = e.currentTarget;
+    if (form.dataset.saving === 'true') return;
+    const submit = form.querySelector('button[type="submit"]');
+    const submitLabel = submit.textContent;
     const errEl = document.getElementById('habit-form-error');
     const name = document.getElementById('habit-name')?.value?.trim();
     const description = document.getElementById('habit-desc')?.value?.trim();
@@ -7842,22 +7717,48 @@ function openHabitForm(habitId = null) {
     const targetPerWeek = document.getElementById('habit-target')?.value;
 
     const payload = { name, description, categoryId, frequency, targetPerWeek: Number(targetPerWeek) };
-    const result = isEdit
-      ? await updateHabit(habitId, payload)
-      : await createHabit(payload);
-
-    if (result.success) {
+    const showError = (message) => {
+      if (errEl) {
+        errEl.textContent = message;
+        errEl.hidden = false;
+      } else {
+        showToast(message, 'error');
+      }
+    };
+    if (errEl) errEl.hidden = true;
+    form.dataset.saving = 'true';
+    submit.disabled = true;
+    submit.textContent = '儲存中…';
+    if (cancel) cancel.disabled = true;
+    let saved = false;
+    try {
+      const result = isEdit
+        ? await updateHabit(habitId, payload)
+        : await createHabit(payload);
+      if (!result.success) {
+        showError(result.error || '儲存失敗');
+        return;
+      }
+      saved = true;
       closeModal();
       await onRefresh();
       renderHabitsView();
       showToast(isEdit ? '習慣已更新' : '習慣已建立', 'success');
       await handleAchievementCheckAfterAction();
-    } else {
-      if (errEl) {
-        errEl.textContent = result.error || '儲存失敗';
-        errEl.hidden = false;
+    } catch (err) {
+      console.error('[QuestNote] 習慣儲存流程失敗:', err);
+      if (saved) {
+        showToast('習慣已儲存，但畫面更新未完成。請重新整理。', 'error');
       } else {
-        showToast(result.error || '儲存失敗', 'error');
+        showError('儲存失敗，請再試一次。');
+      }
+    } finally {
+      // A detached, committed form must never submit a second create action.
+      if (!saved) {
+        form.dataset.saving = 'false';
+        submit.disabled = false;
+        submit.textContent = submitLabel;
+        if (cancel) cancel.disabled = false;
       }
     }
   }));
@@ -8932,8 +8833,9 @@ async function executeRestoreBackup() {
     setImportElementHidden('import-restoring-hint', true);
     setImportElementHidden('import-preview', true);
     setImportElementHidden('btn-import-select', false);
-    showImportError('恢復失敗，資料未完整寫入。請重新整理後再試。');
-    showToast('恢復失敗，請確認備份檔是否正確。', 'error');
+    const message = '恢復流程未完成，請先重新整理並檢查資料。';
+    showImportError(message);
+    showToast(message, 'error');
   }
 }
 
@@ -9018,9 +8920,10 @@ function renderSettingsView() {
   if (!state) return;
 
   const { tasks, wallet, collectionProgress, gachaStats, activeExpedition, userPreferences, achievementSummary } = state;
-  const completedCount = tasks.filter((t) => t.completed).length;
+  const formalTasks = tasks.filter((t) => !t.isTutorial);
+  const completedCount = formalTasks.filter((t) => t.completed).length;
 
-  setText('settings-task-count', tasks.length);
+  setText('settings-task-count', formalTasks.length);
   setText('settings-completed-count', completedCount);
   setText('settings-stardust', wallet.stardust ?? 0);
   setText('settings-energy', wallet.adventureEnergy ?? 0);

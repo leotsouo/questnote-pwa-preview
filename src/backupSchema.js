@@ -1,14 +1,16 @@
+import { validateDailyRace } from './dailyRaceCore.js';
 import { validateEncounterEconomy } from './encounterEconomyCore.js';
 /** Backup profiles verified against historical exporters; no database or DOM access. */
 import { SUPPORTED_THEMES } from './themeRegistry.js';
 import { FONT_SIZES, READING_MODES } from './preferencesService.js';
 import { validateBondJourney } from './bondJourneyCore.js';
+import { validateDemonFinalTask, isDemonFinalTask } from './demonFinalTaskCore.js';
 import { validatePetAwakening } from './petAwakeningCore.js';
 const BASE_KEYS = ['tasks', 'wallet', 'collection', 'gachaStats', 'expeditions',
   'achievements', 'taskStats', 'userPreferences', 'habits'];
 const ADDITIONS = ['inventory', 'workshopStats', 'dailyCheckIn', 'questProgress',
   'explorationProgress', 'collectionMilestones', 'globalMailboxState',
-  'poolDebutSeen', 'poolUnlockState', 'idempotentGrants', 'campProgress', 'bondJourney', 'petAwakening', 'encounterEconomy'];
+  'poolDebutSeen', 'poolUnlockState', 'idempotentGrants', 'campProgress', 'bondJourney', 'petAwakening', 'encounterEconomy', 'dailyRace'];
 export const SNAPSHOT_KEYS = [...BASE_KEYS, ...ADDITIONS];
 // Counts come from actual versioned exports, not inferred release dates.
 const LEGACY_PROFILES = {
@@ -35,7 +37,7 @@ const QUEST_TARGETS = {
   weekly: { weekly_complete_tasks_20: 20, weekly_complete_habits_10: 10,
     weekly_checkin_5: 5, weekly_expedition_5: 5, weekly_gift_5: 5 },
 };
-const AREA_IDS = ['mist_forest', 'lava_rift', 'machine_ruins', 'astral_rift', 'polar_shore', 'harvest_fields', 'cloudrest_trail', 'lionheart_city'];
+const AREA_IDS = ['mist_forest', 'lava_rift', 'machine_ruins', 'astral_rift', 'polar_shore', 'harvest_fields', 'cloudrest_trail', 'lionheart_city', 'darkcrown_border', 'aurora_feast_garden'];
 const COLLECTION_MILESTONE_IDS = ['collection_005', 'collection_010', 'collection_020',
   'collection_030', 'collection_040', 'collection_050', 'collection_all', 'rarity_first_sr',
   'rarity_first_ssr', 'rarity_first_ur', 'rarity_all_n', 'rarity_all_r', 'rarity_sr_5',
@@ -128,8 +130,12 @@ export function validateSnapshotData(data, requiredKeys = SNAPSHOT_KEYS, profile
     type: oneOf(['one_time', 'repeatable']), categoryId: id, startDate: nullable(dateKey),
     dueDate: nullable(dateKey), isPlannedToday: bool, plannedDate: nullable(dateKey),
     subtasks: list(subtask), completed: bool, rewardClaimed: bool, createdAt: timestamp,
-    updatedAt: timestamp, completedAt: nullable(timestamp), lastRewardClaimedAt: nullable(timestamp) },
-  { plannedTime: nullable(scalar((value) => typeof value === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(value), '時間格式無效')) });
+    updatedAt: timestamp, completedAt: nullable(timestamp), lastRewardClaimedAt: nullable(timestamp) }, {
+    plannedTime: nullable(scalar((value) => typeof value === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(value), '時間格式無效')),
+    systemTask: oneOf(['demon-final']), awakeningPetId: id,
+    isTutorial: bool, tutorialRunId: id, tutorialMode: oneOf(['first', 'replay']),
+    tutorialReward: shape({ amount: integer, energy: integer, bondAmount: integer, preview: bool }),
+  });
   const habitLog = (value, path, key) => {
     if (key.startsWith('week_')) {
       dateKey(key.slice(5), path);
@@ -205,6 +211,14 @@ export function validateSnapshotData(data, requiredKeys = SNAPSHOT_KEYS, profile
     });
   };
   checkRows(data.tasks, 'id', 'tasks');
+  for (const task of Array.isArray(data.tasks) ? data.tasks : []) {
+    if (isDemonFinalTask(task) || task?.systemTask === 'demon-final') {
+      for (const error of validateDemonFinalTask(task)) fail('tasks', error);
+      if (!isDemonFinalTask(task)) fail('tasks', '惡魔的趣味任務 ID 無效');
+      const progress = data.petAwakening?.byPet?.[task.awakeningPetId];
+      if (!['ready', 'awakened'].includes(progress?.status) || (progress?.awakenedAt && !task.completed)) fail('tasks', '惡魔的趣味與覺醒進度矛盾');
+    }
+  }
   checkRows(data.habits, 'id', 'habits');
   checkRows(data.expeditions, 'id', 'expeditions');
   checkRows(data.collection, 'petId', 'collection', true);
@@ -272,7 +286,8 @@ export function validateSnapshotData(data, requiredKeys = SNAPSHOT_KEYS, profile
     const versionParts = String(profile).split('.').map(Number);
     const atLeast = (minor, patch) => versionParts[0] > 3 || (versionParts[0] === 3
       && (versionParts[1] > minor || (versionParts[1] === minor && versionParts[2] >= patch)));
-    const requiredAreas = profile === 'current' || atLeast(5, 6) ? AREA_IDS
+    const requiredAreas = profile === 'current' || atLeast(9, 0) ? AREA_IDS
+      : atLeast(5, 6) ? AREA_IDS.slice(0, 8)
       : atLeast(5, 3) ? AREA_IDS.slice(0, 7)
       : atLeast(4, 18) ? AREA_IDS.slice(0, 6) : AREA_IDS.slice(0, 4);
     for (const id of requiredAreas) if (!Object.hasOwn(value || {}, id)) fail(`${path}.${id}`, '缺少持久化項目');
@@ -303,6 +318,7 @@ export function validateSnapshotData(data, requiredKeys = SNAPSHOT_KEYS, profile
       visit(item, next);
     }
   };
+  if (Object.hasOwn(data, 'dailyRace')) errors.push(...validateDailyRace(data.dailyRace));
   if (Object.hasOwn(data, 'bondJourney')) errors.push(...validateBondJourney(data.bondJourney));
   if (Object.hasOwn(data, 'petAwakening')) errors.push(...validatePetAwakening(data.petAwakening));
   if (Object.hasOwn(data, 'encounterEconomy')) {
@@ -369,7 +385,8 @@ export function validateBackupEnvelope(raw, currentVersion) {
   const preAwakeningRelease = actual[0] < 3 || (actual[0] === 3
     && (actual[1] < 5 || (actual[1] === 5 && (actual[2] ?? 0) < 5)));
   const preEncounterRelease = actual[0] < 3 || (actual[0] === 3 && actual[1] < 6);
-  const additions = LEGACY_PROFILES[version] ?? (preCampRelease ? 10 : preBondRelease ? 11 : preAwakeningRelease ? ADDITIONS.length - 2 : preEncounterRelease ? ADDITIONS.length - 1 : ADDITIONS.length);
+  const preRaceRelease = actual[0] < 3 || (actual[0] === 3 && (actual[1] < 9 || (actual[1] === 9 && (actual[2] ?? 0) < 2)));
+  const additions = LEGACY_PROFILES[version] ?? (preCampRelease ? 10 : preBondRelease ? 11 : preAwakeningRelease ? 12 : preEncounterRelease ? 13 : preRaceRelease ? 14 : ADDITIONS.length);
   const required = [...BASE_KEYS, ...ADDITIONS.slice(0, additions)];
   const errors = validateSnapshotData(data, required, version);
   if (isRecord(data)) {

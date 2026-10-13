@@ -2,6 +2,7 @@
 import { createCollectionEntry } from './collectionService.js';
 import { resolveEffectivePool } from './poolContentContract.js';
 import { getEligiblePetsForPool } from './petPoolFilter.js';
+import { validateDailyEncounterReceipt } from './dailyEncounterCore.js';
 export const ENCOUNTER_ECONOMY_KEY = 'encounterEconomy';
 export const ENCOUNTER_MIGRATION_VERSION = 1;
 export const ENCOUNTER_FRAGMENTS_BY_RARITY = Object.freeze({ N:1, R:2, SR:5, SSR:10, UR:20 });
@@ -18,7 +19,8 @@ export function validateEncounterEconomy(raw) {
   const date = (value) => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(value) && Number.isFinite(Date.parse(value));
   const integer = (value) => Number.isSafeInteger(value) && value >= 0;
   if (!record(raw)) return ['encounterEconomy: 缺少相遇存檔'];
-  for (const key of Object.keys(raw)) if (!['key','schemaVersion','migrationVersion','balance','migrationReceipt'].includes(key)) fail('未知欄位 ' + key);
+  for (const key of Object.keys(raw)) if (!['key','schemaVersion','migrationVersion','balance','migrationReceipt','dailyReceipt'].includes(key)) fail('未知欄位 ' + key);
+  if (raw.dailyReceipt !== undefined && !validateDailyEncounterReceipt(raw.dailyReceipt)) fail('每日相遇收據無效');
   if (raw.schemaVersion !== 1 || ![0,1].includes(raw.migrationVersion)) fail('版本不相容');
   if (raw.key !== undefined && raw.key !== ENCOUNTER_ECONOMY_KEY) fail('key 不符');
   if (!integer(raw.balance)) fail('餘額無效');
@@ -46,7 +48,8 @@ export function normalizeEncounterEconomy(raw) {
   if (raw) { const errors = validateEncounterEconomy(raw); if (errors.length) throw new Error(errors[0]); }
   return { key:ENCOUNTER_ECONOMY_KEY, schemaVersion:1, migrationVersion,
     balance:amount(raw?.balance ?? 0, '相遇碎片'),
-    migrationReceipt:raw?.migrationReceipt ? structuredClone(raw.migrationReceipt) : null };
+    migrationReceipt:raw?.migrationReceipt ? structuredClone(raw.migrationReceipt) : null,
+    ...(raw?.dailyReceipt ? { dailyReceipt:structuredClone(raw.dailyReceipt) } : {}) };
 }
 export function earnEncounterFragments(economy, gained) {
   amount(gained, '相遇碎片獎勵');

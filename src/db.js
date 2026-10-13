@@ -211,7 +211,11 @@ export async function dbMutateRecords(reads, reduce) {
               if (!names.includes(write.store)) throw new Error('Mutation writes outside locked stores');
               tx.objectStore(write.store).put(write.value);
             }
-            if ((update.puts || []).some((write) => affectsReminders(write.store))) markReminderDirty(tx);
+            for (const removal of update.deletes || []) {
+              if (!names.includes(removal.store)) throw new Error('Mutation deletes outside locked stores');
+              tx.objectStore(removal.store).delete(removal.key);
+            }
+            if ([...(update.puts || []), ...(update.deletes || [])].some((write) => affectsReminders(write.store))) markReminderDirty(tx);
             result = update.result;
           } catch (error) { abort(error); }
         };
@@ -323,6 +327,7 @@ export async function replaceAllStores(payload) {
       if (payload.inventory) metaStore.put(payload.inventory);
       if (payload.workshopStats) metaStore.put(payload.workshopStats);
       if (payload.dailyCheckIn) metaStore.put(payload.dailyCheckIn);
+      if (payload.dailyRace) metaStore.put(payload.dailyRace);
       if (payload.questProgress) metaStore.put(payload.questProgress);
       if (payload.explorationProgress) metaStore.put(payload.explorationProgress);
       if (payload.campProgress) metaStore.put(payload.campProgress);

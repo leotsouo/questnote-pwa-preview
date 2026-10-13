@@ -16,7 +16,7 @@ export function hasPoolPresentation(pool) {
 }
 
 export function shouldUseThemedSummon(pool) {
-  return ['dream_bloom', 'glacier_arrival', 'honeylight_sugar', 'swordwild_shanhe', 'lionheart_inverse_oath'].includes(normalizePoolPresentation(pool)?.animationKey);
+  return ['aurora_fairy_feast', 'chaos_demon_court', 'dream_bloom', 'glacier_arrival', 'honeylight_sugar', 'swordwild_shanhe', 'lionheart_inverse_oath'].includes(normalizePoolPresentation(pool)?.animationKey);
 }
 
 /** Canonical dream_bloom retains the existing eternal_slumber_bloom CSS theme. */

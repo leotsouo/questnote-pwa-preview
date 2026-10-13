@@ -4,6 +4,7 @@
 import { openDB, dbGet, dbPut, dbUpdateRecord, dbMutateRecords, STORES } from './db.js';
 import { updateTask } from './taskService.js';
 import { addBondExpToCompanion } from './collectionService.js';
+import { claimTutorialReward } from './guidedOnboardingService.js';
 
 const WALLET_KEY = 'wallet';
 const INVENTORY_KEY = 'inventory';
@@ -176,6 +177,7 @@ export async function spendStardust(amount) {
  * @returns {{ task: object, amount: number, energy: number, bond: object|null }}
  */
 export async function claimTaskReward(task) {
+  if (task.isTutorial) return claimTutorialReward(task.id);
   if (!canClaimReward(task)) {
     return { task, amount: 0, energy: 0, bond: null };
   }

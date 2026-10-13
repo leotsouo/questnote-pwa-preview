@@ -1,0 +1,378 @@
+/* Private feedback */
+.feedback-form { display: grid; gap: 10px; }
+.feedback-card { display: grid; gap: 16px; }
+.feedback-card[hidden] { display: none; }
+.feedback-card input:not([type="checkbox"]), .feedback-card select, .feedback-card textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-main);
+  background: var(--color-bg-surface);
+  font: inherit;
+}
+.feedback-card textarea { resize: vertical; }
+.feedback-card :is(input, select, textarea, a, button):focus-visible {
+  outline: 2px solid var(--color-primary-light);
+  outline-offset: 3px;
+}
+.feedback-note { color: var(--color-text-secondary); font-size: var(--font-size-sm); line-height: 1.7; }
+.feedback-note a { color: var(--color-primary-light); }
+.feedback-check { display: flex; align-items: flex-start; gap: 10px; line-height: 1.6; }
+.feedback-check input { margin-top: 6px; flex-shrink: 0; }
+.feedback-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.feedback-diagnostics { white-space: pre-wrap; overflow-wrap: anywhere; font-size: var(--font-size-sm); }
+#feedback-report-title { overflow-wrap: anywhere; }
+#feedback-send:disabled { opacity: 0.5; cursor: not-allowed; }
+.feedback-receipt { background: var(--color-success-soft); padding: 14px; border-radius: var(--radius-sm); overflow-wrap: anywhere; line-height: 1.7; }
+.expedition-camp, .expedition-archive { margin: 1rem 0; }
+.camp-card, .journey-archive { padding: 1.2rem; }
+.camp-card p, .journey-archive p { line-height: 1.6; }
+.camp-unlocks, .camp-costs { display: flex; flex-wrap: wrap; gap: .5rem; margin: .8rem 0; }
+.camp-unlock, .camp-cost { padding: .35rem .65rem; border-radius: 999px; background: rgba(128,128,128,.14); font-size: .85rem; }
+.camp-unlock.is-open { background: rgba(90,170,120,.2); }
+.camp-cost.is-missing { color: #b84646; }
+.journey-list { display: grid; gap: .5rem; }
+.journey-list button { width: 100%; display: flex; justify-content: space-between; gap: .5rem; text-align: left; padding: .75rem; border: 1px solid currentColor; border-radius: .7rem; background: transparent; color: inherit; cursor: pointer; }
+.journey-list span { opacity: .75; }
+.expedition-objectives { display: grid; grid-template-columns: repeat(3, 1fr); gap: .45rem; margin: 1rem 0; }
+.expedition-objective { display: grid; gap: .2rem; padding: .6rem; border: 1px solid currentColor; border-radius: .7rem; background: transparent; color: inherit; text-align: left; cursor: pointer; }
+.expedition-objective span { font-size: .78rem; opacity: .75; }
+.expedition-objective.is-selected { outline: 2px solid #8d78cf; }
+.expedition-pet-option__specialty { font-size: .78rem; }
+.expedition-dispatch-modal__objective-section { margin-bottom: 16px; }
+.expedition-recommendation {
+  display: grid;
+  gap: 8px;
+  margin: 8px 0 12px;
+  padding: 10px;
+  border: 1px solid var(--primary);
+  border-radius: 10px;
+}
+.expedition-recommendation__summary { margin: 0; font-size: .85rem; line-height: 1.5; }
+.expedition-recommendation__button { width: 100%; white-space: normal; }
+.expedition-pet-option__recommended { color: var(--primary); font-size: .78rem; font-weight: 700; }
+.expedition-report-event { line-height: 1.6; }
+@media (max-width: 520px) { .expedition-objectives { grid-template-columns: 1fr; } .journey-list button { display: grid; } }
+
+/* Compact expedition overview: region artwork carries the choice, details stay in dispatch. */
+#view-expedition .expedition-energy {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+}
+#view-expedition .expedition-energy__header { margin: 0; align-items: center; }
+#view-expedition .expedition-energy__header > div { display: flex; align-items: baseline; gap: 7px; }
+#view-expedition .expedition-energy__icon { font-size: 1.2rem; }
+#view-expedition .expedition-energy__value { font-size: 1.25rem; line-height: 1; }
+#view-expedition .expedition-energy__hint { margin: 0; max-width: 135px; text-align: right; font-size: .7rem; line-height: 1.3; }
+#view-expedition .expedition-energy__warning { margin: 0; max-width: 150px; font-size: .7rem; line-height: 1.3; }
+
+#view-expedition .expedition-area-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+}
+#view-expedition .expedition-area-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 0;
+  overflow: hidden;
+}
+#view-expedition .expedition-area-card--locked { opacity: 1; }
+#view-expedition .expedition-area-card--locked .expedition-area-card__art img { filter: saturate(.45) brightness(.75); }
+#view-expedition .expedition-area-card__art {
+  position: relative;
+  height: 116px;
+  overflow: hidden;
+  background: var(--bg-card);
+}
+#view-expedition .expedition-area-card__art img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+#view-expedition .expedition-area-card__status {
+  position: absolute;
+  z-index: 1;
+  top: 7px;
+  right: 7px;
+  padding: 2px 7px;
+  color: #fff;
+  background: rgba(8, 14, 29, .84);
+  border: 1px solid rgba(255, 255, 255, .22);
+  font-size: .64rem;
+}
+#view-expedition .expedition-area-card__content {
+  display: grid;
+  flex: 1;
+  grid-template-columns: minmax(0, 1fr) 104px;
+  grid-template-areas:
+    'header action'
+    'meta action'
+    'material action'
+    'progress progress';
+  align-items: center;
+  gap: 4px 10px;
+  min-width: 0;
+  padding: 10px 12px;
+}
+#view-expedition .expedition-area-card__header {
+  grid-area: header;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+}
+#view-expedition .expedition-area-card__title {
+  flex: 1;
+  font-size: .94rem;
+  line-height: 1.25;
+  min-width: 0;
+}
+#view-expedition .expedition-explore-badge { padding: 2px 6px; font-size: .66rem; }
+#view-expedition .expedition-area-card__meta {
+  grid-area: meta;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 8px;
+  margin: 0;
+  font-size: .7rem;
+  line-height: 1.25;
+}
+#view-expedition .expedition-area-card__progress {
+  grid-area: progress;
+  height: 5px;
+  margin: 0;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(145, 158, 191, .2);
+}
+#view-expedition .expedition-area-card__progress .expedition-area-progress-fill { display: block; min-width: 0; }
+#view-expedition .expedition-area-card__material {
+  grid-area: material;
+  overflow: hidden;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: .7rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#view-expedition .expedition-dispatch-button {
+  grid-area: action;
+  width: 100%;
+  min-height: 40px;
+  margin: 0;
+  padding: 5px 8px;
+  font-size: .75rem;
+}
+
+#view-expedition .camp-card,
+#view-expedition .journey-archive { padding: 0; }
+#view-expedition .camp-card__summary,
+#view-expedition .journey-archive__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  cursor: pointer;
+  list-style: none;
+}
+#view-expedition .camp-card__summary::-webkit-details-marker,
+#view-expedition .journey-archive__summary::-webkit-details-marker { display: none; }
+#view-expedition .camp-card__summary > span:first-child { display: grid; gap: 3px; }
+#view-expedition .camp-card__summary small { color: var(--text-muted); font-size: .73rem; }
+#view-expedition .camp-card__summary-action,
+#view-expedition .journey-archive__summary span { flex: none; color: var(--primary); font-size: .75rem; font-weight: 700; }
+#view-expedition .camp-card__content,
+#view-expedition .journey-archive__content { padding: 0 14px 14px; }
+#view-expedition .camp-card__content p:first-child,
+#view-expedition .journey-archive__content p:first-child { margin-top: 0; }
+
+.expedition-dispatch-area__image {
+  display: block;
+  width: 100%;
+  height: 118px;
+  margin-bottom: 10px;
+  border-radius: 9px;
+  object-fit: cover;
+}
+.expedition-dispatch-area__unlock { margin: 8px 0 0; color: var(--accent); font-size: .78rem; line-height: 1.4; }
+.expedition-specialty-help {
+  margin: 7px 0 12px;
+  padding: 8px 10px;
+  border: 1px solid rgba(145, 158, 191, .25);
+  border-radius: 10px;
+  font-size: .78rem;
+  line-height: 1.45;
+}
+.expedition-specialty-help summary { cursor: pointer; font-weight: 700; }
+.expedition-specialty-help p { margin: 8px 0; color: var(--text-muted); }
+.expedition-specialty-help ul { display: grid; gap: 5px; margin: 8px 0 0; padding-left: 1.2rem; }
+.expedition-specialty-help li strong { margin-right: 5px; }
+
+/* Shared notification stack: rewards and achievements reserve their own height. */
+.toast-container > .reward-toast,
+.toast-container > .bond-unlock-toast {
+  position: relative;
+  inset: auto;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  white-space: normal;
+  flex-wrap: wrap;
+  overflow-wrap: anywhere;
+  transform: translateY(-12px);
+}
+.toast-container > .reward-toast.show,
+.toast-container > .bond-unlock-toast.show {
+  transform: translateY(0);
+}
+.toast-container > .toast {
+  box-sizing: border-box;
+  width: 100%;
+  flex: 0 0 auto;
+  overflow-wrap: anywhere;
+}
+/* Daily reminder controls share the app's form and theme tokens. */
+.reminder-options { display: grid; gap: 12px; margin: 16px 0; }
+.reminder-options label, .reminder-consent { display: flex; align-items: flex-start; gap: 10px; line-height: 1.6; }
+.reminder-options input, .reminder-consent input { flex-shrink: 0; margin-top: 5px; }
+.reminder-actions { flex-wrap: wrap; }
+.settings-reminders .form-hint { overflow-wrap: anywhere; }
+
+/* Workshop: one readable type scale across materials, recipes and gifting.
+   Scoped after theme rules so a theme cannot shrink individual text roles. */
+body[data-theme] #app #view-workshop {
+  --workshop-type-title: 1.5rem;
+  --workshop-type-heading: 1.0625rem;
+  --workshop-type-body: 0.9375rem;
+  --workshop-type-meta: 0.8125rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+  font-size: var(--workshop-type-body);
+  line-height: 1.6;
+}
+
+body[data-theme] #app #view-workshop :is(h1, h2, h3, button, summary) {
+  font-family: inherit;
+  letter-spacing: normal;
+}
+
+body[data-theme] #app #view-workshop .page-title {
+  font-size: var(--workshop-type-title);
+  line-height: 1.35;
+  font-weight: 700;
+}
+
+body[data-theme] #app #view-workshop .page-subtitle { font-weight: 400; max-width: none; }
+
+body[data-theme] #app #view-workshop :is(.page-subtitle, .workshop-material-card__desc, .workshop-material-card__qty,
+  .workshop-craft-card__desc, .workshop-craft-card__effect, .workshop-recipe-list li,
+  .workshop-gift-item__effect, .workshop-gift-item__stock, .workshop-gift-pet__reason,
+  .workshop-gift-preview__list, .workshop-gift-preview > p, .workshop-gift-section > p,
+  .workshop-gift-hint, .workshop-gift-status, .workshop-gift-others summary, .btn, .segmented-control__btn) {
+  font-size: var(--workshop-type-body);
+  line-height: 1.6;
+}
+
+body[data-theme] #app #view-workshop :is(.workshop-material-card__header h3, .workshop-craft-card__header h3,
+  .section-title, .workshop-gift-item__name, .workshop-gift-pet__name) {
+  font-size: var(--workshop-type-heading);
+  line-height: 1.45;
+  font-weight: 650;
+  color: var(--color-text-main);
+}
+
+body[data-theme] #app #view-workshop :is(.workshop-summary__label, .workshop-material-card__source,
+  .workshop-craft-card__source, .workshop-craft-card__theme, .workshop-craft-card__affinity,
+  .workshop-gift-pet__meta, .workshop-gift-pet__companion, .pet-original-name,
+  .workshop-gift-preview__limit, .workshop-tag, .rarity-badge) {
+  font-size: var(--workshop-type-meta);
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+body[data-theme] #app #view-workshop :is(.page-subtitle, .workshop-material-card__desc, .workshop-material-card__source,
+  .workshop-summary__label, .workshop-craft-card__desc, .workshop-craft-card__source,
+  .workshop-craft-card__theme, .workshop-craft-card__affinity, .workshop-gift-pet__meta,
+  .workshop-gift-item__effect, .workshop-gift-hint, .pet-original-name) {
+  color: var(--color-text-secondary);
+}
+
+body[data-theme] #app #view-workshop :is(.workshop-summary__value, .workshop-gift-item__stock,
+  .workshop-recipe-list span, .workshop-material-card__qty strong, .workshop-gift-pet__meta,
+  .workshop-gift-preview__list) {
+  font-variant-numeric: tabular-nums;
+}
+
+body[data-theme] #app #view-workshop .workshop-summary__value {
+  font-size: var(--workshop-type-title);
+  line-height: 1.35;
+  font-weight: 700;
+}
+
+body[data-theme] #app #view-workshop .workshop-summary__grid { margin-bottom: 0; }
+body[data-theme] #app #view-workshop :is(.workshop-material-card, .workshop-craft-card) { padding: var(--space-4); }
+body[data-theme] #app #view-workshop :is(.workshop-craft-card, .workshop-material-card) > p { margin: 0 0 var(--space-2); }
+body[data-theme] #app #view-workshop .workshop-craft-card__effect { color: var(--color-text-main); font-weight: 600; }
+body[data-theme] #app #view-workshop .workshop-recipe-list { gap: var(--space-2); margin-top: var(--space-3); }
+body[data-theme] #app #view-workshop .workshop-recipe-list li { gap: var(--space-3); }
+body[data-theme] #app #view-workshop .workshop-recipe-list span { flex-shrink: 0; }
+body[data-theme] #app #view-workshop .workshop-tag { padding: 3px 8px; }
+body[data-theme] #app #view-workshop :is(.btn, .segmented-control__btn, .workshop-gift-others summary) { min-height: 44px; font-weight: 600; }
+body[data-theme] #app #view-workshop .workshop-gift-section { padding: var(--space-4); }
+body[data-theme] #app #view-workshop .section-title { margin: 0 0 var(--space-3); }
+body[data-theme] #app #view-workshop :is(.workshop-gift-item, .workshop-gift-pet) { padding: var(--space-3); gap: var(--space-3); }
+body[data-theme] #app #view-workshop .workshop-gift-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; align-items: baseline; }
+body[data-theme] #app #view-workshop .workshop-gift-item__effect { grid-column: 1 / -1; }
+body[data-theme] #app #view-workshop .workshop-gift-item__stock { font-weight: 600; white-space: nowrap; }
+body[data-theme] #app #view-workshop .workshop-gift-pet__info { gap: var(--space-1); }
+body[data-theme] #app #view-workshop :is(.workshop-gift-item__name, .workshop-gift-item__effect, .workshop-gift-preview > p) { overflow-wrap: anywhere; }
+body[data-theme] #app #view-workshop .workshop-gift-preview > p { margin: 0 0 var(--space-3); font-weight: 600; }
+body[data-theme] #app #view-workshop .workshop-gift-preview__levelup { color: var(--color-accent); font-weight: 600; }
+/* Keep horizontal filter gestures within their own scroll row. */
+.filter-bar { overscroll-behavior-x: contain; user-select: none; cursor: grab; }
+.filter-bar.is-dragging, .filter-bar.is-dragging .filter-btn { cursor: grabbing; }
+
+/* Teaching uses a short invitation first; rules remain available on demand. */
+.onboarding-dock {
+  box-sizing: border-box;
+  /* Anchor the header; only the content grows within the reserved lower region. */
+  top: max(calc(var(--safe-top) + 10px), calc(100dvh - var(--nav-height) - var(--safe-bottom) - min(52dvh, 380px) - 10px));
+  bottom: auto;
+  height: auto;
+  max-height: min(52dvh, 380px, calc(100dvh - var(--nav-height) - var(--safe-bottom) - var(--safe-top) - 20px));
+  padding: 16px 20px;
+  overscroll-behavior-y: contain;
+}
+.onboarding-progress { display: block; width: 100%; height: 4px; margin: 10px 0 14px; border: 0; border-radius: 4px; accent-color: var(--color-primary-light); }
+.onboarding-progress::-webkit-progress-bar { background: var(--color-border); border-radius: 4px; }
+.onboarding-progress::-webkit-progress-value { background: var(--color-primary-light); border-radius: 4px; }
+.onboarding-dock .onboarding-brief { font-size: .9rem; line-height: 1.65; margin-bottom: 10px; }
+.onboarding-more { margin: 0 0 12px; border-top: 1px solid var(--color-border); }
+.onboarding-more summary, .guide-start-details summary, .guide-chapter__help summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; gap: 8px; color: var(--color-text-secondary); font-size: .82rem; }
+.onboarding-more summary::before, .guide-start-details summary::before, .guide-chapter__help summary::before { content: '+'; font-size: 1rem; }
+.onboarding-more[open] summary::before, .guide-start-details[open] summary::before, .guide-chapter__help[open] summary::before { content: '−'; }
+.onboarding-more ul { padding-inline-start: 20px; margin: 0 0 12px; color: var(--color-text-secondary); font-size: .82rem; line-height: 1.7; }
+.onboarding-more li + li { margin-top: 8px; }
+.onboarding-dock__actions .btn { flex: 1 1 100px; }
+.onboarding-dock__footer { display: flex; align-items: flex-start; gap: 12px; margin-top: 12px; border-top: 1px solid var(--color-border); }
+.onboarding-dock__footer .onboarding-more { flex: 1; min-width: 0; margin: 0; border: 0; }
+.onboarding-dock__footer .onboarding-dock__skip { min-width: 44px; min-height: 44px; flex-shrink: 0; margin: 0; }
+.guide-chapter__help p { margin: 0 0 12px; }
+#guide-chapters { grid-template-columns: minmax(0, 1fr); }
+@media (max-width: 600px) {
+  #guide-chapters { grid-template-columns: minmax(0, 1fr); }
+  #guide-chapters .guide-chapter { padding: 16px 20px; }
+  .onboarding-dock__top { align-items: center; }
+  .onboarding-dock__top > span { flex: 1; min-width: 0; }
+}

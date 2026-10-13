@@ -1,3 +1,4 @@
+import { normalizeDailyRace } from './dailyRaceCore.js';
 import { planEncounterMigration, normalizeEncounterEconomy } from './encounterEconomyCore.js';
 /**
  * 備份與恢復服務 — QuestNote V2.3
@@ -52,6 +53,7 @@ const DATA_KEYS = [
   'inventory',
   'workshopStats',
   'dailyCheckIn',
+  'dailyRace',
   'questProgress',
   'explorationProgress',
   'campProgress',
@@ -81,6 +83,8 @@ function buildDataPayload({
   inventory,
   workshopStats,
   dailyCheckIn,
+
+  dailyRace,
   questProgress,
   explorationProgress,
   campProgress,
@@ -135,6 +139,8 @@ function buildDataPayload({
     inventory,
     workshopStats,
     dailyCheckIn,
+
+    dailyRace,
     questProgress,
     explorationProgress,
     campProgress,
@@ -162,7 +168,7 @@ export async function exportBackup() {
   const meta = Object.fromEntries(snapshot.meta.map((entry) => [entry.key, entry]));
   const normalized = migrateImportedData(normalizePayloadData({ data: {
     ...meta,
-    tasks: snapshot.tasks,
+    tasks: snapshot.tasks.filter((task) => task.tutorialMode !== 'replay'),
     collection: snapshot.collection,
     expeditions: snapshot.expeditions,
     habits: snapshot.habits,
@@ -383,6 +389,7 @@ function normalizePayloadData(rawBackup) {
     inventory: normalizeInventory(data.inventory),
     workshopStats: normalizeWorkshopStats(data.workshopStats),
     dailyCheckIn: normalizeDailyCheckIn(data.dailyCheckIn),
+    dailyRace: normalizeDailyRace(data.dailyRace),
     questProgress: normalizeQuestProgress(data.questProgress),
     explorationProgress: normalizeExplorationProgress(data.explorationProgress),
     campProgress: normalizeCampProgress(data.campProgress),
@@ -402,11 +409,18 @@ function normalizePayloadData(rawBackup) {
  * 正規化匯入資料（migration / normalize）
  * @param {object} normalizedBackup
  */
-export function migrateImportedData(normalizedBackup) {
+export function migrateImportedData(normalizedBackup, { forRestore = false } = {}) {
   const today = getTodayDateString();
 
   const tasks = (normalizedBackup.tasks || [])
     .map((task) => normalizeTask(task, today))
+    .map((task) => {
+      // Guide checkpoints are intentionally local, so an unfinished first practice
+      // cannot resume after restore. Retain user edits as an ordinary shared task.
+      if (!forRestore || !task?.isTutorial || task.tutorialMode !== 'first' || task.completed) return task;
+      const { isTutorial, tutorialRunId, tutorialMode, tutorialReward, ...restoredTask } = task;
+      return restoredTask;
+    })
     .filter(Boolean);
 
   let collection = (normalizedBackup.collection || [])
@@ -460,6 +474,7 @@ export function migrateImportedData(normalizedBackup) {
   const inventory = normalizeInventory(normalizedBackup.inventory);
   const workshopStats = normalizeWorkshopStats(normalizedBackup.workshopStats);
   const dailyCheckIn = normalizeDailyCheckIn(normalizedBackup.dailyCheckIn);
+  const dailyRace = normalizeDailyRace(normalizedBackup.dailyRace);
   // Restore the snapshot's dates; normal app reads perform any subsequent rollover.
   const questProgress = normalizeQuestProgress(normalizedBackup.questProgress);
   const explorationProgress = normalizeExplorationProgress(normalizedBackup.explorationProgress);
@@ -487,6 +502,8 @@ export function migrateImportedData(normalizedBackup) {
     inventory,
     workshopStats,
     dailyCheckIn,
+
+    dailyRace,
     questProgress,
     explorationProgress,
     campProgress,
@@ -587,6 +604,7 @@ export async function safeReplaceAllData(migratedData) {
     inventory: migratedData.inventory,
     workshopStats: migratedData.workshopStats,
     dailyCheckIn: migratedData.dailyCheckIn,
+    dailyRace: migratedData.dailyRace,
     questProgress: migratedData.questProgress,
     explorationProgress: migratedData.explorationProgress,
     campProgress: migratedData.campProgress,
@@ -609,7 +627,7 @@ export async function restoreBackup(normalizedBackup) {
   // Raw rows in a verified historical envelope still need their legacy adapter.
   const errors = validateSnapshotData(normalizedBackup, undefined, normalizedBackup?.appVersion ?? 'current');
   if (errors.length) throw new Error('備份資料不完整或無效：' + errors.slice(0, 3).join('；'));
-  const migrated = migrateImportedData(normalizedBackup);
+  const migrated = migrateImportedData(normalizedBackup, { forRestore: true });
   await safeReplaceAllData(migrated);
   return migrated;
 }
