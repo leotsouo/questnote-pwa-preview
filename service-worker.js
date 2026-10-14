@@ -1,12 +1,12 @@
 /**
- * QuestNote Service Worker — V3.10.0
+ * QuestNote Service Worker — V3.10.1
  * 快取 App Shell 與靜態資源，支援離線使用
  * data/global-mailbox.json 使用動態 Network First，不進 App Shell precache
  * 作者本機工具（mailbox publisher／pet series builder／summon preview）原始碼不得加入 App Shell precache
  * 寵物圖片不得加入 App Shell precache
  */
 
-const CACHE_NAME = 'questnote-preview-app-7fd04c01509c9ec89ddf7084b8cade9adedc0a3baf74606324e69e690a9667ff';
+const CACHE_NAME = 'questnote-preview-app-224014e35ebb62b906a7b25b933dca40434d083dd8165f89881fac1d765b9c7b';
 const PET_IMAGE_CACHE = 'questnote-preview-pet-images-v1';
 const MAILBOX_RUNTIME_CACHE = 'questnote-preview-mailbox-runtime-v1';
 const MAILBOX_FETCH_TIMEOUT_MS = 7000;
@@ -40,8 +40,8 @@ self.addEventListener('notificationclick', (event) => {
 const BUILD_PROFILE = {
   "schemaVersion": 1,
   "profile": "preview",
-  "artifactId": "7fd04c01509c9ec89ddf7084b8cade9adedc0a3baf74606324e69e690a9667ff",
-  "sourceCommit": "5d119cadfefa799067326e828342f32bd0e60e65",
+  "artifactId": "224014e35ebb62b906a7b25b933dca40434d083dd8165f89881fac1d765b9c7b",
+  "sourceCommit": "40873e920ef28b05143fb9d05f27e9c409116cc0",
   "scopePath": "/questnote-pwa-preview/",
   "runtimeContentSchema": 1,
   "dbName": "QuestNotePreviewDB",
@@ -90,7 +90,7 @@ const PRECACHE_HASHES = {
   "data/pools.json": "4fd1cdc8674e5592b6b2256603bad59b5bf555650c482237eedb6a86b3867fcc",
   "data/releases/53f3cf3aea133c9186cbaf0396dfd54241d5fb0bb4debbf57601cd4d2c944046/catalog.json": "53f3cf3aea133c9186cbaf0396dfd54241d5fb0bb4debbf57601cd4d2c944046",
   "data/titles.json": "318675b79872dfabccc4b8beb99f77eb248a40e5e50bbbd4e4dc24886b3a1398",
-  "index.html": "bf75eb3f83f13a475d6da048076a2f98f05707168664673fde7baff914c468aa",
+  "index.html": "5a215d4c249059faf89262025e8f16ae6f827c4eea1d6e8c25dfd5cdf04630bf",
   "manifest.webmanifest": "92eebd112db700add8829cda91380b117bcf4f4d91723ea899055ebde22caad0",
   "src/achievementService.js": "98d9cc071a70f849b2e856563e1e2ad0663164cc2b9747c18f259f1dff497620",
   "src/adventureHandbookService.js": "94d08c97deeb211f9f2aa5c50d482af46a13d957c8ad0e6da703172d43ced6d7",
@@ -194,7 +194,7 @@ const PRECACHE_HASHES = {
   "src/questIcons.js": "7f9395e0af7db0fda7fa273e793275c94d5b8e3bdd2fb249b726e5f6c2046ad0",
   "src/questService.js": "ae9532ad78abb8af981d3d76adb9f06f132e81e1fed945bd77a608a7dd2bfa3b",
   "src/releaseCatalog.js": "38ac32aedef26d927638ef7413ec78520c0f9d114623a4a61283d488d99cbb4a",
-  "src/releaseProfile.js": "1ab30f5eebfdb569c30f577c8fd91b0b55d4a12bb7ab12bb1f78602fe24f1c49",
+  "src/releaseProfile.js": "99b50f6559e03b43f6590b343103cf308b47b620a15b4cb9bf050827c0f36fab",
   "src/reminder-settings.css": "e90f6e75ac50b3fef946c454c4849f3322cd4e0c06c0b10feb718fef60a878b4",
   "src/reminderController.js": "4ba72d19acca52c417445956521d97ce57b3873b1a61924840fdc47b8a9ad5b5",
   "src/reminderRules.js": "f9cfd9f99703dfd3e91f12f4382716875964b09785bf67418dfdc607c5cb1c5d",
@@ -238,14 +238,28 @@ const PRECACHE_HASHES = {
   "src/todayHabitsView.js": "51a16e89416241eda1e105e2fe1d2ce6c6f846a7943f65dd81603432e956879a",
   "src/twilightPresentation.js": "905c328be48088db41ea7be5804ad5da84de5498f3b5ad9d3d375c2df12219ab",
   "src/ui-polish.css": "84d6af7a8206e91be084e1e9b868d51b1bbb4da50550936ccb4c24724e350f5e",
-  "src/ui.js": "8127582ddb3d218ff2cfbc9eeb7268d36718fd999586366da8e5ef788fa2c5e7",
+  "src/ui.js": "b8676c99fc245becc1c7ced7c8d588854fd6ae63091eadcde8684c75b7f7863a",
+  "src/ui/achievementsView.js": "6b0d2ce7249ffa015b6c8affef550b909d064f758b77b628fa7ea2dde18e7e01",
+  "src/ui/collectionView.js": "d8a72fe97a20bfc8e533214e56ff19f98704e29a7162961a0e679e2221335bb2",
+  "src/ui/companionView.js": "d97496d1d796ec91c2389ded51d07ef9b9c1c45863f1adb4463469e5314b8d2f",
+  "src/ui/dailyBlessingView.js": "af0c9c2f3678252eb183027089bde27614b09cbd6a47fee833b50045243248b8",
   "src/ui/dailyWheelView.js": "2084cbe2a782fa724d321e48787d83bc7cf47fb5626d715f954ac5e38528e7f6",
+  "src/ui/expeditionView.js": "d1498a910503d2f1800ecdc6b211a311de964ba421a1ec98348abf6ca38fce19",
+  "src/ui/gachaView.js": "add8edb48a5078ac1e76ab908c6ad4ba3dd02eada1869f4922be8e6770e3b8fb",
+  "src/ui/habitsView.js": "666f81e7df981199f99a6ec8460dd6868c4bbd68b106f12f161586d7eaf90d59",
+  "src/ui/handbookView.js": "0237ab41fe25142220104bff7983647c544ba77fb040afa65fd3e61bcdb93ae2",
+  "src/ui/mailboxView.js": "a4d6b8269b7d408ddfe18277422cf418c26066455dedcbdd13d0d819b2db6982",
+  "src/ui/modalHost.js": "395bb6e8561ae723a79614da2599dc8c64138c948b21a9d5d51715dfff03a2f2",
+  "src/ui/settingsView.js": "e030e93f41ba71426076907fe64b547c03397d510ffa82e32b45207e2243ae5b",
+  "src/ui/taskFormView.js": "9d5103ceb8c11869e3fd31c579062da6b66295c1b57c0ec35d74bf2fa4c6e672",
+  "src/ui/taskListView.js": "8f2d19cc10b9b849c927dbaf7efdccc21d2722d3f69cf9a362eee93761592f20",
+  "src/ui/workshopView.js": "d31e25ef500733be43202d4f9086cc94a7930057199ab4cd5ed8c6a33af13631",
   "src/uiHelpers.js": "875f08583510e7c246eebeff4b39d6a7273d2643f6a2a2931281672c6c4d7de6",
-  "src/uiSourceParts.js": "4894aee90ddd225aeb7f16b53b54ec872bedb1e7ce1aea4d710ae50a1c8c330c",
+  "src/uiSourceParts.js": "237944c4cf93bc753e61563a66714e1ac1b4242e9d9633f32308fb42e7cec174",
   "src/updateActivity.js": "a7032e043a14561ad07ab521b649a2bd508aeca6801376066fcab701e3d2b641",
   "src/updateController.js": "e038b05c3fa2e97158cb3a363996e34b10eba3f243dc5284ec540ea0753c93b9",
   "src/updateProtocol.js": "53e770213f0074208c348d7d4a12d68cad79404637eddbe7c2f7c8d3c2cd39c0",
-  "src/version.js": "6eb111b6061c0d5c12643a9edebabcc5d1de836e98e8c83ddbdde056d447e908",
+  "src/version.js": "9b4c68f9f3a0d40067dddeec105d7ee90e78bdb983b9638030e79430a47431fc",
   "src/workshopGiftView.js": "6ea791929caaee1e1127cbb23bac061f155bcf24cc6071b78db5d84e5509bb2c",
   "src/workshopService.js": "9df4a6002291dc73eea2c92a1c6db2bbb10c67e2f24ca085757aeb74cddbcdf0"
 };
@@ -441,7 +455,21 @@ const PRECACHE_URLS = [
   "src/twilightPresentation.js",
   "src/ui-polish.css",
   "src/ui.js",
+  "src/ui/achievementsView.js",
+  "src/ui/collectionView.js",
+  "src/ui/companionView.js",
+  "src/ui/dailyBlessingView.js",
   "src/ui/dailyWheelView.js",
+  "src/ui/expeditionView.js",
+  "src/ui/gachaView.js",
+  "src/ui/habitsView.js",
+  "src/ui/handbookView.js",
+  "src/ui/mailboxView.js",
+  "src/ui/modalHost.js",
+  "src/ui/settingsView.js",
+  "src/ui/taskFormView.js",
+  "src/ui/taskListView.js",
+  "src/ui/workshopView.js",
   "src/uiHelpers.js",
   "src/uiSourceParts.js",
   "src/updateActivity.js",
