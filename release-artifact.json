@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "artifactId": "3e70c13c06ffdc3834ea2dd3961682736e0d9101f3e7b85047d8bc13e0fd6bad",
-  "sourceCommit": "8c056a1b704d9ec315bb36cef42128478b073c0a",
+  "artifactId": "7fd04c01509c9ec89ddf7084b8cade9adedc0a3baf74606324e69e690a9667ff",
+  "sourceCommit": "5d119cadfefa799067326e828342f32bd0e60e65",
   "profile": {
     "schemaVersion": 1,
     "profile": "preview",
-    "artifactId": "3e70c13c06ffdc3834ea2dd3961682736e0d9101f3e7b85047d8bc13e0fd6bad",
-    "sourceCommit": "8c056a1b704d9ec315bb36cef42128478b073c0a",
+    "artifactId": "7fd04c01509c9ec89ddf7084b8cade9adedc0a3baf74606324e69e690a9667ff",
+    "sourceCommit": "5d119cadfefa799067326e828342f32bd0e60e65",
     "scopePath": "/questnote-pwa-preview/",
     "runtimeContentSchema": 1,
     "dbName": "QuestNotePreviewDB",
@@ -3645,7 +3645,7 @@
       "bytes": 6119
     },
     "index.html": {
-      "sha256": "4f9e068beb3d67e91e4a6e02f37e744a35f6b2313fdf2c491bd09171f0067553",
+      "sha256": "bf75eb3f83f13a475d6da048076a2f98f05707168664673fde7baff914c468aa",
       "bytes": 67095
     },
     "manifest.webmanifest": {
@@ -3653,7 +3653,7 @@
       "bytes": 869
     },
     "service-worker.js": {
-      "sha256": "a6500126633f8bd68102c73229a2f926e8bc46825b05fa599c37183060cfd557",
+      "sha256": "266ecc402897c5f2e649f6d053f646739194e42523e69ce4cfe2c0b72e2413d2",
       "bytes": 40150
     },
     "src/achievementService.js": {
@@ -4065,7 +4065,7 @@
       "bytes": 4727
     },
     "src/releaseProfile.js": {
-      "sha256": "1492e30adb1ef319daeca54a6672faf3f28c34a84eae6a688736fc61a552cf10",
+      "sha256": "1ab30f5eebfdb569c30f577c8fd91b0b55d4a12bb7ab12bb1f78602fe24f1c49",
       "bytes": 631
     },
     "src/reminder-settings.css": {
@@ -4269,7 +4269,7 @@
       "bytes": 695
     },
     "src/version.js": {
-      "sha256": "28767fe02bde7451c859d3244855b719df6ffcd1c674eeee6790e36714e1be97",
+      "sha256": "6eb111b6061c0d5c12643a9edebabcc5d1de836e98e8c83ddbdde056d447e908",
       "bytes": 1145
     },
     "src/workshopGiftView.js": {
