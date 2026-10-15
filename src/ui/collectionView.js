@@ -531,6 +531,13 @@ export function openPetDetailModal(petId) {
   `);
   if (owned) void recordOnboardingEvent('pet-care-opened');
 
+  // 詳情主圖：在詳情之上疊開原圖 viewer，關閉後焦點回到這顆按鈕
+  document.querySelector('[data-action="detail-view-image"]')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const button = e.currentTarget;
+    openPetImageViewer(button.dataset.petId, button);
+  });
+
   document.querySelector('[data-action="detail-feed-pet"]')?.addEventListener('click', () => {
     openPetFeedModal(pet);
   });
