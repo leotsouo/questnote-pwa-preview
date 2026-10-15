@@ -20,7 +20,9 @@ import {
   raiseDevCompanionBond,
   devForceCompleteExpedition,
 } from '../devService.js';
+import { runAppHealthCheck } from '../healthCheckService.js';
 import { dismissOnboardingAfterRestore, showOnboardingAfterReset } from '../onboardingController.js';
+import { RELEASE_PROFILE } from '../releaseProfile.js';
 import { renderReminderSettings } from '../reminderController.js';
 import { escapeHtml } from '../uiHelpers.js';
 import { trackUpdateActivity } from '../updateActivity.js';
@@ -335,7 +337,72 @@ function buildVersionInfoHtml({ compact = false, serviceWorkerStatus = '檢查�
     </dl>
     <p class="settings-version__note version-info-note" data-version-update-hint>
       按「檢查並更新」即可取得新版。更新保留存檔，請勿清除網站資料。
-    </p>${updateControlsHtml()}`;
+    </p>${updateControlsHtml()}${HEALTH_CHECK_VISIBLE ? healthCheckHtml() : ''}`;
+}
+
+/** The App health check is a developer tool: offered in the source checkout and the preview, never in production. */
+const HEALTH_CHECK_VISIBLE = RELEASE_PROFILE?.profile !== 'production';
+// The version card can re-render while a check runs, so the block is always drawn from this state.
+let healthCheckRunning = false;
+let healthCheckReport = null;
+let healthCheckError = '';
+
+function healthCheckSummary() {
+  if (healthCheckRunning) return '檢查中，請稍候…';
+  if (healthCheckError) return `健康檢查無法完成：${healthCheckError}`;
+  if (!healthCheckReport) return '只在預覽版與本機顯示。會讀取 App 檔案，並在這台裝置的存檔寫入後刪除一筆探測紀錄。';
+  const entries = Object.values(healthCheckReport.results);
+  const failed = entries.filter((status) => status === 'error').length;
+  return healthCheckReport.ok
+    ? `${formatDisplayVersion()}：${entries.length} 項全部通過`
+    : `${formatDisplayVersion()}：${failed} / ${entries.length} 項未通過`;
+}
+
+function healthResultsHtml(report) {
+  if (!report) return '';
+  const entries = Object.entries(report.results);
+  const failures = report.errors.length
+    ? `<ul class="settings-health__errors">${report.errors.map((error) => `<li>${escapeHtml(error)}</li>`).join('')}</ul>`
+    : '';
+  const rows = entries.map(([name, status]) => `
+    <li class="settings-health__row"><span>${escapeHtml(name)}</span><strong>${status === 'error' ? '未通過' : '通過'}</strong></li>`).join('');
+  return `${failures}
+    <details class="settings-health__details">
+      <summary>全部 ${entries.length} 項</summary>
+      <ul class="settings-health__list">${rows}</ul>
+    </details>`;
+}
+
+function healthCheckHtml() {
+  const label = healthCheckRunning ? '檢查中…' : healthCheckReport ? '重新執行健康檢查' : '執行健康檢查';
+  return `
+    <div class="settings-health" data-health-check>
+      <button type="button" class="btn btn--secondary btn--block" data-action="run-health-check"${healthCheckRunning ? ' disabled' : ''}>${label}</button>
+      <p class="settings-version__note settings-health__summary" role="status" aria-live="polite">${escapeHtml(healthCheckSummary())}</p>
+      ${healthResultsHtml(healthCheckReport)}
+    </div>`;
+}
+
+function refreshHealthCheckBlocks() {
+  document.querySelectorAll('[data-health-check]').forEach((block) => { block.outerHTML = healthCheckHtml(); });
+}
+
+/** Run the App health check from the settings version card and show the result there. */
+export async function runHealthCheckFromSettings() {
+  if (healthCheckRunning) return;
+  healthCheckRunning = true;
+  healthCheckError = '';
+  refreshHealthCheckBlocks();
+  try {
+    healthCheckReport = await runAppHealthCheck();
+  } catch (error) {
+    healthCheckReport = null;
+    healthCheckError = error?.message || String(error);
+  } finally {
+    healthCheckRunning = false;
+    refreshHealthCheckBlocks();
+    document.querySelector('#view-settings [data-action="run-health-check"]')?.focus({ preventScroll: true });
+  }
 }
 
 function updateVersionInfoServiceWorkerStatus(status) {

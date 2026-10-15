@@ -4,6 +4,8 @@
 import { openDB, dbGetAll, dbPut, dbDelete, STORES } from './db.js';
 import { APP_STYLE_PARTS } from './styleParts.js';
 import { UI_SOURCE_PARTS } from './uiSourceParts.js';
+import { PET_IMAGE_CACHE } from './version.js';
+import { RELEASE_PROFILE } from './releaseProfile.js';
 import { normalizeTask } from './taskMigration.js';
 import { normalizeWallet, DEFAULT_MATERIALS } from './rewardService.js';
 import { normalizeEntry, normalizeCollectionItem } from './collectionService.js';
@@ -68,6 +70,90 @@ import {
   getEligiblePetsForPool,
 } from './petPoolFilter.js';
 
+/**
+ * Checks written for an earlier release still apply to every later one: the version must not be
+ * older than the release that introduced the feature, rather than equal to it.
+ */
+function isVersionAtLeast(versionText, minimum) {
+  const version = versionText.match(/APP_VERSION\s*=\s*['"]([^'"]+)['"]/)?.[1];
+  return Boolean(version) && compareAppVersions(version, minimum) >= 0;
+}
+
+function assertVersionAtLeast(versionText, minimum) {
+  if (!isVersionAtLeast(versionText, minimum)) throw new Error(`APP_VERSION 應不低於 ${minimum}`);
+}
+
+/** version.js and service-worker.js must name the same app cache; the release assembler rewrites both per profile. */
+function cacheNamesMatch(versionText, swText) {
+  const name = versionText.match(/CACHE_NAME\s*=\s*['"]([^'"]+)['"]/)?.[1];
+  return Boolean(name) && swText.includes(`const CACHE_NAME = '${name}'`);
+}
+
+function assertCacheNamesMatch(versionText, swText) {
+  if (!cacheNamesMatch(versionText, swText)) throw new Error('version.js 與 service-worker 的 CACHE_NAME 不一致');
+}
+
+/**
+ * Start of a release section in the stylesheet: its banner comment has a line that begins with the
+ * version (e.g. "   V2.7.3 ..."). The banners' Chinese titles were lost to an old encoding change, so
+ * match the version line instead of the title.
+ */
+function cssBlockStart(cssText, version) {
+  const match = new RegExp(`^[ \\t]+${version.replace(/\./g, '\\.')} `, 'm').exec(cssText);
+  return match ? match.index : -1;
+}
+
+/**
+ * Expedition rewards and exploration progress are written in the same transaction by
+ * expeditionService.claimExpeditionRewards, which the UI calls when a report is claimed.
+ */
+function claimUpdatesExploration(uiText, expeditionText) {
+  return expeditionText.includes('advanceExplorationRecord')
+    && expeditionText.includes("key: 'explorationProgress'")
+    && uiText.includes('claimExpeditionRewards');
+}
+
+/**
+ * The catalogs the App actually runs on: data/*.json in the source checkout, the verified content
+ * bundle in release builds (their data/pets.json is the frozen legacy catalog for older clients).
+ */
+async function fetchRuntimeCatalogs() {
+  if (RELEASE_PROFILE) {
+    const res = await fetch(`./${RELEASE_PROFILE.contentBundleUrl}`);
+    if (!res.ok) throw new Error('無法讀取正式內容包 catalog');
+    const { petsData, loreData, poolsData } = await res.json();
+    return { petsData, loreData, poolsData };
+  }
+  const [petsRes, loreRes, poolsRes] = await Promise.all(
+    ['pets', 'pets-lore', 'pools'].map((name) => fetch(`./data/${name}.json`)));
+  if (!petsRes.ok || !loreRes.ok || !poolsRes.ok) throw new Error('無法讀取 pets / pets-lore / pools');
+  return { petsData: await petsRes.json(), loreData: await loreRes.json(), poolsData: await poolsRes.json() };
+}
+
+/**
+ * Release builds ship only the App: author tools under scripts/ and devtools/ must be absent.
+ * Their full source checks run in the source checkout.
+ */
+async function assertToolsNotShipped(paths) {
+  const shipped = [];
+  for (const path of paths) {
+    const res = await fetch(`./${path}`, { method: 'HEAD', cache: 'no-store' });
+    if (res.ok) shipped.push(path);
+  }
+  if (shipped.length) throw new Error(`發布產物不應包含作者工具：${shipped.join(', ')}`);
+  return `release build：${paths.length} 個作者工具檔確認未隨產物發布（完整檢查在原始碼環境執行）`;
+}
+
+/** Declaration blocks of the CSS rules whose selector list contains exactly `selector`. */
+function cssRuleBlocks(cssText, selector) {
+  const blocks = [];
+  for (const [, selectors, body] of cssText.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+    const list = selectors.replace(/\/\*[\s\S]*?\*\//g, '').split(',').map((item) => item.trim());
+    if (list.includes(selector)) blocks.push(body);
+  }
+  return blocks;
+}
+
 /** Static source checks read a split file's parts as one text, in order. */
 async function fetchSourceParts(parts, separator) {
   const responses = await Promise.all(parts.map((part) => fetch(`./${part}`)));
@@ -79,6 +165,11 @@ async function fetchSourceParts(parts, separator) {
 /** The base stylesheet parts (src/styles/) in cascade order, exactly as the former single styles.css. */
 function fetchAppStyles() {
   return fetchSourceParts(APP_STYLE_PARTS, '');
+}
+
+/** Backup logic: backupService (export/restore) and backupSchema (verified version profiles), as one text. */
+function fetchBackupSource() {
+  return fetchSourceParts(['src/backupService.js', 'src/backupSchema.js'], '\n');
 }
 
 /** src/ui.js followed by the view modules extracted from it (src/ui/). */
@@ -528,7 +619,8 @@ async function checkPetImageSystem() {
   }
   if (sizeReports.length) stats.push(`尺寸取樣: ${sizeReports.join('; ')}`);
 
-  if (!swText.includes('PET_IMAGE_CACHE') || !swText.includes('questnote-pet-images-v235')) {
+  // The release assembler prefixes cache names per profile, so compare with version.js instead of a fixed string.
+  if (!/pet-images-v\d+$/.test(PET_IMAGE_CACHE) || !swText.includes(`const PET_IMAGE_CACHE = '${PET_IMAGE_CACHE}'`)) {
     throw new Error('service-worker 缺少 PET_IMAGE_CACHE');
   }
   if (!swText.includes('/assets/pets/') || !swText.includes('cachePetImage')) {
@@ -694,12 +786,11 @@ async function checkSweetToastContrast() {
   ];
 
   for (const [label, selector, color] of requiredPairs) {
-    const idx = cssText.indexOf(selector);
-    if (idx === -1) {
+    const blocks = cssRuleBlocks(cssText, selector);
+    if (!blocks.length) {
       throw new Error(`缺少 ${selector}`);
     }
-    const block = cssText.slice(idx, idx + 400);
-    if (!block.includes(color)) {
+    if (!blocks.some((block) => block.includes(color))) {
       throw new Error(`${label} 未使用 ${color}`);
     }
     stats.push(`${label}=ok`);
@@ -1007,7 +1098,7 @@ async function checkQuestSystem() {
     fetch('./src/questService.js'),
     fetchUiSource(),
     fetch('./index.html'),
-    fetch('./src/backupService.js'),
+    fetchBackupSource(),
     fetch('./service-worker.js'),
   ]);
   if (!svcRes.ok) throw new Error('無法讀取 questService.js');
@@ -1026,7 +1117,7 @@ async function checkQuestSystem() {
   // 1. 必要 API 存在
   const requiredApis = [
     'export function normalizeQuestProgress',
-    'export function initQuestProgress',
+    'export async function initQuestProgress',
     'export function getTodayKey',
     'export function getWeekKey',
     'export function rolloverQuestProgress',
@@ -1255,7 +1346,7 @@ async function checkBondSystem() {
     fetch('./src/collectionService.js'),
     fetch('./src/companionDialogueService.js'),
     fetchUiSource(),
-    fetch('./src/backupService.js'),
+    fetchBackupSource(),
   ]);
   if (!collectionRes.ok || !dialogueRes.ok || !uiRes.ok || !backupRes.ok) {
     throw new Error('無法讀取 collection / dialogue / ui / backup');
@@ -1523,11 +1614,12 @@ async function checkPetImageViewerContrast() {
  * 只檢查與回報，不會自動改資料。
  */
 async function checkExpeditionDispatchUX() {
-  const [uiRes, cssRes] = await Promise.all([
+  const [uiRes, cssRes, expRes] = await Promise.all([
     fetchUiSource(),
     fetchAppStyles(),
+    fetch('./src/expeditionService.js'),
   ]);
-  if (!uiRes.ok || !cssRes.ok) throw new Error('無法讀取 ui.js / styles.css');
+  if (!uiRes.ok || !cssRes.ok || !expRes.ok) throw new Error('無法讀取 ui.js / styles.css / expeditionService.js');
   const uiText = await uiRes.text();
   const cssText = await cssRes.text();
   const stats = [];
@@ -1562,13 +1654,13 @@ async function checkExpeditionDispatchUX() {
   // 7-9. 確認派遣時的檢查
   const confirmIdx = uiText.indexOf('async function confirmExpeditionDispatch');
   const confirmBody = confirmIdx === -1 ? '' : uiText.slice(confirmIdx, confirmIdx + 1400);
-  if (!confirmBody.includes('請先選擇出發寵物')) throw new Error('confirm 未檢查 petId');
+  if (!confirmBody.includes('請先選擇 1～3 隻出發寵物')) throw new Error('confirm 未檢查 petId');
   if (!confirmBody.includes('冒險能量不足')) throw new Error('confirm 未檢查冒險能量');
   if (!confirmBody.includes('目前已有探險進行中')) throw new Error('confirm 未檢查進行中探險');
   stats.push('confirm 檢查=ok');
 
   // 10. 仍使用原本 startExpedition
-  if (!confirmBody.includes('startExpedition(petId, areaId')) {
+  if (!confirmBody.includes('startExpedition(petIds, areaId')) {
     throw new Error('confirm 未使用原本 startExpedition 邏輯');
   }
   stats.push('startExpedition=ok');
@@ -1583,7 +1675,7 @@ async function checkExpeditionDispatchUX() {
   stats.push('quest 進度=ok');
 
   // 12. 探險完成後仍更新探索度
-  if (!uiText.includes('applyExplorationOnClaim')) {
+  if (!claimUpdatesExploration(uiText, await expRes.text())) {
     throw new Error('探險完成後未更新探索度');
   }
   stats.push('探索度整合=ok');
@@ -1636,17 +1728,18 @@ async function checkExpeditionDispatchUX() {
  * 只檢查與回報，不會自動清除資料。
  */
 async function checkExplorationSystem() {
-  const [svcRes, uiRes, indexRes, backupRes, achRes, swRes] = await Promise.all([
+  const [svcRes, uiRes, indexRes, backupRes, achRes, swRes, expRes] = await Promise.all([
     fetch('./src/explorationService.js'),
     fetchUiSource(),
     fetch('./index.html'),
-    fetch('./src/backupService.js'),
+    fetchBackupSource(),
     fetch('./data/achievements.json'),
     fetch('./service-worker.js'),
+    fetch('./src/expeditionService.js'),
   ]);
   if (!svcRes.ok) throw new Error('無法讀取 explorationService.js');
-  if (!uiRes.ok || !indexRes.ok || !backupRes.ok || !achRes.ok || !swRes.ok) {
-    throw new Error('無法讀取 ui / index / backup / achievements / service-worker');
+  if (!uiRes.ok || !indexRes.ok || !backupRes.ok || !achRes.ok || !swRes.ok || !expRes.ok) {
+    throw new Error('無法讀取 ui / index / backup / achievements / service-worker / expeditionService');
   }
 
   const svcText = await svcRes.text();
@@ -1674,12 +1767,12 @@ async function checkExplorationSystem() {
   }
   stats.push('exploration API=ok');
 
-  // 8. 探險完成領獎是否會更新 explorationProgress
-  if (!uiText.includes('applyExplorationOnClaim') || !uiText.includes('updateAreaExplorationProgress')) {
-    throw new Error('ui.js 探險領獎未接入探索度更新');
+  // 8. 探險完成領獎是否會更新 explorationProgress：領獎與探索度在 expeditionService 的同一筆交易寫入
+  if (!claimUpdatesExploration(uiText, await expRes.text())) {
+    throw new Error('探險領獎未接入探索度更新');
   }
-  if (!/claim-expedition[\s\S]{0,600}applyExplorationOnClaim/.test(uiText)) {
-    notes.push('claim-expedition 流程可能未呼叫 applyExplorationOnClaim');
+  if (!/claim-expedition[\s\S]{0,600}claimExpeditionRewards/.test(uiText)) {
+    notes.push('claim-expedition 流程可能未呼叫 claimExpeditionRewards');
   }
   if (!uiText.includes('claimExplorationMilestone')) {
     throw new Error('ui.js 未使用 claimExplorationMilestone');
@@ -1842,7 +1935,7 @@ async function checkTypographyScale() {
   if (xsMatch) stats.push(`xs=${xsMatch[1]}rem`);
 
   // 2. V2.7.3 統一區塊標記
-  const blockIdx = cssText.indexOf('V2.7.3 — 全站字體大小與排版比例統一');
+  const blockIdx = cssBlockStart(cssText, 'V2.7.3');
   if (blockIdx === -1) throw new Error('styles.css 缺少 V2.7.3 typography 區塊標記');
   const block = cssText.slice(blockIdx);
   stats.push('V2.7.3 typography 區塊=ok');
@@ -2028,7 +2121,7 @@ async function checkStabilityReadabilityPolish() {
   stats.push('gacha pull safety=ok');
 
   // 6. Sweet 可讀性：指定 selector 有覆寫，且避免淡底淡字
-  const sweetBlockIdx = cssText.indexOf('V2.7.4 — 穩定性');
+  const sweetBlockIdx = cssBlockStart(cssText, 'V2.7.4');
   if (sweetBlockIdx === -1) throw new Error('styles.css 缺少 V2.7.4 可讀性區塊');
   const sweetBlock = cssText.slice(sweetBlockIdx);
   const requiredSweet = [
@@ -2174,7 +2267,7 @@ async function checkCompanionWheelHotfix() {
   stats.push('collection actions preserved=ok');
 
   // ── 2. Sweet 轉盤專屬覆寫（須在 sweet scope） ──
-  const sweetWheelBlockIdx = cssText.indexOf('V2.7.5 — 首頁陪伴卡片互動');
+  const sweetWheelBlockIdx = cssBlockStart(cssText, 'V2.7.5');
   if (sweetWheelBlockIdx === -1) throw new Error('styles.css 缺少 V2.7.5 轉盤重設計區塊');
   const sweetWheelBlock = cssText.slice(sweetWheelBlockIdx);
 
@@ -2250,7 +2343,7 @@ async function checkCollectionMilestones() {
     fetchUiSource(),
     fetch('./index.html'),
     fetchAppStyles(),
-    fetch('./src/backupService.js'),
+    fetchBackupSource(),
     fetch('./service-worker.js'),
   ]);
   if (![petsRes, serviceRes, rewardRes, uiRes, indexRes, cssRes, backupRes, swRes].every((res) => res.ok)) {
@@ -2396,10 +2489,11 @@ async function checkCollectionMilestones() {
   }
   stats.push('sweet selectors=6');
 
+  // Backups since 2.8.0 carry collectionMilestones; the snapshot schema now validates it as a versioned state.
   if (!backupText.includes('collectionMilestones')
     || !backupText.includes('normalizeCollectionMilestoneState')
-    || !backupText.includes("'2.8.0'")) {
-    throw new Error('備份未完整支援 collectionMilestones / 2.8.0');
+    || !backupText.includes("state('collectionMilestones'")) {
+    throw new Error('備份未完整支援 collectionMilestones');
   }
   if (!swText.includes('src/collectionMilestoneService.js')) {
     throw new Error('Service Worker 未 precache collectionMilestoneService.js');
@@ -2423,7 +2517,7 @@ async function checkAdventureHandbook() {
     fetch('./index.html'),
     fetchAppStyles(),
     fetch('./service-worker.js'),
-    fetch('./src/backupService.js'),
+    fetchBackupSource(),
     fetch('./src/version.js'),
   ]);
   if (!svcRes.ok) throw new Error('無法讀取 adventureHandbookService.js');
@@ -2655,14 +2749,11 @@ async function checkAdventureHandbook() {
   if (!swText.includes('src/adventureHandbookService.js')) {
     throw new Error('service-worker 未 precache adventureHandbookService.js');
   }
-  if (!versionText.includes("APP_VERSION = '3.4.4'")) {
-    notes.push('version.js APP_VERSION 非 3.4.4');
+  if (!isVersionAtLeast(versionText, '3.4.4')) {
+    notes.push('version.js APP_VERSION 低於 3.4.4');
   }
-  if (!versionText.includes('questnote-cache-v344-pool-intro-polish')) {
-    notes.push('version.js CACHE_NAME 未更新為 v343');
-  }
-  if (!swText.includes('questnote-cache-v344-pool-intro-polish')) {
-    notes.push('service-worker CACHE_NAME 未更新為 v343');
+  if (!cacheNamesMatch(versionText, swText)) {
+    notes.push('version.js 與 service-worker 的 CACHE_NAME 不一致');
   }
   if (!backupText.includes("'3.4.4'")) {
     notes.push('backupService 未加入 3.4.4 支援版本');
@@ -2688,7 +2779,7 @@ async function checkGlobalMailbox() {
     fetchUiSource(),
     fetch('./service-worker.js'),
     fetch('./src/version.js'),
-    fetch('./src/backupService.js'),
+    fetchBackupSource(),
     fetchAppStyles(),
     fetch('./index.html'),
   ]);
@@ -2974,19 +3065,17 @@ async function checkGlobalMailbox() {
   stats.push('ui=ok');
 
   // 7. 版本／備份／SW -----------------------------------------------
-  if (!versionText.includes("APP_VERSION = '3.4.4'")) {
-    throw new Error('APP_VERSION 應為 3.4.4');
-  }
-  if (!versionText.includes('questnote-cache-v344-pool-intro-polish')) {
-    throw new Error('CACHE_NAME 應為 v344-pool-intro-polish');
-  }
+  assertVersionAtLeast(versionText, '3.4.4');
+  assertCacheNamesMatch(versionText, swText);
   if (!swText.includes('src/mailboxService.js')) {
     throw new Error('service-worker 未 precache mailboxService.js');
   }
   if (!swText.includes('src/mailboxSchema.js')) {
     throw new Error('service-worker 未 precache mailboxSchema.js');
   }
-  if (!swText.includes('questnote-mailbox-runtime-v1') && MAILBOX_RUNTIME_CACHE !== 'questnote-mailbox-runtime-v1') {
+  // The release assembler prefixes cache names per profile; the worker and the app must agree.
+  if (!MAILBOX_RUNTIME_CACHE.endsWith('mailbox-runtime-v1')
+    || !swText.includes(`const MAILBOX_RUNTIME_CACHE = '${MAILBOX_RUNTIME_CACHE}'`)) {
     throw new Error('MAILBOX_RUNTIME_CACHE 名稱不符');
   }
   if (!backupText.includes('globalMailboxState') || !backupText.includes("'3.4.4'")) {
@@ -3029,6 +3118,10 @@ async function checkGlobalMailbox() {
  * 禁止副作用：不得啟動 publisher、寫入 JSON、執行 Git、發放獎勵
  */
 async function checkMailboxDevTools() {
+  if (RELEASE_PROFILE) {
+    return assertToolsNotShipped(['scripts/mailbox-publisher-server.mjs', 'scripts/mailbox-publisher-ui.html',
+      'scripts/mailbox-publisher-ui.js']);
+  }
   const stats = [];
   const notes = [];
 
@@ -3042,7 +3135,7 @@ async function checkMailboxDevTools() {
     fetch('./scripts/mailbox-publisher-server.mjs'),
     fetch('./scripts/mailbox-publisher-ui.html'),
     fetch('./scripts/mailbox-publisher-ui.js'),
-    fetch('./src/backupService.js'),
+    fetchBackupSource(),
   ]);
 
   if (!devRes.ok) throw new Error('無法讀取 devService.js');
@@ -3209,6 +3302,10 @@ async function checkMailboxDevTools() {
  * 禁止副作用：不得建立工作區、發布寵物、修改 JSON、複製圖片、修改 IndexedDB
  */
 async function checkPetSeriesBuilder() {
+  if (RELEASE_PROFILE) {
+    return assertToolsNotShipped(['devtools/pet-series-builder/server.mjs', 'scripts/petSeriesPublishService.mjs',
+      'scripts/validate-pet-series.mjs', 'scripts/publish-pet-series.mjs']);
+  }
   const stats = [];
   const notes = [];
 
@@ -3228,7 +3325,7 @@ async function checkPetSeriesBuilder() {
     fetch('./index.html'),
     fetchUiSource(),
     fetch('./service-worker.js'),
-    fetch('./src/backupService.js'),
+    fetchBackupSource(),
     fetch('./src/version.js'),
     fetch('./devtools/pet-series-builder/server.mjs'),
     fetch('./scripts/petSeriesPublishService.mjs'),
@@ -3434,15 +3531,13 @@ async function checkPetSeriesBuilder() {
   if (!publishSvcText.includes('OFFICIAL_PETS_PATH') || !publishSvcText.includes('getPublishAllowlist')) {
     throw new Error('缺少發布目標白名單');
   }
-  if (!schemaText.includes("mode === 'new'") || !schemaText.includes("mode === 'existing'")) {
+  if (!schemaText.includes("mode === 'new'") || !schemaText.includes("options.mode === 'new' ? 'new' : 'existing'")) {
     throw new Error('petDataSchema 應支援 existing／new 模式');
   }
   if (backupText.includes('pet-series.json') && /DATA_KEYS[\s\S]*pet-series/.test(backupText)) {
     throw new Error('pet-series.json 不應進入使用者備份');
   }
-  if (!versionText.includes("APP_VERSION = '3.4.4'")) {
-    throw new Error('APP_VERSION 應為 3.4.4');
-  }
+  assertVersionAtLeast(versionText, '3.4.4');
   if (!backupText.includes("'3.4.4'")) {
     throw new Error('backupService 應支援 3.4.4');
   }
@@ -3473,7 +3568,7 @@ async function checkMorningGardenAwakening() {
     fetch('./service-worker.js'),
     fetch('./src/poolUnlockService.js'),
     fetch('./src/poolAwakeningController.js'),
-    fetch('./src/backupService.js'),
+    fetchBackupSource(),
     fetchUiSource(),
   ]);
 
@@ -3539,10 +3634,8 @@ async function checkMorningGardenAwakening() {
   if (unlockedEligible !== 16) throw new Error('已解鎖候選應為 16');
   stats.push('eligible=12/16');
 
-  if (!versionText.includes("APP_VERSION = '3.4.4'")) throw new Error('APP_VERSION 應為 3.4.4');
-  if (!versionText.includes('questnote-cache-v344-pool-intro-polish')) {
-    throw new Error('CACHE_NAME 應為 v344-pool-intro-polish');
-  }
+  assertVersionAtLeast(versionText, '3.4.4');
+  assertCacheNamesMatch(versionText, swText);
   if (!swText.includes('poolUnlockService.js') || !swText.includes('poolAwakeningController.js')) {
     throw new Error('SW 應 precache 解鎖模組');
   }
@@ -3593,16 +3686,14 @@ async function checkRevealFlowV343() {
   const stats = [];
   const notes = [];
 
-  const [versionRes, swRes, svcRes, themedRes, uiRes, dbRes, petsRes, loreRes, poolsRes] = await Promise.all([
+  const [versionRes, swRes, svcRes, themedRes, uiRes, dbRes, catalogs] = await Promise.all([
     fetch('./src/version.js'),
     fetch('./service-worker.js'),
     fetch('./src/summonRevealService.js'),
     fetch('./src/themedSummonController.js'),
     fetchUiSource(),
     fetch('./src/db.js'),
-    fetch('./data/pets.json'),
-    fetch('./data/pets-lore.json'),
-    fetch('./data/pools.json'),
+    fetchRuntimeCatalogs(),
   ]);
 
   if (!versionRes.ok || !swRes.ok || !svcRes.ok || !themedRes.ok || !uiRes.ok || !dbRes.ok) {
@@ -3615,19 +3706,10 @@ async function checkRevealFlowV343() {
   const themedText = await themedRes.text();
   const uiText = await uiRes.text();
   const dbText = await dbRes.text();
-  const petsData = await petsRes.json();
-  const loreData = await loreRes.json();
-  const poolsData = await poolsRes.json();
+  const { petsData, loreData, poolsData } = catalogs;
 
-  if (!versionText.includes("APP_VERSION = '3.4.4'")) {
-    throw new Error('APP_VERSION 應為 3.4.4');
-  }
-  if (!versionText.includes('questnote-cache-v344-pool-intro-polish')) {
-    throw new Error('CACHE_NAME 應為 v344-pool-intro-polish');
-  }
-  if (!swText.includes('questnote-cache-v344-pool-intro-polish')) {
-    throw new Error('service-worker CACHE_NAME 應為 v344');
-  }
+  assertVersionAtLeast(versionText, '3.4.4');
+  assertCacheNamesMatch(versionText, swText);
   if (!swText.includes("src/summonRevealService.js")) {
     throw new Error('summonRevealService 必須加入 App Shell precache');
   }
@@ -3675,8 +3757,8 @@ async function checkRevealFlowV343() {
   const standard = pets.filter((p) => (p.poolTags || []).includes('standard'));
   const slumber = pets.filter((p) => (p.poolTags || []).includes('eternal_slumber_bloom'));
   const awakened = pets.filter((p) => (p.poolTags || []).includes('eternal_slumber_bloom_awakened'));
-  if (pets.length !== 72) throw new Error(`pets 應為 72，實際 ${pets.length}`);
-  if (lore.length !== 72) throw new Error(`pets-lore 應為 72，實際 ${lore.length}`);
+  if (pets.length !== 172) throw new Error(`pets 應為 172，實際 ${pets.length}`);
+  if (lore.length !== 172) throw new Error(`pets-lore 應為 172，實際 ${lore.length}`);
   if (standard.length !== 56) throw new Error(`standard 應為 56，實際 ${standard.length}`);
   if (slumber.length !== 12) throw new Error(`永眠未解鎖應為 12，實際 ${slumber.length}`);
   if (slumber.length + awakened.length !== 16) {
@@ -3707,7 +3789,7 @@ async function checkPoolIntroPolishV344() {
   const stats = [];
   const notes = [];
 
-  const [versionRes, swRes, themedRes, cssRes, presentationRes, debutRes, poolsRes, dbRes, backupRes] = await Promise.all([
+  const [versionRes, swRes, themedRes, cssRes, presentationRes, debutRes, poolsRes, dbRes, backupRes, contractRes] = await Promise.all([
     fetch('./src/version.js'),
     fetch('./service-worker.js'),
     fetch('./src/themedSummonController.js'),
@@ -3716,10 +3798,12 @@ async function checkPoolIntroPolishV344() {
     fetch('./src/poolDebutService.js'),
     fetch('./data/pools.json'),
     fetch('./src/db.js'),
-    fetch('./src/backupService.js'),
+    fetchBackupSource(),
+    fetch('./src/poolContentContract.js'),
   ]);
 
-  if (!versionRes.ok || !swRes.ok || !themedRes.ok || !cssRes.ok || !presentationRes.ok || !debutRes.ok || !dbRes.ok) {
+  if (!versionRes.ok || !swRes.ok || !themedRes.ok || !cssRes.ok || !presentationRes.ok || !debutRes.ok || !dbRes.ok
+    || !contractRes.ok) {
     throw new Error('無法讀取 V3.4.4 入場動畫必要檔案');
   }
 
@@ -3733,15 +3817,8 @@ async function checkPoolIntroPolishV344() {
   const dbText = await dbRes.text();
   const backupText = await backupRes.text();
 
-  if (!versionText.includes("APP_VERSION = '3.4.4'")) {
-    throw new Error('APP_VERSION 應為 3.4.4');
-  }
-  if (!versionText.includes('questnote-cache-v344-pool-intro-polish')) {
-    throw new Error('CACHE_NAME 應為 v344-pool-intro-polish');
-  }
-  if (!swText.includes('questnote-cache-v344-pool-intro-polish')) {
-    throw new Error('service-worker CACHE_NAME 應為 v344');
-  }
+  assertVersionAtLeast(versionText, '3.4.4');
+  assertCacheNamesMatch(versionText, swText);
   if (!backupText.includes("'3.4.4'")) {
     throw new Error('backupService 應支援 3.4.4');
   }
@@ -3767,7 +3844,9 @@ async function checkPoolIntroPolishV344() {
   if (!themedText.includes('is-phase-bloom') || !themedText.includes('is-phase-reveal')) {
     throw new Error('入場動畫缺少分鏡 phase class');
   }
-  if (!themedText.includes('月皇花') || !themedText.includes('已於長夜中') || !themedText.includes('甦醒')) {
+  // The debut lines now live in the frozen eternal_slumber_bloom presentation of the pool content contract.
+  const contractText = await contractRes.text();
+  if (!contractText.includes("debutLines: Object.freeze(['月皇花', '已於長夜中', '甦醒'])")) {
     throw new Error('入場台詞分段缺失');
   }
   if (!themedText.includes('is-exiting') || !themedText.includes('is-skipped')) {

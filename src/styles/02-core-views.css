@@ -880,6 +880,53 @@ body.reduce-motion .pet-image-frame img {
   margin-top: 12px;
 }
 
+/* App health check (preview and local source only; never rendered in production) */
+.settings-health {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.settings-health__errors,
+.settings-health__list {
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+.settings-health__errors li {
+  padding: 0.375rem 0;
+  color: var(--color-danger);
+  overflow-wrap: anywhere;
+}
+
+.settings-health__details {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.settings-health__details summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.settings-health__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0.25rem 0;
+  color: var(--text-muted);
+}
+
+.settings-health__row strong {
+  flex: 0 0 auto;
+  color: var(--color-text-main, var(--text-main, #e8e8f0));
+}
+
 .version-info-note {
   display: block;
   visibility: visible;

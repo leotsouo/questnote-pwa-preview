@@ -118,6 +118,7 @@ import {
   handleDevCompanionBond,
   handleDevExpedition,
   handleReset,
+  runHealthCheckFromSettings,
 } from './ui/settingsView.js';
 import {
   connectExpeditionView,
@@ -1074,6 +1075,12 @@ function bindDelegatedEvents() {
     const backBtn = e.target.closest('[data-goto]');
     if (backBtn) {
       switchView(backBtn.dataset.goto);
+      return;
+    }
+
+    const healthButton = e.target.closest('[data-action="run-health-check"]');
+    if (healthButton) {
+      await runHealthCheckFromSettings();
       return;
     }
 
