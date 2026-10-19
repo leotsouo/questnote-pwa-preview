@@ -5,7 +5,7 @@
 import { showSkippedEditorHint, getGuidedTutorialDraft } from '../guidedOnboardingController.js';
 import { recordOnboardingEvent } from '../onboardingController.js';
 import { shiftDate } from '../reminderRules.js';
-import { composeSeniorTaskForm, decorateSeniorControls, seniorTaskCreated } from '../seniorModeController.js';
+import { composeSeniorTaskForm, decorateSeniorControls, seniorTaskCreated, isSeniorMode } from '../seniorModeController.js';
 import { getTodayDateString, isInTodayPlan, validateDateRange } from '../taskFilterService.js';
 import { updateTask, createTask } from '../taskService.js';
 import { initTaskWizard } from '../taskWizard.js';
@@ -299,5 +299,6 @@ export function openTaskForm(taskId = null) {
       showToast(err.message || '儲存失敗', 'error');
     } finally { form.dataset.saving = 'false'; submit.disabled = false; }
   }));
-  if (!isEdit && !practice) wizard = initTaskWizard(document.getElementById('task-form'));
+  // Senior mode keeps the one-page form composed by composeSeniorTaskForm instead of the six-step wizard.
+  if (!isEdit && !practice && !isSeniorMode()) wizard = initTaskWizard(document.getElementById('task-form'));
 }

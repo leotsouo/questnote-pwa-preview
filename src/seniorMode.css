@@ -296,7 +296,8 @@ body[data-theme][data-reading-mode="senior"] .bottom-nav {
   height: auto;
   min-height: calc(var(--nav-height) + var(--safe-bottom));
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  /* Senior mode hides summon, collection and expedition (.normal-only): tasks and more remain. */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 4px;
   padding: 8px 8px max(8px, var(--safe-bottom));
 }

@@ -782,13 +782,13 @@ function bindDelegatedEvents() {
       const encounterGain = isCompleting && receipt?.source === 'task' && receipt.sourceId === id && receipt.date !== encounterDateBefore ? receipt.amount : 0;
       if (isCompleting && !isSeniorMode()) {
         if (result.reward) showRewardToast(result.reward.amount, result.reward.energy, encounterGain);
-        else showToast(`任務已完成${encounterGain ? ` · 相遇碎片 +${encounterGain}` : ''}`, 'success');
+        else showToast(`任務已完成${encounterGain && !isSeniorMode() ? ` · 相遇碎片 +${encounterGain}` : ''}`, 'success');
       }
 
       if (isSeniorMode()) {
         const reward = result.reward;
         seniorFeedback(isCompleting
-          ? `已完成「${taskBefore.title}」。${reward ? `獲得 ${reward.amount} 星塵、${reward.energy || 0} 冒險能量${reward.bond ? '，也增進了夥伴的親密度' : ''}。` : '完成狀態已儲存。'}${encounterGain ? `今日相遇碎片增加 ${encounterGain} 枚，已儲存。` : ''}`
+          ? `已完成「${taskBefore.title}」。${state.companion ? '夥伴也很開心。' : '完成狀態已儲存。'}`
           : `「${taskBefore.title}」已改回未完成。已領獎勵不會重複發放。`, 'success');
         syncSeniorPresentation();
         document.querySelector(`.task-card[data-id="${CSS.escape(String(id))}"] [data-action="toggle"]`)?.focus({ preventScroll: true });
@@ -1869,7 +1869,7 @@ async function notifyBondUnlocks(petId) {
 }
 
 function showRewardToast(amount, energy = 0, encounterFragments = 0) {
-  seniorFeedback(`已獲得 ${amount} 星塵、${energy} 冒險能量。${encounterFragments ? `相遇碎片 +${encounterFragments}。` : ''}`, 'success');
+  // Senior mode hides the game layer: rewards still accrue, but their numbers are not announced.
   if (isSeniorMode()) return;
   const toast = document.createElement('div');
   toast.className = 'reward-toast reward-toast--reward';

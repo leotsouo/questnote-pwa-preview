@@ -74,7 +74,6 @@ export function initSeniorModeController(callbacks) {
       } catch { seniorFeedback('教學設定未儲存，請再試一次。', 'error'); }
       finally { button.disabled = false; }
     }
-    if (action === 'guide-summon') actions.navigate('gacha');
     if (action === 'dismiss-feedback') {
       const host = button.closest('.senior-completion-receipt').parentElement;
       messages.length = 0;
@@ -153,9 +152,8 @@ export function syncSeniorPresentation() {
   const task = state.tasks.find((row) => row.id === practiceTaskId);
   const step = task?.completed ? 'reward' : task ? 'complete' : 'create';
   guide.querySelector('h2').textContent = { create: '一起試一次，從一件小事開始', complete: '接著，完成你剛新增的任務', reward: '完成小事，旅程也向前一步' }[step];
-  guide.querySelector('p').textContent = { create: '建立一項「喝一杯水」的真實任務，也可以改成你今天想做的事。', complete: '做好這件事後，按任務上的「完成任務」。獎勵會直接存入同一份存檔。', reward: '完成與獎勵已記錄。星塵可以召喚夥伴，能量可以讓夥伴探險。' }[step];
+  guide.querySelector('p').textContent = { create: '建立一項「喝一杯水」的真實任務，也可以改成你今天想做的事。', complete: '做好這件事後，按任務上的「完成任務」，就會記錄下來。', reward: '完成已記錄。陪伴的夥伴也看到了，明天再從一件小事開始。' }[step];
   guide.querySelector('[data-senior-action="practice"]').hidden = step !== 'create';
-  guide.querySelector('[data-senior-action="guide-summon"]').hidden = step !== 'reward';
   guide.querySelector('[data-senior-action="guide-finish"]').textContent = step === 'reward' ? '我知道了' : '先自行使用';
   if (!senior) { messages.length = 0; document.querySelectorAll('.senior-completion-receipt').forEach((node) => node.remove()); }
   else if (messages.length) renderFeedback();
@@ -233,12 +231,15 @@ export function composeSeniorTaskForm(isEdit) {
   const form = document.getElementById('task-form');
   const details = form.querySelector('.task-editor-options');
   details.classList.add('senior-form-options');
-  // Keep the day's schedule visible while the optional classification stays folded.
+  // One page: what to do and which day stay visible; time and everything optional stay folded.
   const plannedDate = form.querySelector('#task-plan-date').closest('.form-field');
-  const plannedTime = form.querySelector('#task-planned-time').closest('.form-field');
-  details.before(plannedDate, plannedTime);
-  details.querySelector('summary').textContent = '更多設定：分類、重要程度、日期與子任務';
+  details.before(plannedDate);
+  details.querySelector('summary').textContent = '更多設定：時間、分類、重要程度與子任務';
   form.querySelector('[data-plan-date]')?.parentElement.classList.add('senior-schedule-shortcuts');
+  const clearDate = form.querySelector('[data-plan-date="clear"]');
+  if (clearDate) clearDate.textContent = '不排日期';
+  // The 今天 shortcut already sets the today-plan switch, so the switch itself is not shown.
+  form.querySelector('label[for="task-plan-today"]')?.classList.add('normal-only');
   form.querySelector('[for="task-content"]').textContent = '要做什麼？';
   form.querySelector('#task-content').placeholder = '例如：晚上吃藥。換行可以補充說明。';
   form.querySelector('#task-content').rows = 3;
