@@ -66,10 +66,11 @@ async function loadCatalog({ appRoot, catalog }) {
   };
   const { RELEASE_PROFILE } = await import(`${appRoot}/src/releaseProfile.js`);
   const artifact = RELEASE_PROFILE ? `${RELEASE_PROFILE.profile} artifact ${RELEASE_PROFILE.artifactId} · source ${RELEASE_PROFILE.sourceCommit.slice(0, 7)}` : '本機來源（非 artifact）';
-  if (catalog) return { source: catalog, artifact, ...(await getJson(catalog)) };
-  if (RELEASE_PROFILE?.contentBundleUrl) return { source: RELEASE_PROFILE.contentBundleUrl, artifact, ...(await getJson(RELEASE_PROFILE.contentBundleUrl)) };
+  const profile = RELEASE_PROFILE;
+  if (catalog) return { source: catalog, artifact, profile, ...(await getJson(catalog)) };
+  if (RELEASE_PROFILE?.contentBundleUrl) return { source: RELEASE_PROFILE.contentBundleUrl, artifact, profile, ...(await getJson(RELEASE_PROFILE.contentBundleUrl)) };
   const [petsData, poolsData, loreData] = await Promise.all(['data/pets.json', 'data/pools.json', 'data/pets-lore.json'].map(getJson));
-  return { source: 'data/*.json', artifact, petsData, poolsData, loreData };
+  return { source: 'data/*.json', artifact, profile: null, petsData, poolsData, loreData };
 }
 
 /** Pet image paths are App-root relative; make them work from this page. */
@@ -212,6 +213,26 @@ output.id = 'review-results';
 main.append(output);
 main.setAttribute('aria-busy', 'false');
 
+// A Service Worker from an earlier App visit serves its own cached (older) modules to this page, so
+// the review would show a stale artifact. Offer a clean reload; the checks fail while it is in control.
+const workerUrl = navigator.serviceWorker?.controller?.scriptURL || null;
+if (workerUrl) {
+  const warning = document.createElement('section');
+  warning.innerHTML = '<h2 class="review__error">這頁正由 App 的 Service Worker 提供，可能是舊版</h2><p></p><div class="review__group"><button type="button">清除快取並重新載入</button></div>';
+  // Production and preview share an origin: touch only this App's scope and this profile's caches.
+  const appScope = new URL(`${config.appRoot}/`, location.href).href;
+  const namespace = catalog.profile?.cacheNamespace || 'questnote-preview-';
+  warning.querySelector('p').textContent = `控制中的 worker：${workerUrl}。清除只影響 ${appScope} 與 ${namespace}* 離線快取，不碰存檔與其他版本。`;
+  warning.querySelector('button').addEventListener('click', async () => {
+    for (const registration of await navigator.serviceWorker.getRegistrations()) {
+      if (registration.scope === appScope) await registration.unregister();
+    }
+    for (const key of await caches.keys()) if (key.startsWith(namespace)) await caches.delete(key);
+    location.reload();
+  });
+  main.insertBefore(warning, main.children[2]);
+}
+
 /** Press whatever the visible overlay offers to move on, the way a hurried player would. */
 async function driveUntil(pending, timeout = 30000) {
   let settled = false;
@@ -276,6 +297,7 @@ async function runChecks() {
       await clean();
     });
   }
+  await check('頁面不是由 Service Worker 快取提供（避免看到舊版）', async () => { assert(!workerUrl, `由 ${workerUrl} 控制`); });
   await check('整個檢視頁沒有存取資料庫', async () => { assert(databaseAttempts === 0, `嘗試存取資料庫 ${databaseAttempts} 次`); });
   const passed = cases.filter((item) => item.ok).length;
   const report = { pool: pool.id, animationKey: presentation.animationKey, artifact: catalog.artifact, theme: document.body.dataset.theme, passed, failed: cases.length - passed, cases };
