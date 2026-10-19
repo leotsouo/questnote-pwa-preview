@@ -59,8 +59,9 @@
   <link rel="stylesheet" href="src/encounter-view.css">
   <link rel="stylesheet" href="src/guided-onboarding.css">
   <link rel="stylesheet" href="src/encounter-invitation.css">
+  <link rel="stylesheet" href="src/weekly-review.css">
   <link rel="stylesheet" href="src/seniorMode.css">
-  <meta name="questnote-artifact" content="623b750c50f87c0e979862f622a23d37290762b7ec5e87a481ffcc6f740df0c6">
+  <meta name="questnote-artifact" content="129cf5c219811b6e1d1a2f351fefbd4ba899dbe1124dd4f6461bf04cb67f8882">
 </head>
 <body data-theme="default">
   <div id="app-loader" class="app-loader">
@@ -111,6 +112,7 @@
       </header>
 
       <div id="twilight-chapter-heading" class="twilight-chapter-heading" hidden><div><p>YOUR DAILY CHAPTER</p><h2>今日任務<span id="twilight-pending"></span></h2></div><button type="button" class="twilight-add-task" data-action="empty-add-task" aria-label="新增任務">＋</button></div>
+      <section id="weekly-review-card" class="weekly-review-card card" aria-label="上週回顧" hidden></section>
       <section class="stats-bar" aria-label="資源統計">
         <div class="stat-card stat-card--stardust">
           <span class="stat-icon" aria-hidden="true">✦</span>
@@ -412,6 +414,14 @@
           </span>
           <span class="more-menu-arrow">›</span>
         </button>
+        <button class="more-menu-item" data-goto="weekly-review" type="button">
+          <span class="more-menu-icon">🗓️</span>
+          <span class="more-menu-text">
+            <span class="more-menu-label">每週回顧</span>
+            <span class="more-menu-desc">看看這週完成了什麼、習慣做了幾天</span>
+          </span>
+          <span class="more-menu-arrow">›</span>
+        </button>
         <button class="more-menu-item" data-goto="settings" type="button">
           <span class="more-menu-icon">⚙️</span>
           <span class="more-menu-text">
@@ -600,6 +610,19 @@
       </header>
 
       <div id="handbook-content" class="handbook-content"></div>
+    </main>
+
+    <!-- 每週回顧 -->
+    <main id="view-weekly-review" class="view">
+      <header class="page-header page-header--with-back">
+        <button class="page-back-btn" data-goto="more" type="button" aria-label="返回更多">‹</button>
+        <div class="page-header__inner">
+          <h1 class="page-title">每週回顧</h1>
+          <p class="page-subtitle">這週完成了什麼、習慣做了幾天</p>
+        </div>
+      </header>
+
+      <div id="weekly-review-content" class="weekly-review"></div>
     </main>
 
     <!-- 習慣頁 -->

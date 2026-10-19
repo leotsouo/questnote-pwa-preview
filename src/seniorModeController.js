@@ -13,7 +13,7 @@ let categoryDisclosure;
 let modalBackgroundWasInert = null;
 const seniorHeadings = new WeakSet();
 const messages = [];
-const pageNames = { tasks: '任務首頁', gacha: '召喚夥伴', collection: '寵物收藏', expedition: '探險', more: '更多功能', settings: '設定', habits: '習慣', achievements: '成就', workshop: '工坊', handbook: '冒險手冊', guide: '使用教學', feedback: '意見回報', share: '分享 QuestNote' };
+const pageNames = { tasks: '任務首頁', gacha: '召喚夥伴', collection: '寵物收藏', expedition: '探險', more: '更多功能', settings: '設定', habits: '習慣', achievements: '成就', workshop: '工坊', handbook: '冒險手冊', 'weekly-review': '每週回顧', guide: '使用教學', feedback: '意見回報', share: '分享 QuestNote' };
 export const isSeniorMode = () => document.body.dataset.readingMode === 'senior';
 
 export function initSeniorModeController(callbacks) {

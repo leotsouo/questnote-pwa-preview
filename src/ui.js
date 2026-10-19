@@ -85,6 +85,13 @@ import {
 } from './onboardingController.js';
 import { renderHandbookView, handleHandbookClick, connectHandbookView } from './ui/handbookView.js';
 import {
+  connectWeeklyReviewView,
+  renderWeeklyReviewView,
+  renderWeeklyReviewCard,
+  handleWeeklyReviewClick,
+  handleWeeklyReviewCardAction,
+} from './ui/weeklyReviewView.js';
+import {
   connectMailboxView,
   getMailboxPayload,
   reloadMailboxState,
@@ -456,6 +463,7 @@ function connectViewModules() {
   connectSettingsView({ applyReduceMotionClass, applyTheme, notifyBondUnlocks, onRefresh, openConfirmModal, renderFontSizePickerState, renderThemePickerState, setText, showToast, state, switchView, uiDebugLog });
   connectAchievementsView({ claimAllButtonHtml, closeModal, getCurrentViewName, isModalOpen, onAchievementCheck, onRefresh, openModal, renderNavBadges, showToast, state });
   connectMailboxView({ claimAllButtonHtml, renderSharedUI, showToast, state, switchView });
+  connectWeeklyReviewView({ state, switchView });
   connectHandbookView({ isAnyOverlayOpen, petImageHtml, state, switchView, uiDebugLog });
 }
 
@@ -663,6 +671,8 @@ function bindDelegatedEvents() {
     const card = target.closest('.task-card');
     const id = card?.dataset.id;
     const action = target.dataset.action;
+
+    if (handleWeeklyReviewCardAction(action)) return;
 
     if (action === 'habit-complete' || action === 'habit-uncomplete') {
       const habitCard = target.closest('.today-habit-card');
@@ -1036,6 +1046,10 @@ function bindDelegatedEvents() {
     void trackUpdateActivity(handleHandbookClick)(e);
   });
 
+  document.getElementById('view-weekly-review')?.addEventListener('click', (e) => {
+    void trackUpdateActivity(handleWeeklyReviewClick)(e);
+  });
+
   document.getElementById('view-guide')?.addEventListener('click', (e) => {
     const backBtn = e.target.closest('[data-goto]');
     if (backBtn) switchView(backBtn.dataset.goto);
@@ -1206,7 +1220,7 @@ export function switchView(viewName) {
 
   const view = document.getElementById(`view-${viewName}`);
   window.scrollTo(0, 0);
-  const navView = viewName === 'achievements' || viewName === 'settings' || viewName === 'habits' || viewName === 'workshop' || viewName === 'handbook' || viewName === 'guide' || viewName === 'feedback' || viewName === 'share' ? 'more' : viewName;
+  const navView = viewName === 'achievements' || viewName === 'settings' || viewName === 'habits' || viewName === 'workshop' || viewName === 'handbook' || viewName === 'weekly-review' || viewName === 'guide' || viewName === 'feedback' || viewName === 'share' ? 'more' : viewName;
   const nav = document.querySelector(`.nav-item[data-view="${navView}"]`);
   if (view) view.classList.add('active');
   if (nav) { nav.classList.add('active'); nav.setAttribute('aria-current', 'page'); }
@@ -1275,6 +1289,10 @@ export function switchView(viewName) {
     renderHandbookView();
   }
 
+  if (viewName === 'weekly-review') {
+    renderWeeklyReviewView();
+  }
+
   if (viewName === 'collection') {
     preloadOwnedPetImages(state?.enrichedCollection, state?.allPets, 12).catch(() => {});
   }
@@ -1283,7 +1301,7 @@ export function switchView(viewName) {
     preloadCompanionImage(state).catch(() => {});
   }
 
-  currentTasksView = viewName === 'achievements' || viewName === 'settings' || viewName === 'habits' || viewName === 'workshop' || viewName === 'handbook' || viewName === 'guide' || viewName === 'feedback' || viewName === 'share' || viewName === 'more'
+  currentTasksView = viewName === 'achievements' || viewName === 'settings' || viewName === 'habits' || viewName === 'workshop' || viewName === 'handbook' || viewName === 'weekly-review' || viewName === 'guide' || viewName === 'feedback' || viewName === 'share' || viewName === 'more'
     ? currentTasksView
     : viewName;
   if (viewName === 'tasks' || viewName === 'gacha' || viewName === 'collection' || viewName === 'expedition' || viewName === 'more') {
@@ -1351,6 +1369,7 @@ export function renderSharedUI() {
   setText('stat-energy', wallet.adventureEnergy ?? 0);
   setText('stat-today', todayCompleted);
   setText('stat-pulls', getAvailablePullsForSelectedPool());
+  renderWeeklyReviewCard();
   const claimable = achievementSummary?.claimable ?? 0;
   setText('stat-claimable', claimable);
   const claimableCard = document.getElementById('stat-claimable-card');
@@ -1424,6 +1443,9 @@ export function renderView(viewName) {
       break;
     case 'handbook':
       renderHandbookView();
+      break;
+    case 'weekly-review':
+      renderWeeklyReviewView();
       break;
     case 'guide':
       if (document.getElementById('guide-pet-awakening')) document.getElementById('guide-pet-awakening').innerHTML = renderAwakeningGuide();

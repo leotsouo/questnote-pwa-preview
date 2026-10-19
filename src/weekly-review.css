@@ -1,0 +1,194 @@
+/* Weekly review page and the Monday home card. Colors come from the theme tokens, so every theme applies. */
+
+.weekly-review {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.weekly-review__tabs {
+  align-self: flex-start;
+}
+
+.weekly-review__range {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.weekly-review__summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
+  gap: var(--space-3);
+}
+
+.weekly-review__stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-card-soft);
+  border: 1px solid var(--color-border);
+}
+
+.weekly-review__stat strong {
+  font-size: var(--font-size-xl);
+  color: var(--color-text-main);
+  overflow-wrap: anywhere;
+}
+
+.weekly-review__stat span {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.weekly-review__section h2 {
+  margin: 0 0 var(--space-3);
+  font-size: var(--font-size-md);
+  color: var(--color-text-main);
+}
+
+.weekly-review__list,
+.weekly-review__habits {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.weekly-review__list li {
+  padding-left: var(--space-4);
+  position: relative;
+  color: var(--color-text-main);
+  overflow-wrap: anywhere;
+}
+
+.weekly-review__list li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--color-success);
+}
+
+.weekly-review__habit {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-1) var(--space-3);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.weekly-review__habit:last-child {
+  border-bottom: 0;
+}
+
+.weekly-review__habit-name {
+  color: var(--color-text-main);
+  overflow-wrap: anywhere;
+}
+
+.weekly-review__habit-count {
+  font-weight: 700;
+  color: var(--color-text-main);
+  white-space: nowrap;
+}
+
+.weekly-review__habit.is-met .weekly-review__habit-count {
+  color: var(--color-success);
+}
+
+.weekly-review__habit-note {
+  grid-column: 1 / -1;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.weekly-review__empty,
+.weekly-review__more {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.weekly-review__more {
+  margin-top: var(--space-2);
+  font-size: var(--font-size-sm);
+}
+
+/* Senior mode: two large numbers and one line */
+.weekly-review__senior {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.weekly-review__big {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-2);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-card-soft);
+  border: 1px solid var(--color-border);
+  text-align: center;
+}
+
+.weekly-review__big strong {
+  font-size: calc(var(--font-size-3xl) * 1.4);
+  line-height: 1.1;
+  color: var(--color-text-main);
+}
+
+.weekly-review__big span {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-main);
+}
+
+.weekly-review__message {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: var(--font-size-lg);
+  text-align: center;
+  color: var(--color-text-main);
+}
+
+/* Monday home card */
+.weekly-review-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.weekly-review-card[hidden] {
+  display: none;
+}
+
+.weekly-review-card__text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.weekly-review-card__text strong {
+  color: var(--color-text-main);
+}
+
+.weekly-review-card__text span {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.weekly-review-card__actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.weekly-review-card__actions .btn {
+  min-height: 44px;
+}
