@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>卡池動畫檢視</title>
+  <style>
+    body {
+      margin: 0;
+      padding: max(1rem, env(safe-area-inset-top)) 1rem 2rem;
+      font-family: "Segoe UI", "Noto Sans TC", system-ui, sans-serif;
+      background: #0b1020;
+      color: #e8eef8;
+    }
+    .review { max-width: 40rem; margin: 0 auto; display: grid; gap: 1rem; }
+    .review h1 { font-size: 1.2rem; margin: 0; }
+    .review h2 { font-size: 0.95rem; margin: 0; color: #c7d2fe; }
+    .review p { margin: 0; color: #9ba8c7; font-size: 0.9rem; }
+    .review__group { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .review__group button {
+      min-height: 44px; padding: 0 1rem; border-radius: 0.6rem; border: 1px solid #334166;
+      background: #18213a; color: inherit; font: inherit; cursor: pointer;
+    }
+    .review__group button:disabled { opacity: 0.5; cursor: wait; }
+    .review__toggle { display: flex; align-items: center; gap: 0.5rem; min-height: 44px; }
+    .review__summary { margin: 0; padding-left: 1.25rem; }
+    .review__results { white-space: pre-wrap; font-size: 0.8rem; background: #111830; padding: 0.75rem; border-radius: 0.5rem; overflow-x: auto; }
+    .review__error { color: #fca5a5; }
+  </style>
+</head>
+<body>
+  <main class="review" id="review" aria-busy="true">
+    <h1 id="review-title">卡池動畫檢視</h1>
+    <p id="review-meta">載入中…</p>
+  </main>
+  <script type="module" src="pool-animation-review.js"></script>
+</body>
+</html>
