@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "artifactId": "7a5a3837f44d61fd2882cccb9a8598d9f10db0e3defea2faa168d0504cb44514",
-  "sourceCommit": "c6b0adcd03b8414dd16addd217821587799309f1",
+  "artifactId": "b77fc93d3f9d38859a428a9e71749ad637f29c45b78c5dc6441345037943fa91",
+  "sourceCommit": "d66b3a7bdc0c23548ae32172a80cf16ae4a710a5",
   "profile": {
     "schemaVersion": 1,
     "profile": "preview",
-    "artifactId": "7a5a3837f44d61fd2882cccb9a8598d9f10db0e3defea2faa168d0504cb44514",
-    "sourceCommit": "c6b0adcd03b8414dd16addd217821587799309f1",
+    "artifactId": "b77fc93d3f9d38859a428a9e71749ad637f29c45b78c5dc6441345037943fa91",
+    "sourceCommit": "d66b3a7bdc0c23548ae32172a80cf16ae4a710a5",
     "scopePath": "/questnote-pwa-preview/",
     "runtimeContentSchema": 1,
     "dbName": "QuestNotePreviewDB",
@@ -3662,7 +3662,7 @@
       "bytes": 6060
     },
     "index.html": {
-      "sha256": "0ff489d516d54dc2ae1ba88bbd756acdd4dfceec838dffa143633dfe9add0a9d",
+      "sha256": "d38ae828072bbe4a163e5d0e70326ef58b59ebc2a2aea83a16cc7fd8e6422d7d",
       "bytes": 67209
     },
     "manifest.webmanifest": {
@@ -3670,7 +3670,7 @@
       "bytes": 869
     },
     "service-worker.js": {
-      "sha256": "6d70a989c4371574658db928d728986fbcaea338143baf0405a8dc4698a893cc",
+      "sha256": "7a7ed6b551956c234e38d9c44a98fb3b73be85516377937f89024c8a4c7479ec",
       "bytes": 42129
     },
     "src/achievementService.js": {
@@ -4082,7 +4082,7 @@
       "bytes": 4645
     },
     "src/releaseProfile.js": {
-      "sha256": "764e3ab61452955b0e7b037d1108e52d921931478c03ea0e61df576ef78ae0ce",
+      "sha256": "02d021f799ab1190ccbadc4d7d256ddbf1a27613ee6f81eda25075a672225f15",
       "bytes": 631
     },
     "src/reminder-settings.css": {
@@ -4346,7 +4346,7 @@
       "bytes": 680
     },
     "src/version.js": {
-      "sha256": "28a8b06ed5a9d067c7a1c34f596bdedbeb536a24ad8ec81117008853d4b4af6e",
+      "sha256": "9fcb702adebb0533abbeae85f0491614ce0a98d9781a16e0f938bfb70056f635",
       "bytes": 1112
     },
     "src/weekly-review.css": {
