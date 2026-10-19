@@ -94,6 +94,7 @@ import {
 import {
   connectMailboxView,
   getMailboxPayload,
+  getMailboxCatalogs,
   reloadMailboxState,
   updateMailboxEntryBadge,
   bindGlobalMailboxEntry,

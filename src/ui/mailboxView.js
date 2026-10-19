@@ -53,7 +53,8 @@ let mailboxLastFocus = null;
    補償：once per local profile（每份本機資料領取一次）
    ═══════════════════════════════════════ */
 
-function getMailboxCatalogs() {
+/** Catalogs a mailbox claim needs; also used by the bulk claim in ui.js. */
+export function getMailboxCatalogs() {
   return {
     materialsCatalog: state?.materialsCatalog || [],
     craftablesCatalog: state?.craftablesCatalog || [],
