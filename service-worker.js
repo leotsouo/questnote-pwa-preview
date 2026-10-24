@@ -1,12 +1,12 @@
 /**
- * QuestNote Service Worker — V3.13.0
+ * QuestNote Service Worker — V3.13.1
  * 快取 App Shell 與靜態資源，支援離線使用
  * data/global-mailbox.json 使用動態 Network First，不進 App Shell precache
  * 作者本機工具（mailbox publisher／pet series builder／summon preview）原始碼不得加入 App Shell precache
  * 寵物圖片不得加入 App Shell precache
  */
 
-const CACHE_NAME = 'questnote-preview-app-8902d17095f734860d7015a063c2ee2f369addb78c9cc0223611e933a711ffc8';
+const CACHE_NAME = 'questnote-preview-app-99c196f9b6f4d6f0a43622a6b368a883bc54f6a58c7db6991d203be848fbb54d';
 const PET_IMAGE_CACHE = 'questnote-preview-pet-images-v1';
 const MAILBOX_RUNTIME_CACHE = 'questnote-preview-mailbox-runtime-v1';
 const MAILBOX_FETCH_TIMEOUT_MS = 7000;
@@ -40,8 +40,8 @@ self.addEventListener('notificationclick', (event) => {
 const BUILD_PROFILE = {
   "schemaVersion": 1,
   "profile": "preview",
-  "artifactId": "8902d17095f734860d7015a063c2ee2f369addb78c9cc0223611e933a711ffc8",
-  "sourceCommit": "31b06f57b5dc1e20e82ca30e1465ce303a69e9d9",
+  "artifactId": "99c196f9b6f4d6f0a43622a6b368a883bc54f6a58c7db6991d203be848fbb54d",
+  "sourceCommit": "7a7eee998832fd17d534e52a1e09c29f802ede71",
   "scopePath": "/questnote-pwa-preview/",
   "runtimeContentSchema": 1,
   "dbName": "QuestNotePreviewDB",
@@ -90,12 +90,12 @@ const PRECACHE_HASHES = {
   "data/pools.json": "4fd1cdc8674e5592b6b2256603bad59b5bf555650c482237eedb6a86b3867fcc",
   "data/releases/53f3cf3aea133c9186cbaf0396dfd54241d5fb0bb4debbf57601cd4d2c944046/catalog.json": "53f3cf3aea133c9186cbaf0396dfd54241d5fb0bb4debbf57601cd4d2c944046",
   "data/titles.json": "ea884cd1a86ff66a8512ba8016632eaea57ee25d55db3cff2a3afac6dc602fcb",
-  "index.html": "3e6a436fa255b5e0d8f8db6d32b5d9e10a6dcd3060ac9217244873319c057be8",
+  "index.html": "e028a0cead73479007b7ec0d6bbdaeba39a8e4004110461d93fb7beb99434bbc",
   "manifest.webmanifest": "92eebd112db700add8829cda91380b117bcf4f4d91723ea899055ebde22caad0",
   "src/achievementService.js": "9d2b24cb553d3ec084edf353b5be0da3a50c3b527175d0fb8ca3269f7af34ca9",
   "src/adventureHandbookService.js": "8ac72423649a5d786e10af713225add10802f02feb9a8ad24ab537b34e639f79",
   "src/app.js": "048308c683ae3f67e31510f99533815d9b38fcb91862d5697d42fe2b546e6693",
-  "src/appBadge.js": "475aef6b818daa90038ecafeef7b0248ab00fcaaf26b9724692141e3dc055a06",
+  "src/appBadge.js": "5a591fe79f84832bde41d6fb6b75ac9f5ccc35c20eea262d31f643298b9bc9ff",
   "src/aurora-fairy-feast.css": "1257ed271007548d4556a8c19c9948b6221ac7c91cd5a3b8e1382fba1aff2feb",
   "src/auroraFairyScene.js": "e541a90166e670c6f687ef34eb499dcdbcfc88fb877e9c436ab36d286276c361",
   "src/backupSchema.js": "33cb4644253ef2862e7b4ffa993415ec7a1f75b5e3f1953189701d29b493bbc7",
@@ -196,9 +196,9 @@ const PRECACHE_HASHES = {
   "src/questIcons.js": "fa0cb1d6c415b3c5812a5d769526050f3fe7fde36a3734d49e09cc622e5959ba",
   "src/questService.js": "285bdbe4e15cd931e56a7126b7e6d14d8257df9baa61ff3568f9e7b7be813389",
   "src/releaseCatalog.js": "1483284705afd533d78d07bdd87f90d29eb20454c004bc624f01f45e51fd9b30",
-  "src/releaseProfile.js": "9afc2a1fd926a043cb3cf14a007ec4f141e229b99d74577bd2fcbef7420751be",
+  "src/releaseProfile.js": "e8088f5c79517da0ef79d94bab1b606f59578263df7454dc3a61bea705164875",
   "src/reminder-settings.css": "3332cd2d88fc7e6db264d4b5669ed43334fb48e0538629b0f15afbeeb5c6c88d",
-  "src/reminderController.js": "f11298bb890a387e52babc9d19ad2f40ab3d60c40ac97f475bd39a67b1666653",
+  "src/reminderController.js": "0c31d1153a8dd7e4130c38f5a76eda041f641baf4fea0dc6742ca843f2d66369",
   "src/reminderRules.js": "33a762131288af03d1038797e79202954638a5d320c791d3c4f2ab0a4b301473",
   "src/reminderService.js": "0020c416619da8746f8dcd8e0d4105b20698d6974aa74fcc6ff8f2101e2b8ed2",
   "src/rewardClaimService.js": "29ae2367857051a8cbda70ae155729f3f887e08815c8ce43681ad888623a9de1",
@@ -262,7 +262,7 @@ const PRECACHE_HASHES = {
   "src/updateActivity.js": "2cb4d2e9f5b4a77b0e92cd2793e577578914cdc4a5f4c2aee3410838a22526b5",
   "src/updateController.js": "fcf45665a4ed9fa8dc8e14f719e65320ce2de90fe877cfa87245387cfafaa8e4",
   "src/updateProtocol.js": "df73542b7899fb473b91f913bc890463331fbb0832db56289f783c33e9d588a0",
-  "src/version.js": "5b92f152ca624fe56bd457dc3d105074bf8fe01379d653f5856b6862b9ae367b",
+  "src/version.js": "276cf117376b28a337a3c9f34b0ba4b6bd1652f5f0a7330e7624ad971990474e",
   "src/weekly-review.css": "540ee55a1d22b0c6dac9a9bf32930c855b168e5359f6f6e34382de3dc16628f1",
   "src/weeklyReviewService.js": "4e1681fd26d685cff09a929938c0a926adeb61dd602ef773997c03b19d45d25d",
   "src/workshopGiftView.js": "7465474a1ac4ed2270e2d1fe9106760ec3855ea1ca48958c0762861d3ce25f09",

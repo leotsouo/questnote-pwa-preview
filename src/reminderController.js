@@ -1,6 +1,15 @@
 import { trackUpdateActivity } from './updateActivity.js';
 import { getReminderState, reminderCapability, enableReminders, saveReminderSettings, disableReminders, syncReminders, testReminder, getReminderServerStatus } from './reminderService.js';
 import { zonedParts, shiftDate } from './reminderRules.js';
+import { appBadgeStatus, enableAppBadge } from './appBadge.js';
+import { getAllTasks } from './taskService.js';
+
+const APP_BADGE_TEXT = {
+  unsupported: '圖示角標需要從主畫面開啟 QuestNote（iOS 16.4 以上）。',
+  off: '開啟後，主畫面圖示會顯示還沒完成的待辦數量。不會另外發送通知。',
+  on: '已開啟：主畫面圖示會顯示還沒完成的待辦數量。',
+  blocked: '通知權限已關閉，請到 iPhone「設定 → 通知 → QuestNote」開啟後再回來。',
+};
 
 let initialized = false;
 let timer;
@@ -25,9 +34,15 @@ function settings() {
   return { time: $('reminder-time').value || '08:00', tasks: $('reminder-tasks').checked, habits: $('reminder-habits').checked,
     weekly: $('reminder-weekly').checked, overdue: $('reminder-overdue').checked, showTitles: $('reminder-titles').checked };
 }
+function renderAppBadgeSetting() {
+  const status = appBadgeStatus();
+  $('app-badge-status').textContent = APP_BADGE_TEXT[status];
+  $('app-badge-enable').hidden = status !== 'off';
+}
 export async function renderReminderSettings() {
   const state = await getReminderState();
   if (!$('reminder-status')) return;
+  renderAppBadgeSetting();
   if (!$('reminder-form').contains(document.activeElement)) {
     $('reminder-time').value = state.settings.time;
     for (const [id, key] of [['tasks', 'tasks'], ['habits', 'habits'], ['weekly', 'weekly'], ['overdue', 'overdue'], ['titles', 'showTitles']]) $('reminder-' + id).checked = state.settings[key];
@@ -73,6 +88,12 @@ export function initReminders({ openToday }) {
   $('reminder-test').addEventListener('click', (event) => { void run(event.currentTarget, testReminder, '推播服務已接受測試通知，請查看手機通知中心。'); });
   $('reminder-sync').addEventListener('click', (event) => { void run(event.currentTarget, syncReminders, '提醒資料已同步。'); });
   $('reminder-open-today').addEventListener('click', openToday);
+  $('app-badge-enable').addEventListener('click', async (event) => {
+    const button = event.currentTarget;
+    button.disabled = true;
+    try { await enableAppBadge({ loadTasks: getAllTasks }); } catch { /* The status line explains a refused permission. */ }
+    finally { button.disabled = false; renderAppBadgeSetting(); }
+  });
   window.addEventListener('questnote-reminder-status', () => { void renderReminderSettings(); });
   const queueSync = () => {
     clearTimeout(timer); timer = setTimeout(() => { void syncReminders().catch(() => {}); }, 500);

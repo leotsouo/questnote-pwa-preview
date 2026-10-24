@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "artifactId": "8902d17095f734860d7015a063c2ee2f369addb78c9cc0223611e933a711ffc8",
-  "sourceCommit": "31b06f57b5dc1e20e82ca30e1465ce303a69e9d9",
+  "artifactId": "99c196f9b6f4d6f0a43622a6b368a883bc54f6a58c7db6991d203be848fbb54d",
+  "sourceCommit": "7a7eee998832fd17d534e52a1e09c29f802ede71",
   "profile": {
     "schemaVersion": 1,
     "profile": "preview",
-    "artifactId": "8902d17095f734860d7015a063c2ee2f369addb78c9cc0223611e933a711ffc8",
-    "sourceCommit": "31b06f57b5dc1e20e82ca30e1465ce303a69e9d9",
+    "artifactId": "99c196f9b6f4d6f0a43622a6b368a883bc54f6a58c7db6991d203be848fbb54d",
+    "sourceCommit": "7a7eee998832fd17d534e52a1e09c29f802ede71",
     "scopePath": "/questnote-pwa-preview/",
     "runtimeContentSchema": 1,
     "dbName": "QuestNotePreviewDB",
@@ -715,13 +715,13 @@
     "data/pets.json": "7b3b124f4bec86b058407bcb08b420d0cf205df6f36606dbf3182337394b84d6",
     "data/pools.json": "12fa2b0cf8f9542160e982016edfc81366025116217560feba3935129c134592",
     "data/titles.json": "ea884cd1a86ff66a8512ba8016632eaea57ee25d55db3cff2a3afac6dc602fcb",
-    "index.html": "ff3a774dbe4f686384fb65caff9d6a8a5b776460cfb4c31b8e5b16aae3b1f5f5",
+    "index.html": "3f029c2f05c32047372c35946410f6a0807ac904adf9c94f81a1f03e31b92fac",
     "manifest.webmanifest": "0d4926dd0e36a6a2037d50fd3aa1220cfad95dc80714834aa5fb4150ced1c72b",
-    "service-worker.js": "6071a0d9209d8cea7972f5ca9a9f1ea1ae9edbea15da33be6f77742d73ce05c0",
+    "service-worker.js": "9fd45f31ee45ddb222534e59e03a312cf1adfd42543b12f7885df917344a2764",
     "src/achievementService.js": "9d2b24cb553d3ec084edf353b5be0da3a50c3b527175d0fb8ca3269f7af34ca9",
     "src/adventureHandbookService.js": "8ac72423649a5d786e10af713225add10802f02feb9a8ad24ab537b34e639f79",
     "src/app.js": "048308c683ae3f67e31510f99533815d9b38fcb91862d5697d42fe2b546e6693",
-    "src/appBadge.js": "475aef6b818daa90038ecafeef7b0248ab00fcaaf26b9724692141e3dc055a06",
+    "src/appBadge.js": "5a591fe79f84832bde41d6fb6b75ac9f5ccc35c20eea262d31f643298b9bc9ff",
     "src/aurora-fairy-feast.css": "1257ed271007548d4556a8c19c9948b6221ac7c91cd5a3b8e1382fba1aff2feb",
     "src/auroraFairyScene.js": "e541a90166e670c6f687ef34eb499dcdbcfc88fb877e9c436ab36d286276c361",
     "src/backupSchema.js": "33cb4644253ef2862e7b4ffa993415ec7a1f75b5e3f1953189701d29b493bbc7",
@@ -824,7 +824,7 @@
     "src/releaseCatalog.js": "1483284705afd533d78d07bdd87f90d29eb20454c004bc624f01f45e51fd9b30",
     "src/releaseProfile.js": "a1ef45c3a255d2470eda4ace3fc2fc7d5d8a09a8126190fdc69b4dd8b6f839dd",
     "src/reminder-settings.css": "3332cd2d88fc7e6db264d4b5669ed43334fb48e0538629b0f15afbeeb5c6c88d",
-    "src/reminderController.js": "f11298bb890a387e52babc9d19ad2f40ab3d60c40ac97f475bd39a67b1666653",
+    "src/reminderController.js": "0c31d1153a8dd7e4130c38f5a76eda041f641baf4fea0dc6742ca843f2d66369",
     "src/reminderRules.js": "33a762131288af03d1038797e79202954638a5d320c791d3c4f2ab0a4b301473",
     "src/reminderService.js": "0020c416619da8746f8dcd8e0d4105b20698d6974aa74fcc6ff8f2101e2b8ed2",
     "src/rewardClaimService.js": "29ae2367857051a8cbda70ae155729f3f887e08815c8ce43681ad888623a9de1",
@@ -888,7 +888,7 @@
     "src/updateActivity.js": "2cb4d2e9f5b4a77b0e92cd2793e577578914cdc4a5f4c2aee3410838a22526b5",
     "src/updateController.js": "fcf45665a4ed9fa8dc8e14f719e65320ce2de90fe877cfa87245387cfafaa8e4",
     "src/updateProtocol.js": "df73542b7899fb473b91f913bc890463331fbb0832db56289f783c33e9d588a0",
-    "src/version.js": "e69daea5c2864be6734e53617ee1d99e80c4b63a8ead28d257f03e7d8f7df080",
+    "src/version.js": "8134efdd46d3056d6f2dd7a23030a776ba768cc3ca93f9350214e9d36f247ba0",
     "src/weekly-review.css": "540ee55a1d22b0c6dac9a9bf32930c855b168e5359f6f6e34382de3dc16628f1",
     "src/weeklyReviewService.js": "4e1681fd26d685cff09a929938c0a926adeb61dd602ef773997c03b19d45d25d",
     "src/workshopGiftView.js": "7465474a1ac4ed2270e2d1fe9106760ec3855ea1ca48958c0762861d3ce25f09",
@@ -3664,15 +3664,15 @@
       "bytes": 6060
     },
     "index.html": {
-      "sha256": "3e6a436fa255b5e0d8f8db6d32b5d9e10a6dcd3060ac9217244873319c057be8",
-      "bytes": 67209
+      "sha256": "e028a0cead73479007b7ec0d6bbdaeba39a8e4004110461d93fb7beb99434bbc",
+      "bytes": 67555
     },
     "manifest.webmanifest": {
       "sha256": "92eebd112db700add8829cda91380b117bcf4f4d91723ea899055ebde22caad0",
       "bytes": 869
     },
     "service-worker.js": {
-      "sha256": "1f25a7fb2fc0cad714fb516ce82103386ddc945ec10871f13379802b8caf0b6c",
+      "sha256": "152b529531d24cd7c25c8b9d18b969055306e04ff6a2cc77d5cd298466f5b161",
       "bytes": 42349
     },
     "src/achievementService.js": {
@@ -3688,8 +3688,8 @@
       "bytes": 19768
     },
     "src/appBadge.js": {
-      "sha256": "475aef6b818daa90038ecafeef7b0248ab00fcaaf26b9724692141e3dc055a06",
-      "bytes": 1063
+      "sha256": "5a591fe79f84832bde41d6fb6b75ac9f5ccc35c20eea262d31f643298b9bc9ff",
+      "bytes": 1999
     },
     "src/aurora-fairy-feast.css": {
       "sha256": "1257ed271007548d4556a8c19c9948b6221ac7c91cd5a3b8e1382fba1aff2feb",
@@ -4092,7 +4092,7 @@
       "bytes": 4645
     },
     "src/releaseProfile.js": {
-      "sha256": "9afc2a1fd926a043cb3cf14a007ec4f141e229b99d74577bd2fcbef7420751be",
+      "sha256": "e8088f5c79517da0ef79d94bab1b606f59578263df7454dc3a61bea705164875",
       "bytes": 631
     },
     "src/reminder-settings.css": {
@@ -4100,8 +4100,8 @@
       "bytes": 10996
     },
     "src/reminderController.js": {
-      "sha256": "f11298bb890a387e52babc9d19ad2f40ab3d60c40ac97f475bd39a67b1666653",
-      "bytes": 7014
+      "sha256": "0c31d1153a8dd7e4130c38f5a76eda041f641baf4fea0dc6742ca843f2d66369",
+      "bytes": 8080
     },
     "src/reminderRules.js": {
       "sha256": "33a762131288af03d1038797e79202954638a5d320c791d3c4f2ab0a4b301473",
@@ -4356,7 +4356,7 @@
       "bytes": 680
     },
     "src/version.js": {
-      "sha256": "5b92f152ca624fe56bd457dc3d105074bf8fe01379d653f5856b6862b9ae367b",
+      "sha256": "276cf117376b28a337a3c9f34b0ba4b6bd1652f5f0a7330e7624ad971990474e",
       "bytes": 1112
     },
     "src/weekly-review.css": {

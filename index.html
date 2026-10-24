@@ -61,7 +61,7 @@
   <link rel="stylesheet" href="src/encounter-invitation.css">
   <link rel="stylesheet" href="src/weekly-review.css">
   <link rel="stylesheet" href="src/seniorMode.css">
-  <meta name="questnote-artifact" content="8902d17095f734860d7015a063c2ee2f369addb78c9cc0223611e933a711ffc8">
+  <meta name="questnote-artifact" content="99c196f9b6f4d6f0a43622a6b368a883bc54f6a58c7db6991d203be848fbb54d">
 </head>
 <body data-theme="default">
   <div id="app-loader" class="app-loader">
@@ -762,6 +762,11 @@
               <strong>今日計畫</strong><p id="reminder-preview-body">今天有 3 項任務、2 項每日習慣。</p>
             </div>
             <p class="reminder-note">今天沒有待辦時，就讓你安靜地開始一天。</p>
+          </fieldset>
+          <fieldset class="reminder-fieldset reminder-badge">
+            <legend>App 圖示角標</legend>
+            <p id="app-badge-status" class="reminder-note" role="status" aria-live="polite"></p>
+            <button id="app-badge-enable" type="button" class="btn btn--secondary btn--sm">開啟圖示角標</button>
           </fieldset>
           <div class="reminder-privacy">
             <label id="reminder-consent-label" class="reminder-consent"><input type="checkbox" id="reminder-consent" /><span><strong>允許同步提醒所需資料</strong><small>僅同步日期、完成狀態與習慣規則。</small></span></label>
