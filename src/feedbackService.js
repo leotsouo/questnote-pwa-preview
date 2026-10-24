@@ -2,6 +2,7 @@
 import { APP_VERSION, BUILD_TIME, CACHE_NAME } from './version.js';
 import { RELEASE_PROFILE } from './releaseProfile.js';
 import { FEEDBACK_ENDPOINT } from './feedbackConfig.js';
+import { formatRecentErrors, getRecentErrors } from './errorLog.js';
 
 export const FEEDBACK_MARKER = '<!-- questnote-feedback:v2 -->';
 export const FEEDBACK_LIMITS = Object.freeze({ title: 100, description: 4000, steps: 2000, expected: 1000 });
@@ -58,6 +59,7 @@ export function collectFeedbackDiagnostics(environment = globalThis) {
     online: navigator.onLine !== false,
     displayMode: environment.matchMedia?.('(display-mode: standalone)')?.matches || navigator.standalone === true ? 'standalone' : 'browser',
     serviceWorkerControlled: Boolean(navigator.serviceWorker?.controller),
+    recentErrors: formatRecentErrors(getRecentErrors(), 5),
   };
 }
 

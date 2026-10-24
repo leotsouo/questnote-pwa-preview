@@ -167,6 +167,29 @@ function fetchAppStyles() {
   return fetchSourceParts(APP_STYLE_PARTS, '');
 }
 
+/**
+ * The source text of one top-level function (from `function name` to the matching closing brace).
+ * Static checks that need to look inside a function use this instead of a fixed character window,
+ * which silently overran when the function grew (V3.12.1: updateGachaAffordability, renderCompanionSection).
+ */
+function functionSource(text, name) {
+  const match = new RegExp(`(?:^|\\n)(?:export\\s+)?(?:async\\s+)?function\\s+${name}\\b`).exec(text);
+  if (!match) return '';
+  const start = match.index;
+  const open = text.indexOf('{', start);
+  if (open === -1) return '';
+  let depth = 0;
+  for (let i = open; i < text.length; i += 1) {
+    const ch = text[i];
+    if (ch === '{') depth += 1;
+    else if (ch === '}') {
+      depth -= 1;
+      if (depth === 0) return text.slice(start, i + 1);
+    }
+  }
+  return text.slice(start);
+}
+
 /** Backup logic: backupService (export/restore) and backupSchema (verified version profiles), as one text. */
 function fetchBackupSource() {
   return fetchSourceParts(['src/backupService.js', 'src/backupSchema.js'], '\n');
@@ -870,18 +893,18 @@ async function checkGachaSync() {
   stats.push('pull handlers 讀最新 wallet=ok');
 
   // updateGachaAffordability 依最新 state.wallet 計算按鈕狀態
-  if (!/function updateGachaAffordability[\s\S]{0,600}state\.wallet\.stardust/.test(uiText)) {
+  const affordabilityText = functionSource(uiText, 'updateGachaAffordability');
+  if (!/state\.wallet\.stardust/.test(affordabilityText)) {
     throw new Error('updateGachaAffordability 未讀最新 state.wallet');
   }
-  if (!/function updateGachaAffordability[\s\S]{0,900}btn-pull['"]/.test(uiText)
-    || !/function updateGachaAffordability[\s\S]{0,900}btn-pull-ten/.test(uiText)) {
+  if (!/btn-pull['"]/.test(affordabilityText) || !/btn-pull-ten/.test(affordabilityText)) {
     notes.push('updateGachaAffordability 可能未同時更新單抽與十連按鈕');
   } else {
     stats.push('單抽/十連 disabled 依最新 wallet=ok');
   }
 
   // DOM 缺失安全 return
-  if (!/function updateGachaAffordability[\s\S]{0,400}if\s*\(!btnSingle\s*&&\s*!btnTen\)\s*return/.test(uiText)) {
+  if (!/if\s*\(!btnSingle\s*&&\s*!btnTen\)\s*return/.test(affordabilityText)) {
     notes.push('updateGachaAffordability 可能缺少 DOM 缺失 safe return');
   } else {
     stats.push('DOM 缺失 safe return=ok');
@@ -2198,9 +2221,8 @@ async function checkCompanionWheelHotfix() {
   const stats = [];
 
   // ── 1. 首頁陪伴卡片：圖片與詳情分離（勿誤查圖鑑） ──
-  const companionRenderIdx = uiText.indexOf('function renderCompanionSection');
-  if (companionRenderIdx === -1) throw new Error('缺少 renderCompanionSection');
-  const companionRender = uiText.slice(companionRenderIdx, companionRenderIdx + 2800);
+  const companionRender = functionSource(uiText, 'renderCompanionSection');
+  if (!companionRender) throw new Error('缺少 renderCompanionSection');
 
   if (!companionRender.includes('data-action="companion-view-image"')) {
     throw new Error('首頁陪伴卡片缺少 companion-view-image');

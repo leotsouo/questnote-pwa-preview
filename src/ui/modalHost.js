@@ -279,7 +279,13 @@ export function openConfirmModal(title, message, onConfirm, options = {}) {
     closeModal();
     if (typeof onCancel === 'function') onCancel();
   });
-  document.getElementById('confirm-ok')?.addEventListener('click', trackUpdateActivity(async () => {
+  // The overlay fades out after closeModal(), so a double tap could reach this handler twice and run
+  // onConfirm twice (delete, archive, spend). Settle on the first click only.
+  let settled = false;
+  document.getElementById('confirm-ok')?.addEventListener('click', trackUpdateActivity(async (event) => {
+    if (settled) return;
+    settled = true;
+    event.currentTarget.disabled = true;
     closeModal();
     try { await onConfirm(); }
     catch (error) { showToast(error.message || '操作未完成，請再試一次。', 'error'); }

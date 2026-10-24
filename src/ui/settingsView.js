@@ -34,6 +34,7 @@ import {
   APP_VERSION,
   BUILD_TIME,
 } from '../version.js';
+import { formatRecentErrors, getRecentErrors } from '../errorLog.js';
 import { handleAchievementCheckAfterAction } from './achievementsView.js';
 
 // Bound from src/ui.js by connectSettingsView() so this module never imports ui.js back.
@@ -334,10 +335,22 @@ function buildVersionInfoHtml({ compact = false, serviceWorkerStatus = '檢查�
         <dt class="version-info-label">Service Worker</dt>
         <dd class="version-info-value" data-version-sw-status>${escapeHtml(serviceWorkerStatus)}</dd>
       </div>
+      ${recentErrorsRowHtml()}
     </dl>
     <p class="settings-version__note version-info-note" data-version-update-hint>
       按「檢查並更新」即可取得新版。更新保留存檔，請勿清除網站資料。
     </p>${updateControlsHtml()}${HEALTH_CHECK_VISIBLE ? healthCheckHtml() : ''}`;
+}
+
+/** Uncaught errors of this session (src/errorLog.js). Shown on every profile so a report can quote them. */
+function recentErrorsRowHtml() {
+  const lines = formatRecentErrors(getRecentErrors(), 3);
+  if (!lines.length) return '';
+  return `
+      <div class="version-info-row stats-row">
+        <dt class="version-info-label">最近錯誤</dt>
+        <dd class="version-info-value version-info-value--mono settings-version__mono" data-version-recent-errors>${lines.map((line) => escapeHtml(line)).join('<br>')}</dd>
+      </div>`;
 }
 
 /** The App health check is a developer tool: offered in the source checkout and the preview, never in production. */

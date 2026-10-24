@@ -1,3 +1,4 @@
+import { installErrorLog } from './errorLog.js';
 import { ensureEncounterMigration, getEncounterEconomy } from './encounterEconomyService.js';
 import { LOCAL_ART_PREVIEW } from './localArtPreview.js';
 /**
@@ -127,6 +128,7 @@ import { syncPetAwakening } from './petAwakeningService.js';
 import { awakeningPortrait } from './petAwakeningView.js';
 import { preloadAwakeningForms } from './petAwakeningScene.js';
 import { preloadCompanionImage, preloadOwnedPetImages } from './imagePreloadService.js';
+import { syncAppBadge } from './appBadge.js';
 
 
 
@@ -320,6 +322,7 @@ async function refreshState(options = {}) {
   appState.dailyCheckIn = dailyCheckIn;
 
   appState.tasks = sortTasks(tasks);
+  void syncAppBadge(appState.tasks);
 
   appState.wallet = wallet;
   appState.encounterEconomy = await getEncounterEconomy();
@@ -756,6 +759,9 @@ async function initApp() {
 }
 
 
+
+// Keep the last uncaught errors of this session for the feedback report and the settings card.
+installErrorLog();
 
 // Release bootstrap imports this module only after the verified worker is ready.
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initApp, { once: true });

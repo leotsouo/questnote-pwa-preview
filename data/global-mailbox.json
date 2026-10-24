@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-10-10T19:58:15.974Z",
+  "generatedAt": "2026-10-20T03:29:27.888Z",
   "messages": [
     {
       "id": "2026-10-v362-encounter-fragments-gift-01",
@@ -377,6 +377,43 @@
         "view": "gacha",
         "label": "查看每日相遇與系列"
       }
+    },
+    {
+      "id": "2026-10-v3121-claim-all-fix-weekly-review",
+      "type": "update",
+      "title": "V3.12.1 更新｜一鍵領取修復與每週回顧",
+      "body": "親愛的旅人：\n\n這幾天的更新整理如下。\n\n【一鍵領取修復】\nV3.10.1 之後，各處的「一鍵領取」（祝福、任務、信箱、收藏、探險）可能因錯誤而無法使用，現已修復。若之前一鍵領取沒有反應，更新後請再試一次；也可以逐項手動領取。你的存檔與已領取的紀錄不受影響。\n\n【每週回顧】\n「更多 → 每週回顧」可查看本週或上週完成了幾項任務、習慣做了幾天與打卡次數。每週一，首頁會出現上週回顧的小卡，打開或關閉後不再顯示。\n\n【長輩模式更簡單】\n長輩模式的新增任務改為單頁：只要填寫要做的事與日期，時間、分類、重要程度與子任務收在「更多設定」。長輩模式也會隱藏召喚、圖鑑、探險等遊戲畫面與獎勵數字，讓介面專注在任務本身；一般模式不受影響。\n\n本信沒有附帶獎勵；先前尚未過期的贈禮仍可依原信期限領取。若遇到問題，歡迎透過「更多 → 意見與問題回報」告訴我們。\n\n若尚未看到新版，請保持連線，關閉其他 QuestNote 分頁與主畫面 App 後重新開啟；看到更新提示時按「更新並重新載入」。請勿清除網站資料，以免失去本機紀錄。\n\nQuestNote 開發團隊",
+      "publishedAt": "2026-10-19T19:57:39.000Z",
+      "expiresAt": null,
+      "priority": "normal",
+      "enabled": true,
+      "minAppVersion": "3.12.1",
+      "maxAppVersion": null,
+      "icon": "📮",
+      "reward": null,
+      "action": {
+        "type": "view",
+        "view": "tasks",
+        "label": "回到任務"
+      }
+    },
+    {
+      "id": "2026-10-v3121-claim-all-compensation-01",
+      "type": "compensation",
+      "title": "一鍵領取異常補償｜星塵 1,500＋冒險能量 5",
+      "body": "親愛的旅人：\n\n10 月 15 日起的幾天裡，「一鍵領取」會跳出錯誤而無法領取祝福、信箱、收藏與探險獎勵，造成不便，非常抱歉。\n\nV3.12.1 已修正這個問題。先前還沒領到的獎勵都還在，現在可以一次領完。\n\n請收下這份補償：星塵 1,500 與冒險能量 5。",
+      "publishedAt": "2026-10-20T11:30:00+08:00",
+      "expiresAt": "2026-11-20T23:59:59+08:00",
+      "priority": "high",
+      "enabled": true,
+      "minAppVersion": "3.12.1",
+      "maxAppVersion": null,
+      "icon": "🎁",
+      "reward": {
+        "stardust": 1500,
+        "adventureEnergy": 5
+      },
+      "action": null
     }
   ]
 }
