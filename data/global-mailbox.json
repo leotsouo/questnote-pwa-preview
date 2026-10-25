@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-10-20T03:29:27.888Z",
+  "generatedAt": "2026-10-20T18:04:21.799Z",
   "messages": [
     {
       "id": "2026-10-v362-encounter-fragments-gift-01",
@@ -411,6 +411,24 @@
       "icon": "🎁",
       "reward": {
         "stardust": 1500,
+        "adventureEnergy": 5
+      },
+      "action": null
+    },
+    {
+      "id": "2026-10-v3122-second-report-compensation-01",
+      "type": "compensation",
+      "title": "再次回報補償｜星塵 1,000＋冒險能量 5",
+      "body": "親愛的旅人：\n\n上次更新後，仍有旅人遇到「一鍵領取」跳出錯誤，讓你又回報了一次，非常抱歉。\n\nV3.12.2 這次把整個 App 檢查了一遍：修正確認視窗連點會重複執行的問題，並在「更多 → 設定」加上「最近錯誤」紀錄，之後回報問題會更容易找到原因。\n\n如果還看到舊版本，請關閉所有 QuestNote 視窗後重新開啟，就會更新。\n\n請收下這份補償：星塵 1,000（剛好一次十連）與冒險能量 5。",
+      "publishedAt": "2026-10-21T12:00:00+08:00",
+      "expiresAt": "2026-11-30T23:59:59+08:00",
+      "priority": "high",
+      "enabled": true,
+      "minAppVersion": "3.12.2",
+      "maxAppVersion": null,
+      "icon": "🎁",
+      "reward": {
+        "stardust": 1000,
         "adventureEnergy": 5
       },
       "action": null

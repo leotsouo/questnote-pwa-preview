@@ -20,4 +20,5 @@ export const UI_SOURCE_PARTS = Object.freeze([
   'src/ui/taskListView.js',
   'src/ui/modalHost.js',
   'src/ui/weeklyReviewView.js',
+  'src/ui/webMigrationView.js',
 ]);

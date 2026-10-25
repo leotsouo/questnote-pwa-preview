@@ -9,6 +9,8 @@ const HASH = /^[a-f0-9]{64}$/;
 const PROFILES = {
   production: { dbName: 'QuestNoteDB', cacheNamespace: 'questnote-production-' },
   preview: { dbName: 'QuestNotePreviewDB', cacheNamespace: 'questnote-preview-' },
+  // The iOS app has its own data container, so it keeps the production database name.
+  ios: { dbName: 'QuestNoteDB', cacheNamespace: 'questnote-ios-' },
 };
 
 export function validateReleaseProfile(profile) {

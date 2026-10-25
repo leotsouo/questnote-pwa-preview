@@ -18,6 +18,8 @@ export async function bootApplication({
     || new URL(baseUrl).pathname !== profile.scopePath) {
     throw new Error('發布檔案版本不一致，請稍後重新開啟。');
   }
+  // The iOS app ships its verified files inside the bundle; there is no worker to wait for.
+  if (profile.profile === 'ios') { await start(); return 'bundled'; }
   if (!serviceWorker) throw unavailableBrowserError();
   if (!attemptStorage) throw unavailableBrowserError();
   const expectedWorkerUrl = new URL(`service-worker.js?artifact=${profile.artifactId}`, baseUrl).href;

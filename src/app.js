@@ -129,6 +129,7 @@ import { awakeningPortrait } from './petAwakeningView.js';
 import { preloadAwakeningForms } from './petAwakeningScene.js';
 import { preloadCompanionImage, preloadOwnedPetImages } from './imagePreloadService.js';
 import { syncAppBadge } from './appBadge.js';
+import { syncNativeWidget } from './nativeBridge.js';
 
 
 
@@ -323,6 +324,7 @@ async function refreshState(options = {}) {
 
   appState.tasks = sortTasks(tasks);
   void syncAppBadge(appState.tasks);
+  void syncNativeWidget(appState.tasks);
 
   appState.wallet = wallet;
   appState.encounterEconomy = await getEncounterEconomy();
@@ -481,6 +483,13 @@ export async function runAchievementCheck() {
 
 
 
+function refreshAfterDayChange() {
+  const today = getTodayDateString();
+  if (today === lastKnownDate) return;
+  lastKnownDate = today;
+  refreshState({ renderMode: 'full' }).catch((err) => console.warn('[QuestNote] 跨日刷新失敗:', err));
+}
+
 async function registerServiceWorker() {
   if (LOCAL_ART_PREVIEW) return;
   const options = { showIconGuide: openModal, openBackupSettings: () => {
@@ -488,6 +497,14 @@ async function registerServiceWorker() {
     document.getElementById('btn-export')?.scrollIntoView({ block: 'center' });
     document.getElementById('btn-export')?.focus({ preventScroll: true });
   } };
+  // The iOS app updates through TestFlight, so it only needs the day-change refresh.
+  if (RELEASE_PROFILE?.profile === 'ios') {
+    initAppUpdates(null, options);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') refreshAfterDayChange();
+    });
+    return;
+  }
   if (!('serviceWorker' in navigator)) { initAppUpdates(null, options); return; }
   try {
     // Keep an existing registration's URL; update() fetches verified new bytes.
@@ -500,11 +517,7 @@ async function registerServiceWorker() {
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState !== 'visible') return;
       reg.update().catch(() => {});
-      const today = getTodayDateString();
-      if (today !== lastKnownDate) {
-        lastKnownDate = today;
-        refreshState({ renderMode: 'full' }).catch((err) => console.warn('[QuestNote] 跨日刷新失敗:', err));
-      }
+      refreshAfterDayChange();
     });
   } catch (err) {
     console.warn('[QuestNote] SW registration failed:', err);

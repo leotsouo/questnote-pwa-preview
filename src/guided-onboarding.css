@@ -96,3 +96,14 @@ body[data-theme] :is(#app, #modal-overlay, #expedition-dispatch-modal) #onboardi
 .pet-detail__growth { margin: 16px 0; padding: 16px; border: 1px solid var(--border-color); border-radius: 14px; }
 .pet-detail__growth button { min-height: 48px; }
 @media (max-width: 600px) { #guide-chapters { grid-template-columns: minmax(0, 1fr); } .growth-coach.onboarding-dock { padding: 16px; } }
+
+/* iOS app first open: move the web save over, or start fresh (src/ui/webMigrationView.js). */
+.web-migration-shade { position: fixed; inset: 0; background: rgba(12, 20, 36, .55); pointer-events: auto; }
+.web-migration-done { position: fixed; inset: 0; z-index: 12000; color: var(--color-text-main); }
+.web-migration { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(440px, calc(100% - 24px)); max-height: calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); overflow-y: auto; overscroll-behavior: contain; padding: 22px; border: 1px solid var(--border-color, #65809c); border-radius: 24px; background: var(--bg-card, #172840); box-shadow: 0 16px 50px rgba(0,0,0,.25); pointer-events: auto; box-sizing: border-box; }
+.web-migration h2 { font-size: 1.3rem; line-height: 1.45; margin: 0 0 8px; font-weight: 650; }
+.web-migration p, .web-migration li { font-size: 1rem; line-height: 1.65; margin: 8px 0; }
+.web-migration__actions { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+.web-migration__actions .btn { min-height: 52px; font-size: 1.05rem; white-space: normal; }
+.web-migration .web-migration__summary { margin: 12px 0; }
+@media (forced-colors: active) { .web-migration { background: Canvas; color: CanvasText; border: 2px solid CanvasText; } }

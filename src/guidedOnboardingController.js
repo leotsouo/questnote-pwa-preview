@@ -7,6 +7,9 @@ import { GUIDED_EDUCATION, contextualEducation } from './guidedEducation.js';
 import { PAGE_LESSONS, readPageTour, savePageTour } from './guidedPageTour.js';
 import { getPetImageSrc } from './imagePreloadService.js';
 import { reactTwilightCompanion } from './twilightPresentation.js';
+import { RELEASE_PROFILE } from './releaseProfile.js';
+import { shouldOfferWebMigration } from './webToAppMigration.js';
+import { renderWebMigrationChoice } from './ui/webMigrationView.js';
 
 let record;
 let app;
@@ -25,6 +28,8 @@ let layoutFrame;
 let hintFeature;
 let pageTour;
 let tourTarget;
+// "從頭開始" only moves past the app's first-open choice for this launch; nothing is saved.
+let webMigrationDeclined = false;
 const inertElements = new Map();
 const pendingSkipKey = () => `questnote-guided-skip-pending:${location.pathname}`;
 const skipPending = () => { try { return sessionStorage.getItem(pendingSkipKey()) === '1'; } catch { return false; } };
@@ -167,6 +172,13 @@ function updateHelp() {
   if (button) { button.textContent = isGuidedOnboardingActive() ? '繼續基本操作練習' : '再次學習基本操作'; button.dataset.onboardingAction = 'replay'; }
 }
 
+function offerWebMigration() {
+  return !skipOpen && !webMigrationDeclined && shouldOfferWebMigration({
+    profile: RELEASE_PROFILE?.profile, guided: record,
+    taskCount: app.tasks?.length ?? 0, petCount: app.collectionProgress?.owned ?? 0, habitCount: app.habits?.length ?? 0,
+  });
+}
+
 export function refreshGuidedOnboarding() {
   if (!root || !record) return;
   updateHelp();
@@ -181,6 +193,17 @@ export function refreshGuidedOnboarding() {
   releaseLock();
   document.dispatchEvent(new CustomEvent('questnote:guided-state-change'));
   document.body.classList.add('guided-active');
+  if (offerWebMigration()) {
+    if (signature !== 'web-migration') {
+      signature = 'web-migration';
+      renderWebMigrationChoice(root, {
+        onStartFresh: () => { webMigrationDeclined = true; signature = ''; refreshGuidedOnboarding(); },
+        onRestored: () => guidedAfterReset(true),
+      });
+    }
+    lockAround([root]);
+    return;
+  }
   document.body.classList.toggle('guided-editor', record.step === 'CREATE_TUTORIAL_QUEST');
   target = findTarget();
   if (!skipOpen && target?.matches('button')) {

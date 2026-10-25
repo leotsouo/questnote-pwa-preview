@@ -4,7 +4,7 @@
 import { RELEASE_PROFILE } from './releaseProfile.js';
 
 // A release profile is authoritative on every host, including local rehearsals.
-const PROFILE_DATABASES = Object.freeze({ production: 'QuestNoteDB', preview: 'QuestNotePreviewDB' });
+const PROFILE_DATABASES = Object.freeze({ production: 'QuestNoteDB', preview: 'QuestNotePreviewDB', ios: 'QuestNoteDB' });
 if (RELEASE_PROFILE !== null && (!Object.hasOwn(PROFILE_DATABASES, RELEASE_PROFILE.profile)
   || RELEASE_PROFILE.dbName !== PROFILE_DATABASES[RELEASE_PROFILE.profile])) {
   throw new Error('Invalid release database profile');
