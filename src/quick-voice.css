@@ -1,0 +1,54 @@
+/* Quick voice entry: sheet, floating mic button and the 復原 / 再說一件 bar. */
+.quick-voice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 0 4px;
+  text-align: center;
+}
+.quick-voice__status { margin: 0; font-size: 1rem; }
+.quick-voice__text {
+  margin: 0;
+  min-height: 3.2em;
+  width: 100%;
+  font-size: 1.15rem;
+  line-height: 1.5;
+  word-break: break-word;
+}
+.quick-voice__main {
+  min-width: 220px;
+  min-height: 64px;
+  padding: 0 28px;
+  border: 0;
+  border-radius: 32px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 1.15rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.quick-voice__main.is-listening { background: #d64550; }
+.quick-voice__main:disabled { opacity: 0.6; }
+
+/* Every theme hides the old ＋ button, so the mic takes its place; onboarding brings the ＋ pill back, so the mic steps up. */
+.fab--voice { background: var(--primary); color: #fff; }
+.fab--voice svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.guided-active .fab--voice, .guided-learned .fab--voice { bottom: calc(var(--nav-height) + var(--safe-bottom) + 84px); }
+
+.quick-voice-undo {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: calc(var(--nav-height) + var(--safe-bottom) + 16px);
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: var(--card-bg, #1d2140);
+  color: var(--text, #fff);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+}
+.quick-voice-undo__text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

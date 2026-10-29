@@ -17,6 +17,7 @@ export const UI_SOURCE_PARTS = Object.freeze([
   'src/ui/dailyBlessingView.js',
   'src/ui/companionView.js',
   'src/ui/taskFormView.js',
+  'src/ui/quickVoiceView.js',
   'src/ui/taskListView.js',
   'src/ui/modalHost.js',
   'src/ui/weeklyReviewView.js',

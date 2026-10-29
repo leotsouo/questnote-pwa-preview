@@ -7,7 +7,7 @@ const ERROR_MESSAGES = {
   'no-speech': '沒有聽到聲音，請再試一次。',
 };
 
-function speechText(results) {
+export function speechText(results) {
   let finalText = '';
   let interimText = '';
   for (let i = 0; i < results.length; i += 1) {

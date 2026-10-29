@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-10-20T18:04:21.799Z",
+  "generatedAt": "2026-10-25T19:56:01.026Z",
   "messages": [
     {
       "id": "2026-10-v362-encounter-fragments-gift-01",
@@ -432,6 +432,25 @@
         "adventureEnergy": 5
       },
       "action": null
+    },
+    {
+      "id": "2026-10-v3131-app-badge",
+      "type": "update",
+      "title": "V3.13.1 更新｜主畫面圖示顯示未完成待辦數",
+      "body": "親愛的旅人：\n\n這次更新新增了一個小功能。\n\n【App 圖示角標】\n開啟後，主畫面上的 QuestNote 圖示右上角會顯示還沒完成的待辦數量；全部完成時角標就會消失。教學任務不計入。\n\n使用方式：到「更多 → 設定」的提醒區，找到「App 圖示角標」，按「開啟圖示角標」，並在系統提示中選「允許」。這只會要求通知權限，不會另外發送通知，也不會同步任何資料。\n\n需要從主畫面開啟的 QuestNote（iPhone 需 iOS 16.4 以上）才能使用。數字會在每次打開 App 時更新，App 沒有開著時不會自己改變；若之後在系統設定關閉通知權限，角標就不會更新，App 其他功能不受影響。\n\n本信沒有附帶獎勵；先前尚未過期的贈禮仍可依原信期限領取。若遇到問題，歡迎透過「更多 → 意見與問題回報」告訴我們。\n\n若尚未看到新版，請保持連線，關閉其他 QuestNote 分頁與主畫面 App 後重新開啟；看到更新提示時按「更新並重新載入」。請勿清除網站資料，以免失去本機紀錄。\n\nQuestNote 開發團隊",
+      "publishedAt": "2026-10-25T20:10:00.000Z",
+      "expiresAt": null,
+      "priority": "normal",
+      "enabled": true,
+      "minAppVersion": "3.13.1",
+      "maxAppVersion": null,
+      "icon": "📮",
+      "reward": null,
+      "action": {
+        "type": "view",
+        "view": "tasks",
+        "label": "回到任務"
+      }
     }
   ]
 }

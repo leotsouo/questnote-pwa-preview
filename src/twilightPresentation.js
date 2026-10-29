@@ -47,7 +47,7 @@ export function initTwilightChrome() {
   });
   document.querySelectorAll('.home-hub__icon').forEach((button) => replace(button.querySelector('.home-hub__emoji'), { blessing: 'sun', quest: 'map', titles: 'award' }[button.dataset.hub]));
   replace(document.querySelector('.mailbox-entry-btn__icon'), 'mail');
-  document.querySelectorAll('.fab, .twilight-add-task').forEach((button) => replace(button, 'plus'));
+  document.querySelectorAll('.fab:not(.fab--voice), .twilight-add-task').forEach((button) => replace(button, 'plus'));
 }
 
 export function buildTwilightHome(companion, hasOwnedPets = false, theme = 'twilight') {
